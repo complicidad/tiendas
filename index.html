@@ -76,6 +76,14 @@
 
     let tiendas = [];
 
+    // Función para recortar texto largo
+    function recortarTexto(texto, maxLength = 50) {
+      if (!texto) return "";
+      if (texto.length <= maxLength) return texto;
+      return texto.slice(0, maxLength) + "...";
+    }
+
+    
     // URL de Google Sheet publicada en CSV
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-8h9aepNqoixNWhC_zdj2fV-8u5JkL1TxdYhvb1Nwdw09aDLLrJpTu2AXdlpPGAhXYXZ9sMlucKwG/pub?gid=1928937044&single=true&output=csv";
 
@@ -153,13 +161,16 @@
     function renderTiendas(lista) {
       const container = document.getElementById('tiendas-list');
       container.innerHTML = "";
-
+      
       lista.forEach(tienda => {
         let coords = galerias[tienda["galería"]];
         let mapsLink = coords 
           ? `https://www.google.com/maps?q=${coords[0]},${coords[1]}` 
           : "#";
 
+        let descripcion = tienda["descripción libre"] || "";
+        let descripcionCorta = recortarTexto(descripcion, 50);
+              
         const card = document.createElement('div');
         card.className = "bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition";
 
@@ -168,7 +179,14 @@
           <p class="text-gray-600 mb-1">${tienda["galería"] || "Ubicación no definida"}</p>
           <p class="text-sm text-gray-500">Piso: ${tienda["piso"] || "?"} - Stand: ${tienda["stand"] || "?"}</p>
 
-          ${tienda["descripción libre"] ? `<p class="mt-2 text-gray-700 text-sm">${tienda["descripción libre"]}</p>` : ""}
+          ${descripcion ? `
+            <p class="mt-2 text-gray-700 text-sm">
+              <span class="descripcion-corta">${descripcionCorta}</span>
+              <span class="descripcion-completa hidden">${descripcion}</span>
+              ${descripcion.length > 50 
+                ? `<button class="text-blue-500 text-xs ml-1 leer-mas hover:underline">Leer más</button>` 
+                : ""}
+            </p>` : ""}
           
           ${tienda["tags"] ? `<div class="mt-2 flex flex-wrap gap-1">
             ${tienda["tags"].split(",").map(tag => 
@@ -185,6 +203,26 @@
 
         container.appendChild(card);
       });
+    
+      // Activar "Leer más / Leer menos"
+      document.querySelectorAll(".leer-mas").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const card = btn.closest("p");
+          const corta = card.querySelector(".descripcion-corta");
+          const completa = card.querySelector(".descripcion-completa");
+
+          if (completa.classList.contains("hidden")) {
+            corta.classList.add("hidden");
+            completa.classList.remove("hidden");
+            btn.textContent = "Leer menos";
+          } else {
+            completa.classList.add("hidden");
+            corta.classList.remove("hidden");
+            btn.textContent = "Leer más";
+          }
+        });
+      });    
+    
     }
 
     // Filtrar por tag desde un chip
