@@ -209,9 +209,25 @@
         let descripcionCorta = recortarTexto(descripcion, 50);
               
         const card = document.createElement('div');
-        card.className = "bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition";
+        card.className = "relative bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition";
+
 
         card.innerHTML = `
+        
+        <button onclick="toggleLike('${tienda["nombre de la tienda"]}', this)" 
+          class="absolute top-2 right-2 px-2 py-1 rounded-full shadow text-sm ${
+            JSON.parse(localStorage.getItem("likes") || "{}")[tienda["nombre de la tienda"]] 
+              ? "bg-red-500 text-white" 
+              : "bg-gray-200 text-gray-700"
+          }">
+          ${
+            JSON.parse(localStorage.getItem("likes") || "{}")[tienda["nombre de la tienda"]] 
+              ? "❤️" 
+              : "👍"
+          }
+        </button>
+        
+        
           <h2 class="text-xl font-bold mb-1">${tienda["nombre de la tienda"]}</h2>
           <p class="text-gray-600 mb-1">${tienda["galería"] || "Ubicación no definida"}</p>
           <p class="text-sm text-gray-500">Piso: ${tienda["piso"] || "?"} - Stand: ${tienda["stand"] || "?"}</p>
@@ -237,7 +253,7 @@
           <div class="mt-3 flex flex-wrap gap-2">
             ${coords ? `<a href="${mapsLink}" target="_blank" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg shadow hover:bg-blue-600 transition">📍 Google Maps</a>` : ""}
             ${tienda["tiktok"] ? `<a href="${tienda["tiktok"]}" target="_blank" class="px-3 py-1 bg-pink-500 text-white text-sm rounded-lg shadow hover:bg-pink-600 transition">🎵 TikTok</a>` : ""}
-            ${renderLikeButton(tienda["nombre de la tienda"])}
+
           </div>
         `;
 
