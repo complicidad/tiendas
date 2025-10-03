@@ -1,92 +1,125 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mapa de Tiendas</title>
-
-  <!-- Tailwind -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Fuse.js (buscador) -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body class="bg-gray-100">
-  <h1 class="text-3xl font-bold text-center mt-5">Mapa de Tiendas</h1>
-  <p class="text-center text-gray-600 mb-4">Ubica las tiendas en el mapa 📍</p>
+  <header class="bg-blue-600 text-white p-4 text-center text-xl font-bold">
+    Portal de Tiendas Populares
+  </header>
 
-  <!-- Buscador -->
-  <div class="w-11/12 mx-auto mb-3">
+  <main class="p-4">
+    <!-- Buscador -->
     <input id="search" type="text" placeholder="Buscar tienda..." 
-      class="w-full p-3 border rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
-    <ul id="results" class="bg-white mt-2 rounded-lg shadow-md"></ul>
-  </div>
+      class="w-full p-2 border rounded mb-4">
 
-  <!-- Mapa -->
-  <div id="map" class="w-11/12 h-[500px] mx-auto rounded-xl shadow-lg"></div>
+    <!-- Mapa -->
+    <div id="map" class="w-full h-[500px] rounded-lg shadow"></div>
+  </main>
 
   <script>
-    let map = L.map('map').setView([-12.0464, -77.0428], 13);
+    // Lista masiva de tiendas en JSON
+    const tiendas = [
+      {
+        "nombre": "Moda Gamarra",
+        "descripcion": "Ropa al por mayor y menor.",
+        "direccion": "Jr. Gamarra 123, La Victoria",
+        "telefono": "987654321",
+        "horario": "Lun-Sab 9am-7pm",
+        "whatsapp": "https://wa.me/51987654321",
+        "facebook": "https://facebook.com/modagamarra",
+        "instagram": "https://instagram.com/modagamarra",
+        "tiktok": "https://tiktok.com/@modagamarra",
+        "lat": -12.0645,
+        "lng": -77.0147
+      },
+      {
+        "nombre": "Polvos Azules",
+        "descripcion": "Tecnología, ropa y accesorios.",
+        "direccion": "Av. Garcilaso de la Vega 1251, Lima",
+        "telefono": "912345678",
+        "horario": "Todos los días 10am-8pm",
+        "whatsapp": "https://wa.me/51912345678",
+        "facebook": "https://facebook.com/polvosazules",
+        "instagram": "https://instagram.com/polvosazules",
+        "tiktok": "https://tiktok.com/@polvosazules",
+        "lat": -12.0584,
+        "lng": -77.034
+      },
+      {
+        "nombre": "Galería Arenales",
+        "descripcion": "Moda urbana y cultura otaku.",
+        "direccion": "Av. Arenales 1737, Lince",
+        "telefono": "999888777",
+        "horario": "Lun-Dom 10am-7pm",
+        "whatsapp": "https://wa.me/51999888777",
+        "facebook": "https://facebook.com/arenales",
+        "instagram": "https://instagram.com/arenales",
+        "tiktok": "https://tiktok.com/@arenales",
+        "lat": -12.0851,
+        "lng": -77.033
+      },
+      {
+        "nombre": "Polvos Rosados",
+        "descripcion": "Juguetes, ropa y artículos varios.",
+        "direccion": "Av. Aviación 2250, San Borja",
+        "telefono": "955123456",
+        "horario": "Lun-Sab 10am-8pm",
+        "whatsapp": "https://wa.me/51955123456",
+        "facebook": "https://facebook.com/polvosrosados",
+        "instagram": "https://instagram.com/polvosrosados",
+        "tiktok": "https://tiktok.com/@polvosrosados",
+        "lat": -12.0982,
+        "lng": -77.0025
+      }
+    ];
 
+    // Inicializar el mapa
+    const map = L.map('map').setView([-12.0621, -77.0365], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    let markers = [];
-    let tiendas = [];
+    // Función para generar el contenido del popup
+    function generarPopup(tienda) {
+      return `
+        <div class="text-sm">
+          <h3 class="font-bold text-lg">${tienda.nombre}</h3>
+          <p>${tienda.descripcion}</p>
+          <p><b>Dirección:</b> ${tienda.direccion}</p>
+          <p><b>Teléfono:</b> ${tienda.telefono}</p>
+          <p><b>Horario:</b> ${tienda.horario}</p>
+          <p><a href="${tienda.whatsapp}" target="_blank">📱 WhatsApp</a></p>
+          <p><a href="${tienda.facebook}" target="_blank">📘 Facebook</a></p>
+          <p><a href="${tienda.instagram}" target="_blank">📷 Instagram</a></p>
+          <p><a href="${tienda.tiktok}" target="_blank">🎵 TikTok</a></p>
+        </div>
+      `;
+    }
 
-    // Cargar JSON
-    fetch('tiendas.json')
-      .then(res => res.json())
-      .then(data => {
-        tiendas = data;
+    // Agregar los marcadores con todos los datos en el popup
+    tiendas.forEach(tienda => {
+      L.marker([tienda.lat, tienda.lng]).addTo(map)
+        .bindPopup(generarPopup(tienda));
+    });
 
-        // Agregar marcadores
-        data.forEach(tienda => {
-          let marker = L.marker(tienda.coords).addTo(map)
-            .bindPopup(`<b>${tienda.nombre}</b><br>${tienda.descripcion}`);
-          markers.push({ marker, ...tienda });
-        });
-
-        // Configurar buscador
-        const fuse = new Fuse(tiendas, {
-          keys: ['nombre', 'descripcion'],
-          threshold: 0.3
-        });
-
-        const searchInput = document.getElementById('search');
-        const resultsList = document.getElementById('results');
-
-        searchInput.addEventListener('input', () => {
-          const query = searchInput.value.trim();
-          resultsList.innerHTML = "";
-
-          if (!query) return;
-
-          const results = fuse.search(query);
-          results.forEach(r => {
-            const li = document.createElement('li');
-            li.textContent = r.item.nombre;
-            li.className = "p-2 cursor-pointer hover:bg-gray-100";
-            li.onclick = () => {
-              map.setView(r.item.coords, 16);
-              const found = markers.find(m => m.nombre === r.item.nombre);
-              if (found) found.marker.openPopup();
-              resultsList.innerHTML = "";
-              searchInput.value = r.item.nombre;
-            };
-            resultsList.appendChild(li);
-          });
-        });
-      })
-      .catch(err => console.error("Error cargando tiendas.json:", err));
+    // Buscador
+    document.getElementById('search').addEventListener('input', (e) => {
+      const texto = e.target.value.toLowerCase();
+      const resultado = tiendas.find(t => t.nombre.toLowerCase().includes(texto));
+      if (resultado) {
+        map.setView([resultado.lat, resultado.lng], 16);
+        L.popup()
+          .setLatLng([resultado.lat, resultado.lng])
+          .setContent(generarPopup(resultado))
+          .openOn(map);
+      }
+    });
   </script>
 </body>
 </html>
