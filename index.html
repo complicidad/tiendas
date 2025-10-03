@@ -3,42 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mapa de Tiendas</title>
+  <title>Listado de Tiendas</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Fuse.js (buscador) -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body class="bg-gray-100">
-  <h1 class="text-3xl font-bold text-center mt-5">Mapa de Tiendas</h1>
-  <p class="text-center text-gray-600 mb-4">Ubica las tiendas en el mapa 📍</p>
+  <h1 class="text-3xl font-bold text-center mt-5">Tiendas Registradas</h1>
+  <p class="text-center text-gray-600 mb-4">Explora las tiendas y abre su ubicación en Google Maps 📍</p>
 
   <!-- Buscador -->
-  <div class="w-11/12 mx-auto mb-3">
-    <input id="search" type="text" placeholder="Buscar tienda..." 
+  <div class="w-11/12 md:w-1/2 mx-auto mb-6">
+    <input id="search" type="text" placeholder="Buscar tienda, productos o tags..." 
       class="w-full p-3 border rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
     <ul id="results" class="bg-white mt-2 rounded-lg shadow-md"></ul>
   </div>
 
-  <!-- Mapa -->
-  <div id="map" class="w-11/12 h-[500px] mx-auto rounded-xl shadow-lg"></div>
+  <!-- Contenedor de tarjetas -->
+  <div id="tiendas-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-11/12 mx-auto"></div>
 
+  <!-- Botón registrar -->
   <a href="https://forms.gle/ZXdRHsZ1XDiojz8FA" target="_blank"
      class="fixed bottom-5 right-5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition"
      style="z-index: 9999;">
-     📌 Registrar tienda
+     ➕
   </a>
 
-
-  
   <script>
     // Coordenadas por galería
     const galerias = {
@@ -50,14 +43,6 @@
       "Mesa Redonda": [-12.0512, -77.0277]
     };
 
-    let map = L.map('map').setView([-12.0464, -77.0428], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    let markers = [];
     let tiendas = [];
 
     // URL de Google Sheet publicada en CSV
@@ -77,24 +62,19 @@
 
         tiendas = data;
 
-        // Agregar marcadores
-        tiendas.forEach(tienda => {
-          let coords = galerias[tienda["galería"]];
-          if (!coords) return;
+        renderTiendas(tiendas);
 
-          let marker = L.marker(coords).addTo(map)
-            .bindPopup(`
-              <b>${tienda["nombre de la tienda"]}</b><br>
-              <i>${tienda["galería"]} - Piso: ${tienda["piso"] || "N/A"} - Stand: ${tienda["stand"] || "N/A"}</i><br>
-              ${tienda["tiktok"] ? "🎵 TikTok: " + tienda["tiktok"] : ""}
-            `);
-
-          markers.push({ marker, ...tienda });
-        });
-
-        // Configurar buscador
+        // Configurar buscador con Fuse.js
         const fuse = new Fuse(tiendas, {
-          keys: ['nombre de la tienda', 'galería', 'stand', 'piso'],
+          keys: [
+            'nombre de la tienda', 
+            'galería', 
+            'stand', 
+            'piso',
+            'productos',
+            'tags',
+            'descripcion'
+          ],
           threshold: 0.3
         });
 
@@ -105,27 +85,74 @@
           const query = searchInput.value.trim();
           resultsList.innerHTML = "";
 
-          if (!query) return;
+          if (!query) {
+            renderTiendas(tiendas);
+            return;
+          }
 
-          const results = fuse.search(query);
+          const results = fuse.search(query).slice(0, 5);
+          renderTiendas(results.map(r => r.item));
+
           results.forEach(r => {
             const li = document.createElement('li');
-            li.textContent = `${r.item["nombre de la tienda"]} (${r.item["galería"]})`;
-            li.className = "p-2 cursor-pointer hover:bg-gray-100";
+            li.innerHTML = `<span class="font-bold">${r.item["nombre de la tienda"]}</span> 
+                            <span class="text-gray-500 text-sm">(${r.item["galería"]})</span>`;
+            li.className = "p-2 cursor-pointer hover:bg-blue-100 transition";
             li.onclick = () => {
-              let coords = galerias[r.item["galería"]];
-              if (!coords) return;
-              map.setView(coords, 16);
-              const found = markers.find(m => m["nombre de la tienda"] === r.item["nombre de la tienda"]);
-              if (found) found.marker.openPopup();
-              resultsList.innerHTML = "";
               searchInput.value = r.item["nombre de la tienda"];
+              renderTiendas([r.item]);
+              resultsList.innerHTML = "";
             };
             resultsList.appendChild(li);
           });
         });
+
+        // Cerrar lista al hacer clic fuera
+        document.addEventListener("click", (e) => {
+          if (!resultsList.contains(e.target) && e.target !== searchInput) {
+            resultsList.innerHTML = "";
+          }
+        });
       })
       .catch(err => console.error("Error cargando Google Sheet:", err));
+
+    // Función para renderizar tiendas como tarjetas
+    function renderTiendas(lista) {
+      const container = document.getElementById('tiendas-list');
+      container.innerHTML = "";
+
+      lista.forEach(tienda => {
+        let coords = galerias[tienda["galería"]];
+        let mapsLink = coords 
+          ? `https://www.google.com/maps?q=${coords[0]},${coords[1]}` 
+          : "#";
+
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition";
+
+        card.innerHTML = `
+          <h2 class="text-xl font-bold mb-1">${tienda["nombre de la tienda"]}</h2>
+          <p class="text-gray-600 mb-1">${tienda["galería"] || "Ubicación no definida"}</p>
+          <p class="text-sm text-gray-500">Piso: ${tienda["piso"] || "?"} - Stand: ${tienda["stand"] || "?"}</p>
+
+          ${tienda["productos"] ? `<p class="mt-2 text-sm"><span class="font-semibold">Productos:</span> ${tienda["productos"]}</p>` : ""}
+          ${tienda["descripcion"] ? `<p class="mt-1 text-gray-700 text-sm">${tienda["descripcion"]}</p>` : ""}
+          
+          ${tienda["tags"] ? `<div class="mt-2 flex flex-wrap gap-1">
+            ${tienda["tags"].split(",").map(tag => 
+              `<span class="px-2 py-0.5 text-xs bg-gray-200 rounded-full">${tag.trim()}</span>`
+            ).join("")}
+          </div>` : ""}
+          
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${coords ? `<a href="${mapsLink}" target="_blank" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg shadow hover:bg-blue-600 transition">📍 Google Maps</a>` : ""}
+            ${tienda["tiktok"] ? `<a href="${tienda["tiktok"]}" target="_blank" class="px-3 py-1 bg-pink-500 text-white text-sm rounded-lg shadow hover:bg-pink-600 transition">🎵 TikTok</a>` : ""}
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
   </script>
 </body>
 </html>
