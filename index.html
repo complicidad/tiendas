@@ -42,6 +42,37 @@
       "Arenales": [-12.08968, -77.03317],
       "Mesa Redonda": [-12.0512, -77.0277]
     };
+    
+    // Diccionario de categorías para extraer tags
+    const diccionarioTags = [
+      // 👟 Calzado
+      "zapatillas", "nike", "adidas", "puma", "reebok", "vans", "converse",
+      "sandalias", "botas", "tacones", "calzado", "original", "réplica",
+
+      // 👕 Ropa y moda
+      "ropa", "moda", "camisetas", "polos", "pantalones", "jeans", 
+      "casacas", "abrigos", "vestidos", "blusas", "camisas",
+      "ropa deportiva", "ropa urbana", "ropa casual", "ropa formal",
+
+      // 🎒 Accesorios
+      "accesorios", "carteras", "bolsos", "mochilas", "gorras", "cinturones",
+      "lentes", "relojes", "joyas", "bisutería", "aretes", "collares", "anillos",
+
+      // 📱 Electrónica y gadgets
+      "electronica", "celulares", "iphone", "samsung", "xiaomi", 
+      "audífonos", "cargadores", "smartwatch", "laptops", "tablets",
+
+      // 🎮 Cultura pop y hobbies
+      "anime", "manga", "cosplay", "figuras", "coleccionables", "comics", "videojuegos",
+      "juguetes", "peluches", "funko", "cartas", "trading cards",
+
+      // 🏠 Hogar
+      "hogar", "decoración", "muebles", "cocina", "vajilla", "iluminación",
+
+      // 🛍️ Extras generales
+      "oferta", "descuento", "nuevo", "importado", "peruano"
+    ];
+
 
     let tiendas = [];
 
@@ -51,29 +82,32 @@
     fetch(sheetUrl)
       .then(res => res.text())
       .then(csv => {
-        // Convertir CSV a JSON
         let rows = csv.split("\n").map(r => r.split(","));
         let headers = rows[0].map(h => h.trim().toLowerCase());
         let data = rows.slice(1).map(r => {
           let obj = {};
           headers.forEach((h, i) => obj[h] = r[i]?.trim());
           return obj;
-        }).filter(r => r["nombre de la tienda"]); // descartar filas vacías
+        }).filter(r => r["nombre de la tienda"]);
 
-        tiendas = data;
+        // Extraer tags desde la descripción libre
+        tiendas = data.map(tienda => {
+          let descripcion = (tienda["descripción libre"] || "").toLowerCase();
+          let tags = diccionarioTags.filter(tag => descripcion.includes(tag));
+          return { ...tienda, tags: tags.join(",") };
+        });
 
         renderTiendas(tiendas);
 
-        // Configurar buscador con Fuse.js
+        // Configurar buscador
         const fuse = new Fuse(tiendas, {
           keys: [
             'nombre de la tienda', 
             'galería', 
-            'stand', 
             'piso',
-            'productos',
-            'tags',
-            'descripcion'
+            'stand',
+            'descripción libre',
+            'tags'
           ],
           threshold: 0.3
         });
@@ -107,7 +141,6 @@
           });
         });
 
-        // Cerrar lista al hacer clic fuera
         document.addEventListener("click", (e) => {
           if (!resultsList.contains(e.target) && e.target !== searchInput) {
             resultsList.innerHTML = "";
@@ -116,7 +149,7 @@
       })
       .catch(err => console.error("Error cargando Google Sheet:", err));
 
-    // Función para renderizar tiendas como tarjetas
+    // Renderizar tiendas como tarjetas
     function renderTiendas(lista) {
       const container = document.getElementById('tiendas-list');
       container.innerHTML = "";
@@ -135,12 +168,12 @@
           <p class="text-gray-600 mb-1">${tienda["galería"] || "Ubicación no definida"}</p>
           <p class="text-sm text-gray-500">Piso: ${tienda["piso"] || "?"} - Stand: ${tienda["stand"] || "?"}</p>
 
-          ${tienda["productos"] ? `<p class="mt-2 text-sm"><span class="font-semibold">Productos:</span> ${tienda["productos"]}</p>` : ""}
-          ${tienda["descripcion"] ? `<p class="mt-1 text-gray-700 text-sm">${tienda["descripcion"]}</p>` : ""}
+          ${tienda["descripción libre"] ? `<p class="mt-2 text-gray-700 text-sm">${tienda["descripción libre"]}</p>` : ""}
           
           ${tienda["tags"] ? `<div class="mt-2 flex flex-wrap gap-1">
             ${tienda["tags"].split(",").map(tag => 
-              `<span class="px-2 py-0.5 text-xs bg-gray-200 rounded-full">${tag.trim()}</span>`
+              `<span class="px-2 py-0.5 text-xs bg-gray-200 rounded-full cursor-pointer hover:bg-blue-200" 
+                onclick="filtrarPorTag('${tag.trim()}')">#${tag.trim()}</span>`
             ).join("")}
           </div>` : ""}
           
@@ -152,6 +185,13 @@
 
         container.appendChild(card);
       });
+    }
+
+    // Filtrar por tag desde un chip
+    function filtrarPorTag(tag) {
+      const filtradas = tiendas.filter(t => (t.tags || "").includes(tag));
+      renderTiendas(filtradas);
+      document.getElementById('search').value = "#" + tag;
     }
   </script>
 </body>
