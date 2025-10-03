@@ -1,62 +1,17 @@
 [
   {
-    "id": 1,
-    "name": "Textiles El Puma",
-    "zone": "Gamarra",
-    "location": "Av. Ignacio Merino 123 - Galería A, Local 45",
-    "lat": -12.0600,
-    "lng": -77.0365,
-    "products": "Polos, camisetas, ropa deportiva",
-    "whatsapp": "51912345678",
-    "instagram": "https://instagram.com/textileselpuma",
-    "tags": ["ropa", "mayorista"]
+    "nombre": "Tienda Central",
+    "coords": [-12.0464, -77.0428],
+    "descripcion": "Nuestra tienda principal en Lima centro."
   },
   {
-    "id": 2,
-    "name": "Moda Rosa",
-    "zone": "Polvos Rosados",
-    "location": "Pasaje 8, Local 12",
-    "lat": -12.0577,
-    "lng": -77.0368,
-    "products": "Moda femenina, vestidos",
-    "whatsapp": "51987654321",
-    "instagram": "",
-    "tags": ["vestidos", "femenino"]
+    "nombre": "Tienda Miraflores",
+    "coords": [-12.1211, -77.0306],
+    "descripcion": "Sucursal en Miraflores."
   },
   {
-    "id": 3,
-    "name": "Accesorios Arenales",
-    "zone": "Arenales",
-    "location": "Av. Arenales 456",
-    "lat": -12.0532,
-    "lng": -77.0290,
-    "products": "Collares, pulseras, bisutería",
-    "whatsapp": "51911223344",
-    "instagram": "https://instagram.com/accesorios_arenales",
-    "tags": ["accesorios"]
-  },
-  {
-    "id": 4,
-    "name": "Calzados Centro",
-    "zone": "Centro de Lima",
-    "location": "Jr. Ica 350",
-    "lat": -12.0468,
-    "lng": -77.0257,
-    "products": "Zapatos, zapatillas",
-    "whatsapp": "51999887766",
-    "instagram": "",
-    "tags": ["calzado"]
-  },
-  {
-    "id": 5,
-    "name": "Mercado Polvos Azules",
-    "zone": "Polvos Azules",
-    "location": "Calle Polvos Azules 10",
-    "lat": -12.0480,
-    "lng": -77.0370,
-    "products": "Textiles al por mayor",
-    "whatsapp": "",
-    "instagram": "",
-    "tags": ["mayorista","textil"]
+    "nombre": "Tienda San Isidro",
+    "coords": [-12.0973, -77.0338],
+    "descripcion": "Sucursal en San Isidro."
   }
 ]
