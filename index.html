@@ -34,42 +34,6 @@
 
   <script>
     
-  function toggleLike(storeName, btn) {
-    // Recuperar likes del navegador
-    let likes = JSON.parse(localStorage.getItem("likes")) || {};
-    
-    // Cambiar estado del like
-    if (likes[storeName]) {
-      delete likes[storeName]; // quitar like
-      btn.classList.remove("bg-red-500", "text-white");
-      btn.classList.add("bg-gray-200", "text-gray-700");
-      btn.innerText = "👍 Like";
-    } else {
-      likes[storeName] = true; // dar like
-      btn.classList.add("bg-red-500", "text-white");
-      btn.classList.remove("bg-gray-200", "text-gray-700");
-      btn.innerText = "❤️ Liked";
-    }
-
-    // Guardar en localStorage
-    localStorage.setItem("likes", JSON.stringify(likes));
-  }
-
-  // Función para renderizar botón según estado
-  function renderLikeButton(storeName) {
-    let likes = JSON.parse(localStorage.getItem("likes")) || {};
-    const liked = !!likes[storeName];
-
-    return `<button 
-      onclick="toggleLike('${storeName}', this)"
-      class="px-3 py-1 rounded-lg shadow transition text-sm ${
-        liked ? "bg-red-500 text-white" : "bg-gray-200 text-gray-700"
-      }"
-    >${liked ? "❤️ Liked" : "👍 Like"}</button>`;
-  }
-   
-    
-    
     // Coordenadas por galería
     const galerias = {
       "Gamarra": [-12.06314, -77.01457],
@@ -120,6 +84,15 @@
       return texto.slice(0, maxLength) + "...";
     }
 
+    
+    function renderLikeButton(storeName, likes = 0) {
+      return `<button 
+        onclick="likeStore('${storeName}', this)" 
+        class="absolute top-2 right-2 px-2 py-1 rounded-full shadow text-sm bg-gray-200 text-gray-700">
+        ❤️ ${likes}
+      </button>`;
+    }
+    
     
     // URL de Google Sheet publicada en CSV
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-8h9aepNqoixNWhC_zdj2fV-8u5JkL1TxdYhvb1Nwdw09aDLLrJpTu2AXdlpPGAhXYXZ9sMlucKwG/pub?gid=1928937044&single=true&output=csv";
@@ -211,24 +184,10 @@
         const card = document.createElement('div');
         card.className = "relative bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition";
 
-
         card.innerHTML = `
-        
-        <button onclick="toggleLike('${tienda["nombre de la tienda"]}', this)" 
-          class="absolute top-2 right-2 px-2 py-1 rounded-full shadow text-sm ${
-            JSON.parse(localStorage.getItem("likes") || "{}")[tienda["nombre de la tienda"]] 
-              ? "bg-red-500 text-white" 
-              : "bg-gray-200 text-gray-700"
-          }">
-          ${
-            JSON.parse(localStorage.getItem("likes") || "{}")[tienda["nombre de la tienda"]] 
-              ? "❤️" 
-              : "👍"
-          }
-        </button>
-        
-        
+          ${renderLikeButton(tienda["nombre de la tienda"], tienda["likes"] || 0)}
           <h2 class="text-xl font-bold mb-1">${tienda["nombre de la tienda"]}</h2>
+
           <p class="text-gray-600 mb-1">${tienda["galería"] || "Ubicación no definida"}</p>
           <p class="text-sm text-gray-500">Piso: ${tienda["piso"] || "?"} - Stand: ${tienda["stand"] || "?"}</p>
 
@@ -260,6 +219,9 @@
         container.appendChild(card);
       });
     
+
+
+      
       // Activar "Leer más / Leer menos"
       document.querySelectorAll(".leer-mas").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -281,6 +243,21 @@
     
     }
 
+          function likeStore(storeName, btn) {
+  fetch("https://script.google.com/macros/s/AKfycbwY-t1NHjjO1e4jXhx6XrryxhYjQF_l3_VATxawr5hnuudTg3KexGJw8Ui3XdIaTo5pcA/exec", { // 👈 pega aquí la URL de tu Apps Script
+    method: "POST",
+    body: JSON.stringify({ nombre: storeName }),
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      btn.innerText = `❤️ ${data.likes}`;
+    }
+  })
+  .catch(err => console.error("Error en like:", err));
+}
+    
     // Filtrar por tag desde un chip
     function filtrarPorTag(tag) {
       const filtradas = tiendas.filter(t => (t.tags || "").includes(tag));
