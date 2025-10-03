@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portal Tiendas - Gamarra & Polvos</title>
+  <meta name="description" content="Busca tiendas en Gamarra, Polvos Azules, Polvos Rosados, Arenales y Centro de Lima. Ultra rápido y móvil-first." />
+
+  <!-- Tailwind CDN (útil para prototipo rápido) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+e2jWZb0Qf8sy1k6mFQGQ+0Gk3v6Q0fB5Lx3x9xkM=" crossorigin=""/>
+
+  <style>
+    /* pequeños ajustes */
+    html,body,#map { height: 100%; }
+    #map { min-height: 320px; border-radius: .5rem; }
+    .hit { cursor: pointer; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <div class="max-w-5xl mx-auto p-4">
+    <header class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-2xl font-bold">Portal Tiendas — Lima (Gamarra, Polvos, Arenales)</h1>
+        <p class="text-sm text-gray-600">Busca por tienda, producto o galería. Muy liviano & móvil.</p>
+      </div>
+      <div class="text-right text-xs text-gray-500">Complicidad Boutique — Demo</div>
+    </header>
+
+    <!-- Buscador y botones rápidos -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+      <div class="md:col-span-2">
+        <input id="search" type="search" placeholder="Busca tienda, producto o galería (ej. 'camiseta', 'Gamarra')" 
+          class="w-full p-3 rounded-lg border bg-white" autocomplete="off" />
+        <div id="results" class="mt-2 bg-white rounded shadow-sm divide-y"></div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 items-start">
+        <!-- botones rápidos -->
+        <button data-zone="Gamarra" class="zoneBtn px-3 py-2 rounded bg-indigo-600 text-white text-sm">Gamarra</button>
+        <button data-zone="Polvos Azules" class="zoneBtn px-3 py-2 rounded bg-indigo-600 text-white text-sm">Polvos Azules</button>
+        <button data-zone="Polvos Rosados" class="zoneBtn px-3 py-2 rounded bg-indigo-600 text-white text-sm">Polvos Rosados</button>
+        <button data-zone="Arenales" class="zoneBtn px-3 py-2 rounded bg-indigo-600 text-white text-sm">Arenales</button>
+        <button data-zone="Centro de Lima" class="zoneBtn px-3 py-2 rounded bg-indigo-600 text-white text-sm">Centro</button>
+      </div>
+    </div>
+
+    <!-- Layout: mapa + listado -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2">
+        <div id="map" class="shadow"></div>
+      </div>
+
+      <aside>
+        <h2 class="font-semibold mb-2">Resultados</h2>
+        <div id="sidebar" class="space-y-2"></div>
+      </aside>
+    </div>
+
+    <footer class="mt-6 text-xs text-gray-500">
+      <div>Mapa: OpenStreetMap (attribution required). Implementación simple con Leaflet.</div>
+    </footer>
+  </div>
+
+  <!-- Librerías: Fuse.js y Leaflet + tiny helper -->
+  <script src="https://unpkg.com/fuse.js@6.6.2/dist/fuse.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-sA+e2jWZb0Qf8sy1k6mFQGQ+0Gk3v6Q0fB5Lx3x9xkM=" crossorigin=""></script>
+
+  <script>
+    // CONFIG: ruta del JSON con tiendas
+    const DATA_URL = './stores.json';
+
+    // Variables globales ligeras
+    let stores = [];
+    let fuse;
+    let map;
+    let markers = L.layerGroup();
+
+    // Inicializa mapa (centrado en Lima)
+    function initMap(){
+      map = L.map('map', { zoomControl: true, preferCanvas: true }).setView([-12.0464, -77.0428], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      markers.addTo(map);
+    }
+
+    // Cargar datos
+    async function loadData(){
+      try {
+        const r = await fetch(DATA_URL);
+        stores = await r.json();
+
+        // Crear índice Fuse.js (config ligero)
+        fuse = new Fuse(stores, {
+          keys: ['name', 'zone', 'products', 'tags'],
+          threshold: 0.35,
+          distance: 80,
+          includeScore: true,
+          minMatchCharLength: 2
+        });
+
+        renderAll(); // muestra todo inicialmente
+      } catch (e) {
+        console.error('Error cargando stores.json', e);
+        document.getElementById('results').innerText = 'Error cargando datos.';
+      }
+    }
+
+    // Render de todos los puntos (o filtrados)
+    function renderList(items){
+      const sidebar = document.getElementById('sidebar');
+      sidebar.innerHTML = '';
+      markers.clearLayers();
+
+      if(!items || items.length === 0){
+        sidebar.innerHTML = '<div class="text-sm text-gray-500">No hay resultados.</div>';
+        return;
+      }
+
+      items.forEach(s => {
+        // Sidebar entry
+        const div = document.createElement('div');
+        div.className = 'p-2 bg-white rounded shadow-sm hit';
+        div.innerHTML = `<div class="font-medium">${s.name}</div>
+                         <div class="text-xs text-gray-500">${s.zone} · ${s.location}</div>
+                         <div class="text-xs text-gray-600 mt-1">${s.products ? s.products.slice(0,60) : ''}</div>`;
+        div.onclick = () => {
+          map.setView([s.lat, s.lng], 18, { animate: true });
+          openPopupForStore(s);
+        };
+        sidebar.appendChild(div);
+
+        // Marker
+        if(s.lat && s.lng){
+          const m = L.marker([s.lat, s.lng]);
+          m.bindPopup(`<b>${s.name}</b><br>${s.zone} · ${s.location}<br><small>${s.products || ''}</small>
+            <br><a href="https://wa.me/${s.whatsapp || ''}" target="_blank">WhatsApp</a> ${s.instagram ? `· <a href="${s.instagram}" target="_blank">IG</a>` : ''}`);
+          m.on('click', () => { /* opcional */ });
+          markers.addLayer(m);
+        }
+      });
+    }
+
+    function openPopupForStore(s){
+      // busca el marker que concuerde (simple)
+      markers.eachLayer(layer => {
+        if (layer.getLatLng && layer.getLatLng().lat === s.lat && layer.getLatLng().lng === s.lng) {
+          layer.openPopup();
+        }
+      });
+    }
+
+    // Render inicial: mostrar todas las tiendas (o las primeras N)
+    function renderAll(){
+      // Para no saturar, mostramos top 200 si hay muchas
+      const list = stores.slice(0, 200);
+      renderList(list);
+      fitMapToMarkers();
+      renderResultsList(list);
+    }
+
+    function fitMapToMarkers(){
+      const group = markers;
+      if(group.getLayers().length > 0){
+        map.fitBounds(group.getBounds().pad(0.15));
+      }
+    }
+
+    // Render pequeño listado de resultados sobre el input
+    function renderResultsList(items){
+      const el = document.getElementById('results');
+      el.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      items.slice(0,8).forEach(s => {
+        const r = document.createElement('div');
+        r.className = 'p-2 text-sm';
+        r.innerHTML = `<strong>${s.name}</strong> <span class="text-gray-500">· ${s.zone}</span>`;
+        r.onclick = () => {
+          map.setView([s.lat, s.lng], 18);
+          openPopupForStore(s);
+        };
+        fragment.appendChild(r);
+      });
+      el.appendChild(fragment);
+    }
+
+    // Buscador
+    function doSearch(q){
+      if(!q || q.trim().length < 1){
+        renderAll();
+        return;
+      }
+      const res = fuse.search(q);
+      const items = res.map(r => r.item);
+      renderList(items.slice(0, 200)); // limitar
+      renderResultsList(items);
+      if(items.length) {
+        const first = items[0];
+        if(first.lat && first.lng) map.setView([first.lat, first.lng], 16);
+      }
+    }
+
+    // Filtrado por zona (botones)
+    function bindZoneButtons(){
+      document.querySelectorAll('.zoneBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const zone = btn.dataset.zone;
+          const items = stores.filter(s => s.zone && s.zone.toLowerCase().includes(zone.toLowerCase()));
+          renderList(items);
+          renderResultsList(items);
+          if(items[0] && items[0].lat && items[0].lng) map.setView([items[0].lat, items[0].lng], 15);
+        });
+      });
+    }
+
+    // Eventos UI
+    function bindUI(){
+      const input = document.getElementById('search');
+      let last = '';
+      let timeout;
+      input.addEventListener('input', (e) => {
+        const v = e.target.value;
+        clearTimeout(timeout);
+        // debounce 150ms
+        timeout = setTimeout(() => {
+          if(v !== last){
+            last = v;
+            doSearch(v);
+          }
+        }, 150);
+      });
+    }
+
+    // Kickoff
+    (function(){
+      initMap();
+      bindUI();
+      bindZoneButtons();
+      loadData();
+    })();
+
+  </script>
+</body>
+</html>
