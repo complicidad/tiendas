@@ -32,6 +32,16 @@
   <div id="map" class="w-11/12 h-[500px] mx-auto rounded-xl shadow-lg"></div>
 
   <script>
+    // Coordenadas por galería
+    const galerias = {
+      "Gamarra": [-12.06314, -77.01457],
+      "Polvos Azules": [-12.05978, -77.02968],
+      "Polvos Rosados": [-12.06865, -77.03301],
+      "Centro de Lima": [-12.0464, -77.0428],
+      "Arenales": [-12.08968, -77.03317],
+      "Mesa Redonda": [-12.0512, -77.0277]
+    };
+
     let map = L.map('map').setView([-12.0464, -77.0428], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -42,22 +52,41 @@
     let markers = [];
     let tiendas = [];
 
-    // Cargar JSON
-    fetch('tiendas.json')
-      .then(res => res.json())
-      .then(data => {
+    // URL de Google Sheet publicada en CSV
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-8h9aepNqoixNWhC_zdj2fV-8u5JkL1TxdYhvb1Nwdw09aDLLrJpTu2AXdlpPGAhXYXZ9sMlucKwG/pub?gid=1928937044&single=true&output=csv";
+
+    fetch(sheetUrl)
+      .then(res => res.text())
+      .then(csv => {
+        // Convertir CSV a JSON
+        let rows = csv.split("\n").map(r => r.split(","));
+        let headers = rows[0].map(h => h.trim().toLowerCase());
+        let data = rows.slice(1).map(r => {
+          let obj = {};
+          headers.forEach((h, i) => obj[h] = r[i]?.trim());
+          return obj;
+        }).filter(r => r["nombre de la tienda"]); // descartar filas vacías
+
         tiendas = data;
 
         // Agregar marcadores
-        data.forEach(tienda => {
-          let marker = L.marker(tienda.coords).addTo(map)
-            .bindPopup(`<b>${tienda.nombre}</b><br>${tienda.descripcion}`);
+        tiendas.forEach(tienda => {
+          let coords = galerias[tienda["galería"]];
+          if (!coords) return;
+
+          let marker = L.marker(coords).addTo(map)
+            .bindPopup(`
+              <b>${tienda["nombre de la tienda"]}</b><br>
+              <i>${tienda["galería"]} - Piso: ${tienda["piso"] || "N/A"} - Stand: ${tienda["stand"] || "N/A"}</i><br>
+              ${tienda["tiktok"] ? "🎵 TikTok: " + tienda["tiktok"] : ""}
+            `);
+
           markers.push({ marker, ...tienda });
         });
 
         // Configurar buscador
         const fuse = new Fuse(tiendas, {
-          keys: ['nombre', 'descripcion'],
+          keys: ['nombre de la tienda', 'galería', 'stand', 'piso'],
           threshold: 0.3
         });
 
@@ -73,20 +102,22 @@
           const results = fuse.search(query);
           results.forEach(r => {
             const li = document.createElement('li');
-            li.textContent = r.item.nombre;
+            li.textContent = `${r.item["nombre de la tienda"]} (${r.item["galería"]})`;
             li.className = "p-2 cursor-pointer hover:bg-gray-100";
             li.onclick = () => {
-              map.setView(r.item.coords, 16);
-              const found = markers.find(m => m.nombre === r.item.nombre);
+              let coords = galerias[r.item["galería"]];
+              if (!coords) return;
+              map.setView(coords, 16);
+              const found = markers.find(m => m["nombre de la tienda"] === r.item["nombre de la tienda"]);
               if (found) found.marker.openPopup();
               resultsList.innerHTML = "";
-              searchInput.value = r.item.nombre;
+              searchInput.value = r.item["nombre de la tienda"];
             };
             resultsList.appendChild(li);
           });
         });
       })
-      .catch(err => console.error("Error cargando tiendas.json:", err));
+      .catch(err => console.error("Error cargando Google Sheet:", err));
   </script>
 </body>
 </html>
