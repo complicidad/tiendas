@@ -2,121 +2,51 @@
   {
     "nombre": "Gamarra - Galería Ya",
     "coords": [-12.0679, -77.0151],
-    "descripcion": "Galería de ropa en Gamarra, La Victoria.",
-    "categoria": "Ropa",
-    "whatsapp": "https://wa.me/51987654301",
-    "facebook": "https://facebook.com/galeriaya",
-    "instagram": "https://instagram.com/galeriaya",
-    "tiktok": "https://tiktok.com/@galeriaya",
-    "web": "http://www.galeriaya.pe",
-    "telefono": "+51 987654301"
+    "descripcion": "Galería de ropa en Gamarra, La Victoria."
   },
   {
     "nombre": "Gamarra - Centro Comercial Santa Lucía",
     "coords": [-12.0673, -77.0148],
-    "descripcion": "Galería de moda femenina y masculina.",
-    "categoria": "Ropa",
-    "whatsapp": "https://wa.me/51987654302",
-    "facebook": "https://facebook.com/santalucia",
-    "instagram": "https://instagram.com/santalucia",
-    "tiktok": "",
-    "web": "",
-    "telefono": "+51 987654302"
+    "descripcion": "Galería de moda femenina y masculina."
   },
   {
     "nombre": "Gamarra - Galería Guizado",
     "coords": [-12.0685, -77.0160],
-    "descripcion": "Especialidad en jeans y ropa juvenil.",
-    "categoria": "Ropa",
-    "whatsapp": "https://wa.me/51987654303",
-    "facebook": "",
-    "instagram": "",
-    "tiktok": "",
-    "web": "",
-    "telefono": "+51 987654303"
+    "descripcion": "Especialidad en jeans y ropa juvenil."
   },
   {
     "nombre": "Polvos Azules",
     "coords": [-12.0578, -77.0375],
-    "descripcion": "Centro comercial con videojuegos, ropa y accesorios.",
-    "categoria": "Tecnología, Ropa, Accesorios",
-    "whatsapp": "https://wa.me/51987654304",
-    "facebook": "https://facebook.com/polvosazules",
-    "instagram": "https://instagram.com/polvosazules",
-    "tiktok": "",
-    "web": "",
-    "telefono": "+51 987654304"
+    "descripcion": "Centro comercial con videojuegos, ropa y accesorios."
   },
   {
     "nombre": "Polvos Rosados",
     "coords": [-12.0898, -77.0034],
-    "descripcion": "Conocido por productos tecnológicos y ropa urbana.",
-    "categoria": "Tecnología, Ropa",
-    "whatsapp": "https://wa.me/51987654305",
-    "facebook": "",
-    "instagram": "",
-    "tiktok": "",
-    "web": "",
-    "telefono": "+51 987654305"
+    "descripcion": "Conocido por productos tecnológicos y ropa urbana."
   },
   {
     "nombre": "Centro Comercial Arenales",
     "coords": [-12.0743, -77.0377],
-    "descripcion": "Galería de cultura pop, anime y tecnología.",
-    "categoria": "Cultura Pop, Anime, Tecnología",
-    "whatsapp": "https://wa.me/51987654306",
-    "facebook": "https://facebook.com/ccarenales",
-    "instagram": "https://instagram.com/ccarenales",
-    "tiktok": "",
-    "web": "",
-    "telefono": "+51 987654306"
+    "descripcion": "Galería de cultura pop, anime y tecnología."
   },
   {
     "nombre": "Mesa Redonda",
     "coords": [-12.0486, -77.0289],
-    "descripcion": "Zona comercial mayorista con productos variados.",
-    "categoria": "Mayorista",
-    "whatsapp": "",
-    "facebook": "",
-    "instagram": "",
-    "tiktok": "",
-    "web": "",
-    "telefono": ""
-  },
-  {
-    "nombre": "Galería CompuPalace - Miraflores",
-    "coords": [-12.1190, -77.0300],
-    "descripcion": "Centro tecnológico en Miraflores.",
-    "categoria": "Tecnología",
-    "whatsapp": "https://wa.me/51987654307",
-    "facebook": "https://facebook.com/compupalace",
-    "instagram": "",
-    "tiktok": "",
-    "web": "http://www.compupalace.pe",
-    "telefono": "+51 987654307"
-  },
-  {
-    "nombre": "Galería El Hueco",
-    "coords": [-12.0480, -77.0320],
-    "descripcion": "Mercado tecnológico popular en Lima.",
-    "categoria": "Tecnología",
-    "whatsapp": "",
-    "facebook": "",
-    "instagram": "",
-    "tiktok": "",
-    "web": "",
-    "telefono": ""
+    "descripcion": "Zona comercial mayorista con productos variados."
   },
   {
     "nombre": "Jirón de la Unión",
     "coords": [-12.0460, -77.0424],
-    "descripcion": "Zona peatonal de comercio en el Centro de Lima.",
-    "categoria": "Ropa, Accesorios",
-    "whatsapp": "",
-    "facebook": "",
-    "instagram": "",
-    "tiktok": "",
-    "web": "",
-    "telefono": ""
+    "descripcion": "Zona peatonal de comercio en el Centro de Lima."
+  },
+  {
+    "nombre": "Galería CompuPalace - Miraflores",
+    "coords": [-12.1190, -77.0300],
+    "descripcion": "Centro tecnológico en Miraflores."
+  },
+  {
+    "nombre": "Galería El Hueco",
+    "coords": [-12.0480, -77.0320],
+    "descripcion": "Mercado tecnológico popular en Lima."
   }
 ]
