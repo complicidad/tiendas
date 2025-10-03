@@ -33,6 +33,43 @@
   </a>
 
   <script>
+    
+  function toggleLike(storeName, btn) {
+    // Recuperar likes del navegador
+    let likes = JSON.parse(localStorage.getItem("likes")) || {};
+    
+    // Cambiar estado del like
+    if (likes[storeName]) {
+      delete likes[storeName]; // quitar like
+      btn.classList.remove("bg-red-500", "text-white");
+      btn.classList.add("bg-gray-200", "text-gray-700");
+      btn.innerText = "👍 Like";
+    } else {
+      likes[storeName] = true; // dar like
+      btn.classList.add("bg-red-500", "text-white");
+      btn.classList.remove("bg-gray-200", "text-gray-700");
+      btn.innerText = "❤️ Liked";
+    }
+
+    // Guardar en localStorage
+    localStorage.setItem("likes", JSON.stringify(likes));
+  }
+
+  // Función para renderizar botón según estado
+  function renderLikeButton(storeName) {
+    let likes = JSON.parse(localStorage.getItem("likes")) || {};
+    const liked = !!likes[storeName];
+
+    return `<button 
+      onclick="toggleLike('${storeName}', this)"
+      class="px-3 py-1 rounded-lg shadow transition text-sm ${
+        liked ? "bg-red-500 text-white" : "bg-gray-200 text-gray-700"
+      }"
+    >${liked ? "❤️ Liked" : "👍 Like"}</button>`;
+  }
+   
+    
+    
     // Coordenadas por galería
     const galerias = {
       "Gamarra": [-12.06314, -77.01457],
@@ -187,6 +224,8 @@
                 ? `<button class="text-blue-500 text-xs ml-1 leer-mas hover:underline">Leer más</button>` 
                 : ""}
             </p>` : ""}
+            
+            
           
           ${tienda["tags"] ? `<div class="mt-2 flex flex-wrap gap-1">
             ${tienda["tags"].split(",").map(tag => 
@@ -198,6 +237,7 @@
           <div class="mt-3 flex flex-wrap gap-2">
             ${coords ? `<a href="${mapsLink}" target="_blank" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg shadow hover:bg-blue-600 transition">📍 Google Maps</a>` : ""}
             ${tienda["tiktok"] ? `<a href="${tienda["tiktok"]}" target="_blank" class="px-3 py-1 bg-pink-500 text-white text-sm rounded-lg shadow hover:bg-pink-600 transition">🎵 TikTok</a>` : ""}
+            ${renderLikeButton(tienda["nombre de la tienda"])}
           </div>
         `;
 
