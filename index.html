@@ -1,269 +1,180 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Listado de Tiendas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramienta de Migración de Clientes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SDKs de Firebase (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Fuse.js (buscador) -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <style>
+        /* Estilo simple para los logs */
+        #logs div:nth-child(even) { background-color: #f9f9f9; }
+        #logs .success { color: green; font-weight: bold; }
+        #logs .error { color: red; font-weight: bold; }
+    </style>
 </head>
-<body class="bg-gray-100">
-  <h1 class="text-3xl font-bold text-center mt-5">Tiendas Registradas</h1>
-  <p class="text-center text-gray-600 mb-4">Explora las tiendas y abre su ubicación en Google Maps 📍</p>
+<body class="bg-gray-100 font-sans p-5 md:p-10">
 
-  <!-- Buscador -->
-  <div class="w-11/12 md:w-1/2 mx-auto mb-6">
-    <input id="search" type="text" placeholder="Buscar tienda, productos o tags..." 
-      class="w-full p-3 border rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
-    <ul id="results" class="bg-white mt-2 rounded-lg shadow-md"></ul>
-  </div>
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold text-gray-800">Herramienta de Migración</h1>
+        <p class="text-gray-600 mt-2">Esta herramienta leerá tu colección `envios` y creará/actualizará tu colección `clientes` con el último registro de cada cliente. Úsala solo una vez.</p>
+        <p class="text-sm text-red-600 font-semibold mt-2">Importante: Debes haber actualizado tus Reglas de Firestore (Paso 1) para darle permisos de lectura a tu email de administrador.</p>
 
-  <!-- Contenedor de tarjetas -->
-  <div id="tiendas-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-11/12 mx-auto"></div>
+        <!-- Estado de Autenticación -->
+        <div id="authStatus" class="mt-4 p-3 bg-gray-50 rounded text-gray-700">
+            Estado: No autenticado.
+        </div>
 
-  <!-- Botón registrar -->
-  <a href="https://forms.gle/ZXdRHsZ1XDiojz8FA" target="_blank"
-     class="fixed bottom-5 right-5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition"
-     style="z-index: 9999;">
-     ➕
-  </a>
+        <!-- Botones de Acción -->
+        <div class="flex gap-4 mt-4">
+            <button id="btnSignIn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                1. Iniciar Sesión con Google
+            </button>
+            <button id="btnMigrate" class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition" disabled>
+                2. Iniciar Migración
+            </button>
+        </div>
 
-  <script>
-    
-    // Coordenadas por galería
-    const galerias = {
-      "Gamarra": [-12.06314, -77.01457],
-      "Polvos Azules": [-12.05978, -77.02968],
-      "Polvos Rosados": [-12.06865, -77.03301],
-      "Centro de Lima": [-12.0464, -77.0428],
-      "Arenales": [-12.08968, -77.03317],
-      "Mesa Redonda": [-12.0512, -77.0277]
-    };
-    
-    // Diccionario de categorías para extraer tags
-    const diccionarioTags = [
-      // 👟 Calzado
-      "zapatillas", "nike", "adidas", "puma", "reebok", "vans", "converse",
-      "sandalias", "botas", "tacones", "calzado", "original", "réplica",
+        <!-- Logs de Salida -->
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold">Logs de Ejecución:</h2>
+            <div id="logs" class="mt-2 h-64 overflow-y-auto bg-gray-50 border border-gray-300 p-3 rounded-lg text-sm font-mono">
+                <div>Esperando para iniciar...</div>
+            </div>
+        </div>
+    </div>
 
-      // 👕 Ropa y moda
-      "ropa", "moda", "camisetas", "polos", "pantalones", "jeans", 
-      "casacas", "abrigos", "vestidos", "blusas", "camisas",
-      "ropa deportiva", "ropa urbana", "ropa casual", "ropa formal",
+    <script>
+        // --- 1. CONFIGURACIÓN ---
+        // Pega el firebaseConfig de tu proyecto (el mismo de tu formulario)
+        const firebaseConfig = {
+          apiKey: "AIzaSyCzJ36uZ6Bh6DdZK3VBv5HMu2xcU4GqCMQ",
+          authDomain: "form-bedc2.firebaseapp.com",
+          projectId: "form-bedc2",
+          storageBucket: "form-bedc2.firebasestorage.app",
+          messagingSenderId: "942482653487",
+          appId: "1:942482653487:web:4193c16f078992659521da"
+        };
 
-      // 🎒 Accesorios
-      "accesorios", "carteras", "bolsos", "mochilas", "gorras", "cinturones",
-      "lentes", "relojes", "joyas", "bisutería", "aretes", "collares", "anillos",
+        // --- 2. INICIALIZACIÓN ---
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-      // 📱 Electrónica y gadgets
-      "electronica", "celulares", "iphone", "samsung", "xiaomi", 
-      "audífonos", "cargadores", "smartwatch", "laptops", "tablets",
+        // Referencias a elementos del DOM
+        const btnSignIn = document.getElementById('btnSignIn');
+        const btnMigrate = document.getElementById('btnMigrate');
+        const authStatus = document.getElementById('authStatus');
+        const logs = document.getElementById('logs');
 
-      // 🎮 Cultura pop y hobbies
-      "anime", "manga", "cosplay", "figuras", "coleccionables", "comics", "videojuegos",
-      "juguetes", "peluches", "funko", "cartas", "trading cards",
+        // Función para añadir logs a la pantalla
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `p-1 border-b border-gray-200 ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(div);
+            // Auto-scroll hacia abajo
+            logs.scrollTop = logs.scrollHeight;
+        }
 
-      // 🏠 Hogar
-      "hogar", "decoración", "muebles", "cocina", "vajilla", "iluminación",
-
-      // 🛍️ Extras generales
-      "oferta", "descuento", "nuevo", "importado", "peruano"
-    ];
-
-
-    let tiendas = [];
-
-    // Función para recortar texto largo
-    function recortarTexto(texto, maxLength = 50) {
-      if (!texto) return "";
-      if (texto.length <= maxLength) return texto;
-      return texto.slice(0, maxLength) + "...";
-    }
-
-    
-    function renderLikeButton(storeName, likes = 0) {
-      return `<button 
-        onclick="likeStore('${storeName}', this)" 
-        class="absolute top-2 right-2 px-2 py-1 rounded-full shadow text-sm bg-gray-200 text-gray-700">
-        ❤️ ${likes}
-      </button>`;
-    }
-    
-    
-    // URL de Google Sheet publicada en CSV
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-8h9aepNqoixNWhC_zdj2fV-8u5JkL1TxdYhvb1Nwdw09aDLLrJpTu2AXdlpPGAhXYXZ9sMlucKwG/pub?gid=1928937044&single=true&output=csv";
-
-    fetch(sheetUrl)
-      .then(res => res.text())
-      .then(csv => {
-        let rows = csv.split("\n").map(r => r.split(","));
-        let headers = rows[0].map(h => h.trim().toLowerCase());
-        let data = rows.slice(1).map(r => {
-          let obj = {};
-          headers.forEach((h, i) => obj[h] = r[i]?.trim());
-          return obj;
-        }).filter(r => r["nombre de la tienda"]);
-
-        // Extraer tags desde la descripción libre
-        tiendas = data.map(tienda => {
-          let descripcion = (tienda["descripción libre"] || "").toLowerCase();
-          let tags = diccionarioTags.filter(tag => descripcion.includes(tag));
-          return { ...tienda, tags: tags.join(",") };
+        // --- 3. LÓGICA DE AUTENTICACIÓN ---
+        btnSignIn.addEventListener('click', async () => {
+            log("Iniciando autenticación con Google...");
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                log(`¡Éxito! Autenticado como: ${user.email}`, 'success');
+                authStatus.textContent = `Estado: Autenticado como ${user.email}`;
+                authStatus.classList.add('bg-green-100');
+                btnSignIn.disabled = true;
+                btnMigrate.disabled = false;
+            } catch (error) {
+                log(`Error de autenticación: ${error.message}`, 'error');
+                authStatus.textContent = `Error: ${error.message}`;
+                authStatus.classList.add('bg-red-100');
+            }
         });
 
-        renderTiendas(tiendas);
-
-        // Configurar buscador
-        const fuse = new Fuse(tiendas, {
-          keys: [
-            'nombre de la tienda', 
-            'galería', 
-            'piso',
-            'stand',
-            'descripción libre',
-            'tags'
-          ],
-          threshold: 0.3
-        });
-
-        const searchInput = document.getElementById('search');
-        const resultsList = document.getElementById('results');
-
-        searchInput.addEventListener('input', () => {
-          const query = searchInput.value.trim();
-          resultsList.innerHTML = "";
-
-          if (!query) {
-            renderTiendas(tiendas);
-            return;
-          }
-
-          const results = fuse.search(query).slice(0, 5);
-          renderTiendas(results.map(r => r.item));
-
-          results.forEach(r => {
-            const li = document.createElement('li');
-            li.innerHTML = `<span class="font-bold">${r.item["nombre de la tienda"]}</span> 
-                            <span class="text-gray-500 text-sm">(${r.item["galería"]})</span>`;
-            li.className = "p-2 cursor-pointer hover:bg-blue-100 transition";
-            li.onclick = () => {
-              searchInput.value = r.item["nombre de la tienda"];
-              renderTiendas([r.item]);
-              resultsList.innerHTML = "";
-            };
-            resultsList.appendChild(li);
-          });
-        });
-
-        document.addEventListener("click", (e) => {
-          if (!resultsList.contains(e.target) && e.target !== searchInput) {
-            resultsList.innerHTML = "";
-          }
-        });
-      })
-      .catch(err => console.error("Error cargando Google Sheet:", err));
-
-    // Renderizar tiendas como tarjetas
-    function renderTiendas(lista) {
-      const container = document.getElementById('tiendas-list');
-      container.innerHTML = "";
-      
-      lista.forEach(tienda => {
-        let coords = galerias[tienda["galería"]];
-        let mapsLink = coords 
-          ? `https://www.google.com/maps?q=${coords[0]},${coords[1]}` 
-          : "#";
-
-        let descripcion = tienda["descripción libre"] || "";
-        let descripcionCorta = recortarTexto(descripcion, 50);
-              
-        const card = document.createElement('div');
-        card.className = "relative bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition";
-
-        card.innerHTML = `
-          ${renderLikeButton(tienda["nombre de la tienda"], tienda["likes"] || 0)}
-          <h2 class="text-xl font-bold mb-1">${tienda["nombre de la tienda"]}</h2>
-
-          <p class="text-gray-600 mb-1">${tienda["galería"] || "Ubicación no definida"}</p>
-          <p class="text-sm text-gray-500">Piso: ${tienda["piso"] || "?"} - Stand: ${tienda["stand"] || "?"}</p>
-
-          ${descripcion ? `
-            <p class="mt-2 text-gray-700 text-sm">
-              <span class="descripcion-corta">${descripcionCorta}</span>
-              <span class="descripcion-completa hidden">${descripcion}</span>
-              ${descripcion.length > 50 
-                ? `<button class="text-blue-500 text-xs ml-1 leer-mas hover:underline">Leer más</button>` 
-                : ""}
-            </p>` : ""}
+        // --- 4. LÓGICA DE MIGRACIÓN ---
+        btnMigrate.addEventListener('click', async () => {
+            if (!auth.currentUser) {
+                log("No estás autenticado.", 'error');
+                return;
+            }
             
-            
-          
-          ${tienda["tags"] ? `<div class="mt-2 flex flex-wrap gap-1">
-            ${tienda["tags"].split(",").map(tag => 
-              `<span class="px-2 py-0.5 text-xs bg-gray-200 rounded-full cursor-pointer hover:bg-blue-200" 
-                onclick="filtrarPorTag('${tag.trim()}')">#${tag.trim()}</span>`
-            ).join("")}
-          </div>` : ""}
-          
-          <div class="mt-3 flex flex-wrap gap-2">
-            ${coords ? `<a href="${mapsLink}" target="_blank" class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg shadow hover:bg-blue-600 transition">📍 Google Maps</a>` : ""}
-            ${tienda["tiktok"] ? `<a href="${tienda["tiktok"]}" target="_blank" class="px-3 py-1 bg-pink-500 text-white text-sm rounded-lg shadow hover:bg-pink-600 transition">🎵 TikTok</a>` : ""}
+            btnMigrate.disabled = true;
+            btnMigrate.textContent = "Migrando...";
+            log("--- INICIANDO MIGRACIÓN ---");
+            log("Paso 1: Leyendo TODOS los documentos de 'envios'...");
 
-          </div>
-        `;
+            try {
+                // 1. Obtener TODOS los envíos y ordenarlos por fecha
+                const enviosCollection = db.collection('envios');
+                const enviosSnapshot = await enviosCollection.orderBy('fechaRegistro', 'desc').get();
+                
+                log(`Paso 2: Se encontraron ${enviosSnapshot.docs.length} envíos. Ordenando...`);
 
-        container.appendChild(card);
-      });
-    
+                const clientesCollection = db.collection('clientes');
+                let clientesProcesados = new Set();
+                let contadorClientesUnicos = 0;
+                let contadorErrores = 0;
 
+                // 2. Iterar sobre cada envío (del más nuevo al más viejo)
+                for (const envioDoc of enviosSnapshot.docs) {
+                    const envioData = envioDoc.data();
+                    const telefonoCliente = envioData.cliente;
 
-      
-      // Activar "Leer más / Leer menos"
-      document.querySelectorAll(".leer-mas").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const card = btn.closest("p");
-          const corta = card.querySelector(".descripcion-corta");
-          const completa = card.querySelector(".descripcion-completa");
+                    // 3. Si tiene teléfono Y NO lo hemos procesado ya...
+                    if (telefonoCliente && !clientesProcesados.has(telefonoCliente)) {
+                        
+                        // 4. Marcarlo para no volver a procesarlo
+                        clientesProcesados.add(telefonoCliente);
+                        
+                        // 5. Preparar los datos del cliente
+                        const clienteData = {
+                            nombre: envioData.nombre || '',
+                            telefono: envioData.telefono || '',
+                            distrito: envioData.distrito || '',
+                            direccion: envioData.direccion || '',
+                            referencia: envioData.referencia || '',
+                            DNI: envioData.DNI || '',
+                            agencia: envioData.agencia || '',
+                            tipoUltimoEnvio: envioData.courier || ''
+                        };
 
-          if (completa.classList.contains("hidden")) {
-            corta.classList.add("hidden");
-            completa.classList.remove("hidden");
-            btn.textContent = "Leer menos";
-          } else {
-            completa.classList.add("hidden");
-            corta.classList.remove("hidden");
-            btn.textContent = "Leer más";
-          }
+                        // 6. Escribir/Actualizar el documento en 'clientes'
+                        try {
+                            // Usamos el teléfono como ID del documento
+                            await clientesCollection.doc(telefonoCliente).set(clienteData, { merge: true });
+                            contadorClientesUnicos++;
+                            log(`Cliente ${telefonoCliente} guardado.`);
+                        } catch (writeError) {
+                            log(`Error al guardar cliente ${telefonoCliente}: ${writeError.message}`, 'error');
+                            contadorErrores++;
+                        }
+                    }
+                }
+
+                log("--- ¡MIGRACIÓN COMPLETADA! ---", 'success');
+                log(`Total de clientes únicos encontrados y migrados: ${contadorClientesUnicos}`, 'success');
+                log(`Total de errores de escritura: ${contadorErrores}`, 'error');
+                btnMigrate.textContent = "Migración Completa";
+
+            } catch (readError) {
+                log(`Error FATAL al leer la colección 'envios': ${readError.message}`, 'error');
+                log("Verifica tus Reglas de Firestore (Paso 1). Debes dar permiso de 'read' a tu email.", 'error');
+                btnMigrate.disabled = false;
+                btnMigrate.textContent = "Reintentar Migración";
+            }
         });
-      });    
-    
-    }
 
-          function likeStore(storeName, btn) {
-  fetch("https://script.google.com/macros/s/AKfycbwY-t1NHjjO1e4jXhx6XrryxhYjQF_l3_VATxawr5hnuudTg3KexGJw8Ui3XdIaTo5pcA/exec", { // 👈 pega aquí la URL de tu Apps Script
-    method: "POST",
-    body: JSON.stringify({ nombre: storeName }),
-    headers: { "Content-Type": "application/json" }
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      btn.innerText = `❤️ ${data.likes}`;
-    }
-  })
-  .catch(err => console.error("Error en like:", err));
-}
-    
-    // Filtrar por tag desde un chip
-    function filtrarPorTag(tag) {
-      const filtradas = tiendas.filter(t => (t.tags || "").includes(tag));
-      renderTiendas(filtradas);
-      document.getElementById('search').value = "#" + tag;
-    }
-  </script>
+    </script>
 </body>
 </html>
+
