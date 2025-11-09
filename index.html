@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Clientes y Boletas</title>
+    <title>Gestor de Boletas con OCR</title>
     <!-- Cargamos Tailwind CSS para un diseño limpio -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 
+      ¡IMPORTANTE!
+      Cargamos Tesseract.js para el OCR. 
+      Esta es una librería pesada (puede tardar en cargar).
+    -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+
     <style>
         /* Estilos adicionales para la cámara */
         #video-stream {
@@ -28,32 +35,20 @@
 
     <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
 
-        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Gestor de Boletas</h1>
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Gestor de Boletas (OCR)</h1>
 
-        <!-- 1. Vista de Lista de Clientes -->
-        <div id="client-list-view">
-            <h2 class="text-2xl font-semibold mb-4">Selecciona un Cliente</h2>
-            <div id="client-list" class="space-y-3">
-                <!-- Aquí irían tus clientes. data-phone debe tener el código de país (ej. 51 para Perú) -->
-                <button data-name="Juan Pérez" data-phone="51912345678" class="client-button w-full text-left p-4 bg-gray-50 border rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <div class="font-medium">Juan Pérez</div>
-                    <div class="text-sm text-gray-600">+51 912 345 678</div>
-                </button>
-                <button data-name="Maria Garcia" data-phone="51987654321" class="client-button w-full text-left p-4 bg-gray-50 border rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <div class="font-medium">Maria Garcia</div>
-                    <div class="text-sm text-gray-600">+51 987 654 321</div>
-                </button>
-                <button data-name="Carlos Sánchez" data-phone="51999888777" class="client-button w-full text-left p-4 bg-gray-50 border rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <div class="font-medium">Carlos Sánchez</div>
-                    <div class="text-sm text-gray-600">+51 999 888 777</div>
-                </button>
-            </div>
+        <!-- 1. Vista de Inicio (Botón para empezar) -->
+        <div id="start-view">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Escanear Nueva Boleta</h2>
+            <p class="text-center text-gray-700 mb-6">Presiona el botón para activar la cámara y tomar una foto de la boleta.</p>
+            <button id="start-camera-button" class="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-blue-700 transition duration-300 text-lg">
+                Iniciar Cámara
+            </button>
         </div>
 
         <!-- 2. Vista de Cámara -->
         <div id="camera-view" class="hidden">
-            <h2 class="text-2xl font-semibold mb-4">Boleta para: <span id="client-name-title" class="text-blue-600"></span></h2>
-            <p class_="text-gray-700 mb-4">Apunta la cámara a la boleta y toma la foto.</p>
+            <h2 class="text-2xl font-semibold mb-4">Apunta a la boleta</h2>
             <!-- El stream de la cámara -->
             <video id="video-stream" autoplay playsinline></video>
             
@@ -69,13 +64,26 @@
 
         <!-- 3. Vista de Previsualización y Compartir -->
         <div id="preview-view" class="hidden">
-            <h2 class="text-2xl font-semibold mb-4">Foto Capturada</h2>
+            <h2 class="text-2xl font-semibold mb-4">Revisar Foto y Datos</h2>
             <!-- El canvas mostrará la foto tomada -->
             <canvas id="photo-canvas"></canvas>
 
-            <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                <button id="share-button" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition duration-300">
-                    Compartir Foto
+            <!-- Estado del OCR -->
+            <div id="ocr-status" class-="w-full text-center p-3 text-blue-600 font-medium">
+                <!-- El estado se insertará aquí, ej: "Procesando foto..." -->
+            </div>
+
+            <!-- Campo de texto -->
+            <div class="mt-4">
+                <label for="client-phone-input" class="block text-sm font-medium text-gray-700 mb-1">
+                    Texto encontrado en la boleta:
+                </label>
+                <textarea id="client-phone-input" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="El texto leído aparecerá aquí..." rows="3"></textarea>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-4">
+                <button id="share-button" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition duration-300 disabled:bg-gray-400">
+                    Compartir Foto y Texto
                 </button>
                 <button id="retake-button" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
                     Tomar Otra
@@ -87,15 +95,16 @@
 
     <script>
         // Obtenemos los elementos principales del DOM
-        const clientListView = document.getElementById('client-list-view');
+        const startView = document.getElementById('start-view');
         const cameraView = document.getElementById('camera-view');
         const previewView = document.getElementById('preview-view');
         
-        const clientList = document.getElementById('client-list');
-        const clientNameTitle = document.getElementById('client-name-title');
+        const startCameraButton = document.getElementById('start-camera-button');
         
         const video = document.getElementById('video-stream');
         const canvas = document.getElementById('photo-canvas');
+        const clientPhoneInput = document.getElementById('client-phone-input');
+        const ocrStatus = document.getElementById('ocr-status'); // Nuevo
         
         const snapButton = document.getElementById('snap-button');
         const cancelButton = document.getElementById('cancel-button');
@@ -104,42 +113,50 @@
 
         // Variables para guardar el estado
         let currentStream = null;
-        let currentClient = {
-            name: '',
-            phone: ''
-        };
+        let tesseractScheduler = null; // Scheduler para Tesseract
+        let tesseractWorker = null; // Worker para Tesseract
 
         // --- MANEJADORES DE EVENTOS ---
 
-        // 1. Cuando se hace clic en un cliente
-        clientList.addEventListener('click', (e) => {
-            // Buscamos el botón de cliente más cercano
-            const clientButton = e.target.closest('.client-button');
-            if (clientButton) {
-                currentClient.name = clientButton.dataset.name;
-                currentClient.phone = clientButton.dataset.phone;
-                clientNameTitle.innerText = currentClient.name;
-                
-                // Abrimos la cámara
-                openCamera();
-            }
-        });
+        // 1. Cuando se hace clic en "Iniciar Cámara"
+        startCameraButton.addEventListener('click', openCamera);
 
         // 2. Cuando se hace clic en "Tomar Foto"
-        snapButton.addEventListener('click', takePhoto);
+        snapButton.addEventListener('click', takePhotoAndRecognize);
 
-        // 3. Cuando se hace clic en "Cancelar"
-        cancelButton.addEventListener('click', closeCamera);
+        // 3. Cuando se hace clic en "Cancelar" (en la cámara)
+        cancelButton.addEventListener('click', returnToStart);
 
-        // 4. Cuando se hace clic en "Tomar Otra"
+        // 4. Cuando se hace clic en "Tomar Otra" (en la previsualización)
         retakeButton.addEventListener('click', () => {
-            // Simplemente volvemos a mostrar la vista de la cámara
+            // Volvemos a mostrar la vista de la cámara
             previewView.classList.add('hidden');
             cameraView.classList.remove('hidden');
         });
 
-        // 5. Cuando se hace clic en "Compartir Foto"
-        shareButton.addEventListener('click', sharePhoto);
+        // 5. Cuando se hace clic en "Compartir Foto y Número"
+        shareButton.addEventListener('click', sharePhotoWithDetails);
+        
+        // --- FUNCIONES DE TESSERACT (OCR) ---
+
+        /**
+         * Inicializa el worker de Tesseract para que esté listo.
+         * Lo llamamos una vez al cargar la página.
+         */
+        async function initializeTesseract() {
+            try {
+                tesseractScheduler = Tesseract.createScheduler();
+                // Usamos 'spa' para español. Cambia 'spa' por 'eng' si es inglés.
+                tesseractWorker = await Tesseract.createWorker('spa'); 
+                tesseractScheduler.addWorker(tesseractWorker);
+                console.log("Tesseract (OCR) listo.");
+            } catch (err) {
+                console.error("Error inicializando Tesseract: ", err);
+                ocrStatus.innerText = "Error al cargar el módulo OCR.";
+            }
+        }
+        // Iniciar Tesseract al cargar la página
+        initializeTesseract();
 
 
         // --- FUNCIONES PRINCIPALES ---
@@ -148,8 +165,8 @@
          * Pide permiso al usuario y abre la cámara del dispositivo.
          */
         async function openCamera() {
-            // Ocultar lista de clientes y mostrar cámara
-            clientListView.classList.add('hidden');
+            // Ocultar vista de inicio y mostrar cámara
+            startView.classList.add('hidden');
             previewView.classList.add('hidden');
             cameraView.classList.remove('hidden');
 
@@ -169,32 +186,35 @@
 
             } catch (err) {
                 console.error("Error al acceder a la cámara: ", err);
-                // Manejar error: el usuario no dio permiso o no tiene cámara
-                // No usamos alert() por buenas prácticas
-                clientNameTitle.innerText = "Error de cámara";
+                // Volver a la pantalla de inicio si hay un error
+                returnToStart();
             }
         }
 
         /**
-         * Detiene el stream de la cámara y vuelve a la lista de clientes.
+         * Detiene el stream de la cámara y vuelve a la vista de inicio.
          */
-        function closeCamera() {
+        function returnToStart() {
             if (currentStream) {
                 // Detener todas las pistas (apagar la luz de la cámara)
                 currentStream.getTracks().forEach(track => track.stop());
             }
             currentStream = null;
             
-            // Mostrar lista de clientes y ocultar cámara
+            // Limpiar el campo de texto y estado
+            clientPhoneInput.value = '';
+            ocrStatus.innerText = '';
+
+            // Mostrar vista de inicio y ocultar las otras
             cameraView.classList.add('hidden');
             previewView.classList.add('hidden');
-            clientListView.classList.remove('hidden');
+            startView.classList.remove('hidden');
         }
 
         /**
-         * Captura un fotograma del video y lo dibuja en el canvas.
+         * Captura un fotograma Y LANZA EL RECONOCIMIENTO OCR.
          */
-        function takePhoto() {
+        function takePhotoAndRecognize() {
             const context = canvas.getContext('2d');
             
             // Ajustar el tamaño del canvas al del video
@@ -207,40 +227,135 @@
             // Ocultar la cámara y mostrar la previsualización
             cameraView.classList.add('hidden');
             previewView.classList.remove('hidden');
+
+            // Iniciar el proceso de OCR
+            recognizeTextFromCanvas();
         }
 
         /**
-         * Utiliza la Web Share API para compartir la foto.
+         * Procesa el canvas con Tesseract.js
          */
-        async function sharePhoto() {
-            // Comprobar si el navegador soporta la API de "Compartir"
-            if (!navigator.share) {
+        async function recognizeTextFromCanvas() {
+            if (!tesseractScheduler) {
+                ocrStatus.innerText = "Error: El OCR no se inicializó.";
+                return;
+            }
+
+            // Desactivar botones mientras procesa
+            shareButton.disabled = true;
+            retakeButton.disabled = true;
+            clientPhoneInput.value = ''; // Limpiar campo
+            ocrStatus.innerText = 'Leyendo foto... (esto puede tardar)';
+
+            try {
+                // Iniciar el reconocimiento
+                const { data: { text } } = await tesseractScheduler.addJob('recognize', canvas);
+                
+                // ¡MODIFICACIÓN! En lugar de volcar el texto, lo filtramos.
+                const extractedNumber = extractNumber(text); // Nueva función de filtrado
+
+                if (extractedNumber) {
+                    clientPhoneInput.value = extractedNumber; // Poner solo el número
+                    clientPhoneInput.style.borderColor = 'rgb(34 197 94)'; // Borde verde
+                    ocrStatus.innerText = '¡Número encontrado!';
+                } else {
+                    clientPhoneInput.value = ''; // No se encontró, dejar vacío
+                    clientPhoneInput.style.borderColor = 'rgb(239 68 68)'; // Borde rojo
+                    ocrStatus.innerText = 'No se pudo encontrar un número (9 u 8 dígitos).';
+                }
+
+            } catch (err) {
+                console.error("Error durante el OCR: ", err);
+                ocrStatus.innerText = 'Error al leer la foto.';
+            } finally {
+                // Reactivar botones
+                shareButton.disabled = false;
+                retakeButton.disabled = false;
+            }
+        }
+
+        /**
+         * Nueva función para extraer un número de 9 (celular) u 8 (DNI) dígitos
+         * del texto completo del OCR.
+         */
+        function extractNumber(ocrText) {
+            if (!ocrText) return null;
+
+            // 1. Quitar espacios, guiones, y puntos para unificar números.
+            // Ej: "912 345 678" se vuelve "912345678"
+            const cleanText = ocrText.replace(/[\s.-]/g, '');
+
+            // 2. Buscar un número de celular (9 dígitos, empieza con 9)
+            // Es la prioridad más alta, ideal para WhatsApp.
+            let phoneRegex = /(9\d{8})/; // Busca "912345678"
+            let match = cleanText.match(phoneRegex);
+            
+            if (match && match[0]) {
+                return match[0]; // Devuelve el número encontrado
+            }
+
+            // 3. Si no hay celular, buscar un DNI (8 dígitos exactos)
+            // Usamos un regex que busque 8 dígitos rodeados por algo que no sea dígito
+            // (o el inicio/fin de la cadena) para evitar capturar parte de un RUC.
+            let dniRegex = /(?:[^\d]|^)(\d{8})(?:[^\d]|$)/;
+            match = cleanText.match(dniRegex);
+            
+            if (match && match[1]) {
+                return match[1]; // Devuelve el grupo capturado (los 8 dígitos)
+            }
+            
+            // 4. No se encontró nada
+            return null;
+        }
+
+        /**
+         * Utiliza la Web Share API para compartir la foto Y el número del campo de texto.
+         */
+        async function sharePhotoWithDetails() {
+            // El texto ahora es el texto completo del OCR
+            const ocrText = clientPhoneInput.value;
+
+            // Validación: asegurarse de que hay texto
+            if (ocrText.trim() === '') {
+                clientPhoneInput.focus();
+                clientPhoneInput.style.borderColor = 'red';
+                return;
+            }
+            clientPhoneInput.style.borderColor = 'rgb(209 213 219)'; // Resetear borde
+
+            // Comprobar si el navegador soporta la API de "Compartir" con archivos
+            if (!navigator.share || !navigator.canShare) {
                 console.error("La API de Web Share no es soportada en este navegador.");
-                // Aquí podrías mostrar un mensaje modal en lugar de alert
-                // alert("Tu navegador no soporta la función de compartir.");
                 return;
             }
 
             // Convertir la imagen del canvas a un archivo (Blob)
             canvas.toBlob(async (blob) => {
-                const file = new File([blob], `boleta-${currentClient.name.replace(' ', '-')}.jpg`, {
+                const file = new File([blob], `boleta_ocr.jpg`, {
                     type: 'image/jpeg'
                 });
 
-                const shareData = {
-                    files: [file],
-                    title: `Boleta para ${currentClient.name}`,
-                    text: `Aquí está la foto de la boleta para ${currentClient.name}.`
-                };
+                // Comprobar si podemos compartir este tipo de archivo
+                if (navigator.canShare({ files: [file] })) {
+                    
+                    const shareData = {
+                        files: [file],
+                        title: `Boleta de Cliente`,
+                        // Adjuntamos el texto completo leído por el OCR
+                        text: `Texto de la boleta:\n${ocrText}`
+                    };
 
-                try {
-                    // Abrir el diálogo nativo de "Compartir"
-                    await navigator.share(shareData);
-                    console.log("Foto compartida exitosamente");
-                    // Después de compartir, volver a la lista de clientes
-                    closeCamera(); 
-                } catch (err) {
-                    console.error("Error al compartir: ", err);
+                    try {
+                        // Abrir el diálogo nativo de "Compartir"
+                        await navigator.share(shareData);
+                        console.log("Foto y datos compartidos exitosamente");
+                        // Después de compartir, volver a la pantalla de inicio
+                        returnToStart(); 
+                    } catch (err) {
+                        console.error("Error al compartir: ", err);
+                    }
+                } else {
+                    console.error("No se pueden compartir estos archivos.");
                 }
             }, 'image/jpeg');
         }
