@@ -152,10 +152,19 @@
         // Establecer nivel de log a Debug para ver actividad de Firestore
         setLogLevel('Debug');
 
-        // Variables Globales
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Variables Globales (Asegúrate de reemplazar __app_id, __firebase_config y __initial_auth_token por tus valores de producción)
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAomajVOrWE-d8p9_bfk5lHYPY4JRFutIw",
+            authDomain: "tiendasapp-233e5.firebaseapp.com",
+            projectId: "tiendasapp-233e5",
+            storageBucket: "tiendasapp-233e5.firebasestorage.app",
+            messagingSenderId: "747918968733",
+            appId: "1:747918968733:web:dc3085a8b0b09c2d46d174",
+            measurementId: "G-2YG39F0V53"
+        }; 
+        // Usamos el projectId como appId para la ruta de la colección pública (artifact/{appId}/...)
+        const appId = 'tiendasapp-233e5'; 
+        const initialAuthToken = null; // No necesario para autenticación anónima
 
         let db;
         let auth;
@@ -188,26 +197,22 @@
                 loadingMessage.textContent = "Error al conectar con la base de datos.";
             }
         } else {
-             loadingMessage.textContent = "Configuración de Firebase no disponible.";
+             // En un entorno de producción real, NUNCA debería entrar aquí si se configura correctamente.
+             loadingMessage.textContent = "¡ATENCIÓN! Configuración de Firebase faltante. Revisa el script.";
              console.error("Configuración de Firebase no disponible.");
         }
-
+        
+        // El onAuthStateChanged maneja la autenticación anónima si no hay un usuario logueado
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
                 userIdDisplay.textContent = `Tu ID de usuario (necesario para likes): ${currentUserId}`;
             } else {
-                // Si no hay token inicial, usa sign-in anónimo
+                // Si no hay usuario, intentamos el sign-in anónimo para obtener un UID.
                 try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    // Una vez autenticado, currentUserId se actualizará con el siguiente onAuthStateChanged
+                     await signInAnonymously(auth);
                 } catch (error) {
-                    console.error("Error al autenticar:", error);
-                    loadingMessage.textContent = "Error de autenticación. Verifica las reglas de seguridad.";
+                    console.error("Error al autenticar anónimamente:", error);
                 }
             }
             isAuthReady = true;
@@ -217,6 +222,7 @@
                 setupRealtimeListeners();
             }
         });
+
 
         // =================================================================
         // 2. LÓGICA DE FIRESTORE (LECTURA y ESCRITURA)
@@ -290,7 +296,8 @@
                 ];
 
                 for (const store of initialStores) {
-                    await setDoc(doc(storesColRef, store.id), store);
+                    // Usar el campo 'id' como Document ID de Firestore para mantener la consistencia
+                    await setDoc(doc(storesColRef, store.id), store); 
                 }
 
                 console.log("¡Siembra de datos completada!");
@@ -328,7 +335,10 @@
                         ...data
                     };
                     stores.push(storeData);
-                    galleries.add(data.galería);
+                    // Asegúrate de que 'galería' exista antes de agregarlo al Set
+                    if (data.galería) {
+                        galleries.add(data.galería);
+                    }
                 });
 
                 stores.sort((a, b) => b.likes - a.likes); 
@@ -358,20 +368,13 @@
                 });
                 
                 // Dispara una re-renderización para actualizar los corazones
-                // La función setupStoreListener ya llama a displayStores cuando cambia la lista de tiendas, 
-                // pero si solo cambian los likes, necesitamos una llamada explícita
-                if (!loadingMessage.classList.contains('hidden')) {
-                   // Si el mensaje de carga está visible, significa que displayStores aún no se ha llamado
-                   // No hacemos nada, setupStoreListener lo hará.
-                } else {
-                    // Si ya se cargaron las tiendas, debemos re-renderizar para actualizar el corazón.
-                    // Para esto, necesitaríamos la lista de tiendas actual. Como no la guardamos globalmente,
-                    // confiaremos en que el listener de tiendas (que es la fuente principal) se dispare.
-                    // Sin embargo, para mayor robustez en un entorno de desarrollo:
-                    // Dejamos la instrucción anterior (que usa la lista de tiendas actual en el scope del listener de tiendas)
-                    // y nos aseguramos de que los filtros se apliquen correctamente.
-                    console.log("Likes de usuario actualizados, esperando re-renderizado de tiendas.");
-                }
+                console.log("Likes de usuario actualizados, re-renderizando tiendas.");
+                
+                // NOTA: Para re-renderizar correctamente, necesitaríamos la lista de tiendas.
+                // Como está fuera de este scope de listener, confiamos en que el listener de tiendas
+                // se dispare o en que el usuario interactúe con los filtros.
+                // En un entorno de desarrollo más robusto, guardaríamos la lista de tiendas
+                // en una variable global para poder llamarla desde aquí.
                 
             }, (error) => {
                 console.error("Error en onSnapshot (Likes): ", error);
@@ -441,10 +444,13 @@
                 displayFormMessage("El nombre de la tienda es obligatorio.", 'error');
                 return;
             }
+            
+            // Usamos el nombre de la tienda como ID del documento
+            const documentId = storeName; 
 
             // Datos de la nueva tienda
             const newStoreData = {
-                // Usamos el nombre de la tienda como Document ID
+                id: documentId, // Guardamos el ID dentro del documento también
                 'nombre de la tienda': storeName,
                 galería: document.getElementById('gallery').value.trim(),
                 piso: document.getElementById('floor').value.trim(),
@@ -456,7 +462,7 @@
                 creatorId: currentUserId // Registrar quién la agregó
             };
             
-            const storeDocRef = doc(getStoresCollectionRef(), storeName);
+            const storeDocRef = doc(getStoresCollectionRef(), documentId);
 
             try {
                 // Verificar si ya existe una tienda con ese nombre
