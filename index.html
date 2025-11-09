@@ -6,7 +6,7 @@
     <title>Buscador de Tiendas</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons (para el ícono del botón flotante y corazón) -->
+    <!-- Lucide Icons (para el ícono del botón flotante, llama y check) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@
         }
         .store-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 4px, 6px, 0.1);
         }
     </style>
 </head>
@@ -54,7 +54,7 @@
             Buscador de Tiendas 🔎
         </h1>
         <p class="text-sm text-gray-500 mb-8 text-center">
-            Muestra tiendas de Gamarra, filtradas por galería y ordenadas por likes.
+            Muestra tiendas de Gamarra, filtradas por galería y ordenadas por **Nivel de Fuego** (Recomendaciones).
             <span id="userIdDisplay" class="block mt-2 text-xs text-blue-600"></span>
         </p>
 
@@ -75,18 +75,18 @@
     </div>
 
     <!-- Botón Flotante para Agregar Tienda -->
-    <button id="addButton" onclick="showModal()"
+    <button id="addButton" onclick="showAddStoreModal()"
             class="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold hover:bg-blue-700 transition duration-150">
         <i data-lucide="plus" class="w-6 h-6"></i>
     </button>
 
-    <!-- MODAL para Agregar Tienda -->
+    <!-- MODAL 1: Agregar Tienda -->
     <div id="addStoreModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
             <!-- Encabezado del Modal -->
             <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                 <h2 class="text-xl font-bold text-gray-800">Registrar Nueva Tienda</h2>
-                <button onclick="hideModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <button onclick="hideAddStoreModal()" class="text-gray-400 hover:text-gray-600 transition">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -98,31 +98,34 @@
                     <input type="text" id="storeName" required placeholder="Ej: Moda Joven S.A.C."
                            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                 </div>
-
+                <div>
+                    <label for="gallerySelectInput" class="block text-sm font-medium text-gray-700">Galería</label>
+                    <select id="gallerySelectInput" required 
+                            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <option value="" disabled selected>Cargando galerías...</option>
+                    </select>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="gallery" class="block text-sm font-medium text-gray-700">Galería</label>
-                        <input type="text" id="gallery" required placeholder="Ej: La Rotonda"
-                               class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                    </div>
                     <div>
                         <label for="floor" class="block text-sm font-medium text-gray-700">Piso</label>
                         <input type="text" id="floor" required placeholder="Ej: 3"
                                class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="stand" class="block text-sm font-medium text-gray-700">Stand/Número</label>
                         <input type="text" id="stand" required placeholder="Ej: 305"
                                class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <div>
-                        <label for="tiktok" class="block text-sm font-medium text-gray-700">Enlace de TikTok</label>
-                        <input type="url" id="tiktok" placeholder="https://tiktok.com/@mitienda"
-                               class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                    </div>
+                </div>
+                 <div>
+                    <label for="imageUrl" class="block text-sm font-medium text-gray-700">URL de Imagen (Opcional)</label>
+                    <input type="url" id="imageUrl" placeholder="https://placehold.co/400x200/505050/ffffff?text=Tienda"
+                            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="tiktok" class="block text-sm font-medium text-gray-700">Enlace de TikTok</label>
+                    <input type="url" id="tiktok" placeholder="https://tiktok.com/@mitienda"
+                            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
@@ -132,7 +135,7 @@
                 </div>
 
                 <!-- Mensaje de Error (oculto por defecto) -->
-                <div id="formMessage" class="hidden p-3 text-sm rounded-lg bg-red-100 text-red-700" role="alert"></div>
+                <div id="formMessage" class="hidden p-3 text-sm rounded-lg" role="alert"></div>
 
                 <!-- Botón de Envío -->
                 <button type="submit" id="saveButton"
@@ -143,14 +146,65 @@
         </div>
     </div>
 
+    <!-- MODAL 2: Verificaciones -->
+    <div id="reviewsModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-y-auto max-h-[90vh]">
+            <!-- Encabezado del Modal -->
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-800">Verificaciones de <span id="reviewStoreName" class="text-blue-600"></span></h2>
+                <button onclick="hideReviewsModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Contenido del Modal de Verificaciones -->
+            <div class="p-6">
+                <!-- Formulario para Añadir Verificación -->
+                <div class="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Añade tu Verificación de Compra</h3>
+                    <form id="reviewForm" class="space-y-3">
+                        <textarea id="reviewText" rows="3" required placeholder="Confirma la ubicación, la calidad de los productos o el buen trato. Sé constructivo."
+                                  class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        
+                        <!-- Mensaje de Error/Éxito para Verificaciones -->
+                        <div id="reviewFormMessage" class="hidden p-3 text-sm rounded-lg" role="alert"></div>
+
+                        <button type="submit" id="saveReviewButton"
+                                class="w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
+                            Publicar Verificación ✅
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Lista de Verificaciones -->
+                <h3 class="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">Verificaciones de Compradores (<span id="reviewCount">0</span>)</h3>
+                <div id="reviewsContainer" class="space-y-4">
+                    <p id="noReviewsMessage" class="text-center text-gray-500">No hay verificaciones todavía. ¡Sé el primero!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts de Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, updateDoc, increment, getDoc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, updateDoc, increment, getDoc, deleteDoc, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Establecer nivel de log a Debug para ver actividad de Firestore
         setLogLevel('Debug');
+
+        // =================================================================
+        // CONFIGURACIÓN DE DATOS ESTÁTICOS Y FIREBASE
+        // =================================================================
+
+        // LISTA ESTÁTICA DE GALERÍAS
+        const STATIC_GALLERIES = [
+            "El Rey",
+            "La Rotonda",
+            "Cyber Plaza",
+            "Galería Gamarra Moda"
+        ];
 
         // Variables Globales (Asegúrate de reemplazar __app_id, __firebase_config y __initial_auth_token por tus valores de producción)
         const firebaseConfig = { 
@@ -164,24 +218,41 @@
         }; 
         // Usamos el projectId como appId para la ruta de la colección pública (artifact/{appId}/...)
         const appId = 'tiendasapp-233e5'; 
-        const initialAuthToken = null; // No necesario para autenticación anónima
-
+        
         let db;
         let auth;
         let currentUserId = null;
         let isAuthReady = false;
         
+        // Estado para el Modal de Verificaciones
+        let currentReviewStoreId = null;
+
         // Referencias del DOM
         const storesContainer = document.getElementById('storesContainer');
         const galleryFilter = document.getElementById('galleryFilter');
         const searchInput = document.getElementById('searchInput');
         const loadingMessage = document.getElementById('loadingMessage');
         const userIdDisplay = document.getElementById('userIdDisplay');
-        const formMessage = document.getElementById('formMessage');
+        
+        // Formulario Agregar Tienda
         const storeForm = document.getElementById('storeForm');
+        const gallerySelectInput = document.getElementById('gallerySelectInput');
+        const formMessage = document.getElementById('formMessage');
 
-        // Estado local para los likes del usuario
-        let userLikes = new Set();
+        // Modal de Verificaciones
+        const reviewsModal = document.getElementById('reviewsModal');
+        const reviewStoreName = document.getElementById('reviewStoreName');
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewTextarea = document.getElementById('reviewText');
+        const reviewsContainer = document.getElementById('reviewsContainer');
+        const noReviewsMessage = document.getElementById('noReviewsMessage');
+        const reviewFormMessage = document.getElementById('reviewFormMessage');
+        const reviewCount = document.getElementById('reviewCount');
+
+
+        // Estado local para las recomendaciones del usuario
+        let userRecommendations = new Set(); // Almacena IDs de tiendas recomendadas
+        let unsubscribeReviews = null; // Para detener el escuchador de verificaciones cuando se cierra el modal
         
         // =================================================================
         // 1. INICIALIZACIÓN Y AUTENTICACIÓN
@@ -197,18 +268,15 @@
                 loadingMessage.textContent = "Error al conectar con la base de datos.";
             }
         } else {
-             // En un entorno de producción real, NUNCA debería entrar aquí si se configura correctamente.
              loadingMessage.textContent = "¡ATENCIÓN! Configuración de Firebase faltante. Revisa el script.";
              console.error("Configuración de Firebase no disponible.");
         }
         
-        // El onAuthStateChanged maneja la autenticación anónima si no hay un usuario logueado
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
-                userIdDisplay.textContent = `Tu ID de usuario (necesario para likes): ${currentUserId}`;
+                userIdDisplay.textContent = `Tu ID de usuario (necesario para recomendaciones/verificaciones): ${currentUserId}`;
             } else {
-                // Si no hay usuario, intentamos el sign-in anónimo para obtener un UID.
                 try {
                      await signInAnonymously(auth);
                 } catch (error) {
@@ -234,11 +302,16 @@
             return collection(db, `artifacts/${appId}/public/data/tiendas`);
         }
         
-        // Define la ruta de la colección de likes del usuario actual
-        function getLikesCollectionRef() {
+        // Define la ruta de la colección de recomendaciones del usuario actual
+        function getRecommendationsCollectionRef() {
             if (!currentUserId) return null;
-            // Ruta privada del usuario: /artifacts/{appId}/users/{userId}/likes
-            return collection(db, `artifacts/${appId}/users/${currentUserId}/likes`);
+            // Ruta privada del usuario: /artifacts/{appId}/users/{userId}/recommendations
+            return collection(db, `artifacts/${appId}/users/${currentUserId}/recommendations`);
+        }
+
+        // Define la ruta de la subcolección de verificaciones para una tienda específica
+        function getVerificationsCollectionRef(storeId) {
+            return collection(db, `artifacts/${appId}/public/data/tiendas/${storeId}/verifications`);
         }
 
         // --- SIEMBRA DE DATOS DE PRUEBA ---
@@ -255,48 +328,53 @@
                 }
                 
                 console.log("Sembrando datos de prueba...");
-
+                
                 const initialStores = [
                     {
                         id: "ModaTrendy",
                         'nombre de la tienda': "Moda Trendy",
-                        galería: "El Rey",
+                        galería: "El Rey", 
                         piso: "2",
                         stand: "215",
                         'descripción libre': "Especialistas en ropa urbana y juvenil.",
                         tiktok: "https://tiktok.com/@modatrendy",
-                        likes: 15,
+                        imageUrl: "https://placehold.co/400x200/2563eb/ffffff?text=Moda+Trendy", 
+                        recommendations: 15, // CAMBIADO de likes a recommendations
+                        verificationCount: 3, // CAMBIADO de reviewCount a verificationCount
                         createdAt: new Date().toISOString(),
                         creatorId: 'system-seed'
                     },
                     {
                         id: "TextilSofia",
                         'nombre de la tienda': "Textil Sofía",
-                        galería: "La Rotonda",
+                        galería: "La Rotonda", 
                         piso: "5",
                         stand: "501",
                         'descripción libre': "Venta de telas por mayor, variedad de colores y diseños.",
                         tiktok: "https://tiktok.com/@textilsofia",
-                        likes: 8,
+                        imageUrl: "https://placehold.co/400x200/059669/ffffff?text=Textil+Sofia", 
+                        recommendations: 8,
+                        verificationCount: 0, 
                         createdAt: new Date().toISOString(),
                         creatorId: 'system-seed'
                     },
                     {
                         id: "AccesoriosCool",
                         'nombre de la tienda': "Accesorios Cool",
-                        galería: "Cyber Plaza",
+                        galería: "Cyber Plaza", 
                         piso: "1",
                         stand: "103",
                         'descripción libre': "Joyas de fantasía, lentes y gorras de moda.",
                         tiktok: "https://tiktok.com/@accesorioscool",
-                        likes: 22,
+                        imageUrl: "https://placehold.co/400x200/9d174d/ffffff?text=Accesorios+Cool", 
+                        recommendations: 22,
+                        verificationCount: 1, 
                         createdAt: new Date().toISOString(),
                         creatorId: 'system-seed'
                     },
                 ];
 
                 for (const store of initialStores) {
-                    // Usar el campo 'id' como Document ID de Firestore para mantener la consistencia
                     await setDoc(doc(storesColRef, store.id), store); 
                 }
 
@@ -311,10 +389,13 @@
         function setupRealtimeListeners() {
             // 1. Escuchar la lista de tiendas
             setupStoreListener();
-            // 2. Escuchar los likes del usuario (si está autenticado)
+            // 2. Escuchar las recomendaciones del usuario (si está autenticado)
             if (currentUserId) {
-                setupLikesListener();
+                setupRecommendationsListener();
             }
+            // 3. Poblar galerías ESTÁTICAS
+            populateGalleryFilter(STATIC_GALLERIES); 
+            populateGallerySelectInput(STATIC_GALLERIES);
         }
         
         // --- ESCUCHADOR DE TIENDAS ---
@@ -325,110 +406,87 @@
             onSnapshot(q, (snapshot) => {
                 loadingMessage.classList.add('hidden');
                 const stores = [];
-                const galleries = new Set();
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const storeData = {
                         id: doc.id,
-                        likes: data.likes || 0,
+                        recommendations: data.recommendations || 0, // Nuevo campo
+                        verificationCount: data.verificationCount || 0, // Nuevo campo
                         ...data
                     };
                     stores.push(storeData);
-                    // Asegúrate de que 'galería' exista antes de agregarlo al Set
-                    if (data.galería) {
-                        galleries.add(data.galería);
-                    }
                 });
 
-                stores.sort((a, b) => b.likes - a.likes); 
-                populateGalleryFilter(galleries);
+                // Ordenar por el nuevo campo: recommendations
+                stores.sort((a, b) => b.recommendations - a.recommendations); 
                 
-                // Pasa el estado actual de todas las tiendas y los likes al renderizador
-                displayStores(stores, userLikes); 
+                // Pasa el estado actual de todas las tiendas y las recomendaciones del usuario
+                displayStores(stores, userRecommendations); 
 
-                galleryFilter.onchange = () => displayStores(stores, userLikes);
-                searchInput.oninput = () => displayStores(stores, userLikes);
+                galleryFilter.onchange = () => displayStores(stores, userRecommendations);
+                searchInput.oninput = () => displayStores(stores, userRecommendations);
             }, (error) => {
                 console.error("Error en onSnapshot (Tiendas): ", error);
                 loadingMessage.textContent = "Error al cargar los datos en tiempo real.";
             });
         }
         
-        // --- ESCUCHADOR DE LIKES DEL USUARIO ---
-        function setupLikesListener() {
-            const likesColRef = getLikesCollectionRef();
-            if (!likesColRef) return;
+        // --- ESCUCHADOR DE RECOMENDACIONES DEL USUARIO ---
+        function setupRecommendationsListener() {
+            const recommendationsColRef = getRecommendationsCollectionRef();
+            if (!recommendationsColRef) return;
             
-            // Escucha todos los documentos (likes) del usuario actual
-            onSnapshot(likesColRef, (snapshot) => {
-                userLikes.clear(); // Limpia el set
+            onSnapshot(recommendationsColRef, (snapshot) => {
+                userRecommendations.clear(); // Limpia el set
                 snapshot.forEach(doc => {
-                    userLikes.add(doc.id); // Agrega el ID de la tienda que tiene like
+                    userRecommendations.add(doc.id); // Agrega el ID de la tienda que el usuario recomienda
                 });
-                
-                // Dispara una re-renderización para actualizar los corazones
-                console.log("Likes de usuario actualizados, re-renderizando tiendas.");
-                
-                // NOTA: Para re-renderizar correctamente, necesitaríamos la lista de tiendas.
-                // Como está fuera de este scope de listener, confiamos en que el listener de tiendas
-                // se dispare o en que el usuario interactúe con los filtros.
-                // En un entorno de desarrollo más robusto, guardaríamos la lista de tiendas
-                // en una variable global para poder llamarla desde aquí.
-                
             }, (error) => {
-                console.error("Error en onSnapshot (Likes): ", error);
+                console.error("Error en onSnapshot (Recomendaciones): ", error);
             });
         }
 
-        // --- ESCRITURA (Likes) ---
-        window.likeStore = async function(storeId) {
+        // --- ESCRITURA (Recomendaciones - 🔥 Fuego) ---
+        window.recommendStore = async function(storeId) {
             if (!currentUserId) {
-                alertUser("Necesitas estar autenticado para dar o quitar 'Me Gusta'.");
+                alertUser("Necesitas estar autenticado para dar o quitar una Recomendación (Fuego).");
                 return;
             }
 
-            const likeDocRef = doc(getLikesCollectionRef(), storeId);
+            const recommendationDocRef = doc(getRecommendationsCollectionRef(), storeId);
             const storeDocRef = doc(getStoresCollectionRef(), storeId);
 
             try {
-                // 1. Verificar si el usuario ya dio like
-                const likeDoc = await getDoc(likeDocRef);
+                const recommendationDoc = await getDoc(recommendationDocRef);
 
-                if (likeDoc.exists()) {
-                    // Ya dio like: Quitar like (Dislike)
-                    await deleteLike(likeDocRef, storeDocRef);
+                if (recommendationDoc.exists()) {
+                    // Ya recomendó: Quitar recomendación
+                    await deleteRecommendation(recommendationDocRef, storeDocRef);
                 } else {
-                    // No ha dado like: Añadir like
-                    await addLike(likeDocRef, storeDocRef);
+                    // No ha recomendado: Añadir recomendación
+                    await addRecommendation(recommendationDocRef, storeDocRef);
                 }
-                
-                // La UI se actualizará automáticamente gracias a los onSnapshot listeners
             } catch (error) {
-                console.error("Error al gestionar el like:", error);
-                alertUser("Error de conexión al dar o quitar 'Me Gusta'.");
+                console.error("Error al gestionar la recomendación:", error);
+                alertUser("Error de conexión al dar o quitar la Recomendación.");
             }
         };
 
-        async function addLike(likeDocRef, storeDocRef) {
-            // Crea el documento de like en la colección privada del usuario
-            await setDoc(likeDocRef, { likedAt: new Date().toISOString() });
-            
-            // Incrementa el contador de likes en la tienda (colección pública)
+        async function addRecommendation(recommendationDocRef, storeDocRef) {
+            await setDoc(recommendationDocRef, { recommendedAt: new Date().toISOString() });
             await updateDoc(storeDocRef, {
-                likes: increment(1)
+                recommendations: increment(1) // Incrementa el contador principal
             });
         }
 
-        async function deleteLike(likeDocRef, storeDocRef) {
-            // Elimina el documento de like
-            await deleteDoc(likeDocRef);
+        async function deleteRecommendation(recommendationDocRef, storeDocRef) {
+            await deleteDoc(recommendationDocRef);
             
-            // Decrementa el contador de likes (asegurando que no baje de 0)
             const storeSnapshot = await getDoc(storeDocRef);
-            if (storeSnapshot.exists() && storeSnapshot.data().likes > 0) {
+            if (storeSnapshot.exists() && storeSnapshot.data().recommendations > 0) {
                  await updateDoc(storeDocRef, {
-                    likes: increment(-1)
+                    recommendations: increment(-1)
                 });
             }
         }
@@ -436,66 +494,150 @@
         // --- ESCRITURA (Añadir Tienda) ---
         window.addStore = async function(e) {
             e.preventDefault();
-            formMessage.classList.add('hidden');
+            displayFormMessage('', 'hide', formMessage);
             
             const storeName = document.getElementById('storeName').value.trim();
+            const selectedGallery = document.getElementById('gallerySelectInput').value.trim(); 
             
-            if (!storeName) {
-                displayFormMessage("El nombre de la tienda es obligatorio.", 'error');
+            if (!storeName || !selectedGallery) {
+                displayFormMessage("El nombre y la galería son obligatorios.", 'error', formMessage);
                 return;
             }
             
-            // Usamos el nombre de la tienda como ID del documento
             const documentId = storeName; 
 
-            // Datos de la nueva tienda
             const newStoreData = {
-                id: documentId, // Guardamos el ID dentro del documento también
+                id: documentId,
                 'nombre de la tienda': storeName,
-                galería: document.getElementById('gallery').value.trim(),
+                galería: selectedGallery, 
                 piso: document.getElementById('floor').value.trim(),
                 stand: document.getElementById('stand').value.trim(),
                 'descripción libre': document.getElementById('description').value.trim(),
                 tiktok: document.getElementById('tiktok').value.trim(),
-                likes: 0, // Inicializar siempre en 0
+                imageUrl: document.getElementById('imageUrl').value.trim() || 'https://placehold.co/400x200/505050/ffffff?text=Tienda', 
+                recommendations: 0, // Nuevo campo
+                verificationCount: 0, // Nuevo campo
                 createdAt: new Date().toISOString(),
-                creatorId: currentUserId // Registrar quién la agregó
+                creatorId: currentUserId
             };
             
             const storeDocRef = doc(getStoresCollectionRef(), documentId);
 
             try {
-                // Verificar si ya existe una tienda con ese nombre
                 const existingDoc = await getDoc(storeDocRef);
                 if (existingDoc.exists()) {
-                    displayFormMessage(`Ya existe una tienda con el nombre "${storeName}". Usa un nombre único.`, 'error');
+                    displayFormMessage(`Ya existe una tienda con el nombre "${storeName}". Usa un nombre único.`, 'error', formMessage);
                     return;
                 }
 
-                // Guardar la nueva tienda usando el nombre como Document ID
                 await setDoc(storeDocRef, newStoreData);
 
-                // Éxito
-                displayFormMessage("¡Tienda registrada con éxito!", 'success');
+                displayFormMessage("¡Tienda registrada con éxito!", 'success', formMessage);
                 storeForm.reset();
-                setTimeout(hideModal, 1500); // Cerrar después de 1.5 segundos
+                setTimeout(hideAddStoreModal, 1500); 
             } catch (error) {
                 console.error("Error al añadir la tienda:", error);
-                displayFormMessage("Error al guardar la tienda. Verifica la consola.", 'error');
+                displayFormMessage("Error al guardar la tienda. Verifica la consola.", 'error', formMessage);
             }
         }
         
         // Asignar la función de envío al formulario
         storeForm.addEventListener('submit', window.addStore);
 
+        // --- ESCRITURA (Añadir Verificación - ✅ Check) ---
+        window.addVerification = async function(e) {
+            e.preventDefault();
+            displayFormMessage('', 'hide', reviewFormMessage);
+            
+            if (!currentReviewStoreId) return; // Debe haber una tienda seleccionada
+
+            const verificationText = reviewTextarea.value.trim();
+
+            if (!verificationText) {
+                displayFormMessage("La verificación no puede estar vacía.", 'error', reviewFormMessage);
+                return;
+            }
+            if (!currentUserId) {
+                displayFormMessage("Debes estar autenticado para dejar una verificación.", 'error', reviewFormMessage);
+                return;
+            }
+
+            const newVerification = {
+                text: verificationText,
+                creatorId: currentUserId,
+                createdAt: serverTimestamp() // Usa serverTimestamp para la hora del servidor
+            };
+
+            try {
+                // 1. Guarda la verificación en la subcolección
+                await addDoc(getVerificationsCollectionRef(currentReviewStoreId), newVerification);
+                
+                // 2. Incrementa el contador de verificaciones en el documento principal de la tienda
+                const storeDocRef = doc(getStoresCollectionRef(), currentReviewStoreId);
+                await updateDoc(storeDocRef, {
+                    verificationCount: increment(1)
+                });
+
+                displayFormMessage("¡Verificación publicada con éxito!", 'success', reviewFormMessage);
+                reviewTextarea.value = ''; // Limpiar textarea
+            } catch (error) {
+                console.error("Error al añadir la verificación:", error);
+                displayFormMessage("Error al publicar la verificación. Verifica la consola.", 'error', reviewFormMessage);
+            }
+        }
+        
+        // Asignar la función de envío al formulario de verificaciones
+        reviewForm.addEventListener('submit', window.addVerification);
+
+
+        // --- ESCUCHADOR DE VERIFICACIONES (Se inicia al abrir el modal) ---
+        function setupVerificationsListener(storeId) {
+            // Detener el escuchador anterior si existe
+            if (unsubscribeReviews) {
+                unsubscribeReviews();
+            }
+
+            const reviewsColRef = getVerificationsCollectionRef(storeId);
+            // Ordena por fecha de creación descendente
+            const q = query(reviewsColRef); 
+            
+            unsubscribeReviews = onSnapshot(q, (snapshot) => {
+                const verifications = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let dateString = 'Pendiente...';
+                    // Convertir el timestamp de Firestore a una cadena legible
+                    if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                        dateString = data.createdAt.toDate().toLocaleString();
+                    } else if (data.createdAt) {
+                        dateString = new Date(data.createdAt).toLocaleString();
+                    }
+                    
+                    verifications.push({
+                        id: doc.id,
+                        ...data,
+                        createdAt: dateString
+                    });
+                });
+                
+                // Ordenar en el cliente (por si la query no usa 'orderBy')
+                verifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                displayVerifications(verifications);
+            }, (error) => {
+                console.error("Error en onSnapshot (Verificaciones): ", error);
+            });
+        }
+
+
         // =================================================================
         // 3. FUNCIONES DE UI Y LÓGICA DE FILTRADO
         // =================================================================
 
-        function populateGalleryFilter(galleries) {
+        // Llena el SELECT del FILTRO Galería
+        function populateGalleryFilter(galleryNames) {
             galleryFilter.innerHTML = '<option value="all">Todas las galerías</option>';
-            // Convertir Set a Array, ordenar alfabéticamente
-            const sortedGalleries = Array.from(galleries).sort();
+            const sortedGalleries = Array.from(galleryNames).sort();
             sortedGalleries.forEach(gallery => {
                 const option = document.createElement('option');
                 option.value = gallery;
@@ -504,17 +646,30 @@
             });
         }
 
-        // La función ahora acepta el set de likes para renderizar el corazón correctamente
-        function displayStores(stores, likesSet) {
+        // Llena el SELECT del FORMULARIO Galería
+        function populateGallerySelectInput(galleryNames) {
+            gallerySelectInput.innerHTML = '<option value="" disabled selected>Selecciona una galería</option>';
+            
+            galleryNames.sort().forEach(galleryName => {
+                const option = document.createElement('option');
+                option.value = galleryName; 
+                option.textContent = galleryName;
+                gallerySelectInput.appendChild(option);
+            });
+             if (galleryNames.length === 0) {
+                 gallerySelectInput.innerHTML = '<option value="" disabled selected>No hay galerías configuradas</option>';
+            }
+        }
+
+        // Renderiza la lista de tiendas
+        function displayStores(stores, recommendationsSet) {
             const selectedGallery = galleryFilter.value;
             const searchTerm = searchInput.value.toLowerCase().trim();
             storesContainer.innerHTML = '';
 
             const filteredStores = stores.filter(store => {
-                // Filtrar por galería
                 const galleryMatch = selectedGallery === 'all' || store.galería === selectedGallery;
 
-                // Filtrar por búsqueda
                 const searchMatch = store['nombre de la tienda'].toLowerCase().includes(searchTerm) ||
                                     (store['descripción libre'] && store['descripción libre'].toLowerCase().includes(searchTerm));
 
@@ -530,32 +685,50 @@
 
             // Renderizar tarjetas de tiendas
             filteredStores.forEach(store => {
-                // Determinar si el usuario actual ha dado like a esta tienda
-                const isLiked = likesSet.has(store.id);
-                // Clase del corazón: fill-red-500 si tiene like, stroke-red-500 (borde) si no
-                const heartClass = isLiked ? 'fill-red-500' : 'stroke-red-500';
+                const isRecommended = recommendationsSet.has(store.id);
+                // Color para el ícono de llama (Fire)
+                const fireClass = isRecommended ? 'fill-orange-500' : 'stroke-orange-500';
                 
                 const card = document.createElement('div');
                 card.className = 'store-card bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg';
+                
+                const imageHtml = store.imageUrl ? 
+                    `<img src="${store.imageUrl}" alt="Imagen de ${store['nombre de la tienda']}" 
+                          class="w-full h-32 object-cover rounded-lg mb-4"
+                          onerror="this.onerror=null;this.src='https://placehold.co/400x200/505050/ffffff?text=Tienda+Sin+Imagen';" />` :
+                    '';
+
                 card.innerHTML = `
+                    ${imageHtml}
                     <h3 class="text-xl font-bold text-blue-600 mb-2">${store['nombre de la tienda']}</h3>
                     <p class="text-sm text-gray-700 mb-3">${store['descripción libre']}</p>
                     <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4 border-t pt-3">
                         <p><strong>Galería:</strong> ${store.galería}</p>
                         <p><strong>Piso:</strong> ${store.piso}</p>
                         <p><strong>Stand:</strong> ${store.stand}</p>
+                        ${store.tiktok ? `
                         <a href="${store.tiktok}" target="_blank" class="text-pink-500 hover:text-pink-600 font-medium truncate">
                             <i data-lucide="tiktok" class="inline w-4 h-4 mr-1"></i>TikTok
                         </a>
+                        ` : '<p class="text-gray-400">Sin TikTok</p>'}
                     </div>
                     <div class="flex justify-between items-center pt-3 border-t">
-                        <button onclick="likeStore('${store.id}')" 
-                                class="flex items-center text-red-500 hover:text-red-700 transition duration-150">
-                            <i data-lucide="heart" class="w-5 h-5 mr-1 ${heartClass}"></i>
-                            <span class="font-bold">${store.likes}</span> Likes
+                        <!-- Botón de Recomendación (Fuego) -->
+                        <button onclick="recommendStore('${store.id}')" 
+                                class="flex items-center text-orange-500 hover:text-orange-700 transition duration-150 mr-4">
+                            <i data-lucide="flame" class="w-5 h-5 mr-1 ${fireClass}"></i>
+                            <span class="font-bold">${store.recommendations}</span> Fuego 🔥
                         </button>
-                        <p class="text-xs text-gray-400">ID: ${store.id.substring(0, 10)}...</p>
+                        
+                        <!-- Botón de Verificaciones (Check) -->
+                        <button onclick="showReviewsModal('${store.id}', '${store['nombre de la tienda']}')" 
+                                class="flex items-center text-green-600 hover:text-green-800 transition duration-150">
+                            <i data-lucide="check-square" class="w-5 h-5 mr-1 stroke-green-600"></i>
+                            <span class="font-bold mr-1">${store.verificationCount || 0}</span> Verificaciones
+                        </button>
+                        
                     </div>
+                    <p class="text-xs text-gray-400 mt-2 text-right">ID: ${store.id.substring(0, 10)}...</p>
                 `;
                 storesContainer.appendChild(card);
             });
@@ -563,8 +736,38 @@
             lucide.createIcons();
         }
 
+        // Renderiza la lista de verificaciones en el modal
+        function displayVerifications(verifications) {
+            reviewsContainer.innerHTML = '';
+            reviewCount.textContent = verifications.length;
+            
+            if (verifications.length === 0) {
+                noReviewsMessage.classList.remove('hidden');
+            } else {
+                noReviewsMessage.classList.add('hidden');
+                
+                verifications.forEach(verification => {
+                    const verificationElement = document.createElement('div');
+                    verificationElement.className = 'p-3 border border-gray-100 rounded-lg bg-white shadow-sm';
+                    verificationElement.innerHTML = `
+                        <p class="text-gray-800 break-words flex items-start">
+                            <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-500"></i>
+                            <span>${verification.text}</span>
+                        </p>
+                        <div class="flex justify-between items-center mt-2 text-xs text-gray-400 border-t pt-2">
+                            <span>Usuario: ${verification.creatorId.substring(0, 8)}...</span>
+                            <span>Fecha: ${verification.createdAt}</span>
+                        </div>
+                    `;
+                    reviewsContainer.appendChild(verificationElement);
+                    lucide.createIcons(); // Vuelve a crear iconos para los elementos dentro del modal
+                });
+            }
+        }
+        
+        // --- UTILIDADES DE UI ---
+        
         function alertUser(message) {
-            // Implementación de mensaje en lugar de alert()
             const existingAlert = document.getElementById('customAlert');
             if (existingAlert) existingAlert.remove();
             
@@ -579,38 +782,77 @@
             }, 3000);
         }
 
-        function displayFormMessage(message, type) {
-            formMessage.textContent = message;
-            formMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+        function displayFormMessage(message, type, element) {
+            element.textContent = message;
+            element.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            
             if (type === 'error') {
-                formMessage.classList.add('bg-red-100', 'text-red-700');
+                element.classList.add('bg-red-100', 'text-red-700');
             } else if (type === 'success') {
-                formMessage.classList.add('bg-green-100', 'text-green-700');
+                element.classList.add('bg-green-100', 'text-green-700');
+            } else if (type === 'hide') {
+                 element.classList.add('hidden');
             }
         }
         
         // =================================================================
-        // 4. FUNCIONES DEL MODAL
+        // 4. FUNCIONES DE MODALES
         // =================================================================
         
-        window.showModal = function() {
+        // --- MODAL AGREGAR TIENDA ---
+        window.showAddStoreModal = function() {
             const modal = document.getElementById('addStoreModal');
             modal.classList.remove('hidden');
-            // Inicializar íconos dentro del modal
             lucide.createIcons();
         }
 
-        window.hideModal = function() {
+        window.hideAddStoreModal = function() {
             const modal = document.getElementById('addStoreModal');
             modal.classList.add('hidden');
-            formMessage.classList.add('hidden');
+            displayFormMessage('', 'hide', formMessage);
             storeForm.reset();
+        }
+        
+        // --- MODAL VERIFICACIONES ---
+        window.showReviewsModal = function(storeId, storeName) {
+            // 1. Configurar estado
+            currentReviewStoreId = storeId;
+            reviewStoreName.textContent = storeName;
+            
+            // 2. Iniciar escuchador de verificaciones para esta tienda
+            setupVerificationsListener(storeId);
+            
+            // 3. Mostrar modal
+            reviewsModal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        window.hideReviewsModal = function() {
+            // 1. Ocultar modal
+            reviewsModal.classList.add('hidden');
+            
+            // 2. Detener escuchador de verificaciones
+            if (unsubscribeReviews) {
+                unsubscribeReviews();
+                unsubscribeReviews = null;
+            }
+            
+            // 3. Limpiar estado y formulario
+            currentReviewStoreId = null;
+            reviewForm.reset();
+            displayFormMessage('', 'hide', reviewFormMessage);
+            reviewsContainer.innerHTML = '';
         }
 
         // Cerrar modal al hacer clic fuera
         document.getElementById('addStoreModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('addStoreModal')) {
-                window.hideModal();
+                window.hideAddStoreModal();
+            }
+        });
+         document.getElementById('reviewsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('reviewsModal')) {
+                window.hideReviewsModal();
             }
         });
         
