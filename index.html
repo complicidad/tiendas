@@ -3,363 +3,611 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Boletas con OCR</title>
-    <!-- Cargamos Tailwind CSS para un diseño limpio -->
+    <title>Buscador de Tiendas</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 
-      ¡IMPORTANTE!
-      Cargamos Tesseract.js para el OCR. 
-      Esta es una librería pesada (puede tardar en cargar).
-    -->
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
-
+    <!-- Lucide Icons (para el ícono del botón flotante y corazón) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
-        /* Estilos adicionales para la cámara */
-        #video-stream {
-            width: 100%;
-            max-width: 600px;
-            border-radius: 0.5rem;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
         }
-        #photo-canvas {
-            width: 100%;
-            max-width: 600px;
-            border-radius: 0.5rem;
+        /* Estilo para el botón flotante */
+        #addButton {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
         }
-        /* Ocultar elementos por defecto */
-        .hidden {
-            display: none;
+        #addButton:hover {
+            transform: scale(1.05);
+        }
+        /* Estilos del Modal */
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        /* Estilo para la tarjeta de tienda */
+        .store-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .store-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans p-4">
+<body>
 
-    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
+    <!-- Contenedor Principal -->
+    <div class="max-w-4xl mx-auto p-4 md:p-8">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-6 text-center">
+            Buscador de Tiendas 🔎
+        </h1>
+        <p class="text-sm text-gray-500 mb-8 text-center">
+            Muestra tiendas de Gamarra, filtradas por galería y ordenadas por likes.
+            <span id="userIdDisplay" class="block mt-2 text-xs text-blue-600"></span>
+        </p>
 
-        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Gestor de Boletas (OCR)</h1>
-
-        <!-- 1. Vista de Inicio (Botón para empezar) -->
-        <div id="start-view">
-            <h2 class="text-2xl font-semibold mb-4 text-center">Escanear Nueva Boleta</h2>
-            <p class="text-center text-gray-700 mb-6">Presiona el botón para activar la cámara y tomar una foto de la boleta.</p>
-            <button id="start-camera-button" class="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-blue-700 transition duration-300 text-lg">
-                Iniciar Cámara
-            </button>
+        <!-- Filtros y Búsqueda -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+            <input type="text" id="searchInput" placeholder="Buscar por nombre o descripción..."
+                   class="flex-grow p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+            <select id="galleryFilter"
+                    class="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 sm:w-1/3">
+                <option value="all">Todas las galerías</option>
+            </select>
         </div>
 
-        <!-- 2. Vista de Cámara -->
-        <div id="camera-view" class="hidden">
-            <h2 class="text-2xl font-semibold mb-4">Apunta a la boleta</h2>
-            <!-- El stream de la cámara -->
-            <video id="video-stream" autoplay playsinline></video>
-            
-            <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                <button id="snap-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
-                    Tomar Foto
-                </button>
-                <button id="cancel-button" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
-                    Cancelar
-                </button>
-            </div>
+        <!-- Contenedor de Tiendas -->
+        <div id="storesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <p id="loadingMessage" class="text-center text-gray-500 col-span-full">Cargando tiendas...</p>
         </div>
-
-        <!-- 3. Vista de Previsualización y Compartir -->
-        <div id="preview-view" class="hidden">
-            <h2 class="text-2xl font-semibold mb-4">Revisar Foto y Datos</h2>
-            <!-- El canvas mostrará la foto tomada -->
-            <canvas id="photo-canvas"></canvas>
-
-            <!-- Estado del OCR -->
-            <div id="ocr-status" class-="w-full text-center p-3 text-blue-600 font-medium">
-                <!-- El estado se insertará aquí, ej: "Procesando foto..." -->
-            </div>
-
-            <!-- Campo de texto -->
-            <div class="mt-4">
-                <label for="client-phone-input" class="block text-sm font-medium text-gray-700 mb-1">
-                    Texto encontrado en la boleta:
-                </label>
-                <textarea id="client-phone-input" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="El texto leído aparecerá aquí..." rows="3"></textarea>
-            </div>
-
-            <div class="flex flex-col gap-3 mt-4">
-                <button id="share-button" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition duration-300 disabled:bg-gray-400">
-                    Compartir Foto y Texto
-                </button>
-                <button id="retake-button" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
-                    Tomar Otra
-                </button>
-            </div>
-        </div>
-
     </div>
 
-    <script>
-        // Obtenemos los elementos principales del DOM
-        const startView = document.getElementById('start-view');
-        const cameraView = document.getElementById('camera-view');
-        const previewView = document.getElementById('preview-view');
+    <!-- Botón Flotante para Agregar Tienda -->
+    <button id="addButton" onclick="showModal()"
+            class="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold hover:bg-blue-700 transition duration-150">
+        <i data-lucide="plus" class="w-6 h-6"></i>
+    </button>
+
+    <!-- MODAL para Agregar Tienda -->
+    <div id="addStoreModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
+            <!-- Encabezado del Modal -->
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-800">Registrar Nueva Tienda</h2>
+                <button onclick="hideModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Formulario -->
+            <form id="storeForm" class="p-6 space-y-4">
+                <div>
+                    <label for="storeName" class="block text-sm font-medium text-gray-700">Nombre de la Tienda (ID)</label>
+                    <input type="text" id="storeName" required placeholder="Ej: Moda Joven S.A.C."
+                           class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="gallery" class="block text-sm font-medium text-gray-700">Galería</label>
+                        <input type="text" id="gallery" required placeholder="Ej: La Rotonda"
+                               class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="floor" class="block text-sm font-medium text-gray-700">Piso</label>
+                        <input type="text" id="floor" required placeholder="Ej: 3"
+                               class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="stand" class="block text-sm font-medium text-gray-700">Stand/Número</label>
+                        <input type="text" id="stand" required placeholder="Ej: 305"
+                               class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="tiktok" class="block text-sm font-medium text-gray-700">Enlace de TikTok</label>
+                        <input type="url" id="tiktok" placeholder="https://tiktok.com/@mitienda"
+                               class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Descripción Libre</label>
+                    <textarea id="description" rows="3" required placeholder="Breve descripción del tipo de producto o especialidad."
+                              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+
+                <!-- Mensaje de Error (oculto por defecto) -->
+                <div id="formMessage" class="hidden p-3 text-sm rounded-lg bg-red-100 text-red-700" role="alert"></div>
+
+                <!-- Botón de Envío -->
+                <button type="submit" id="saveButton"
+                        class="w-full py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
+                    Guardar Tienda
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts de Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, updateDoc, increment, getDoc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Establecer nivel de log a Debug para ver actividad de Firestore
+        setLogLevel('Debug');
+
+        // Variables Globales
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let currentUserId = null;
+        let isAuthReady = false;
         
-        const startCameraButton = document.getElementById('start-camera-button');
+        // Referencias del DOM
+        const storesContainer = document.getElementById('storesContainer');
+        const galleryFilter = document.getElementById('galleryFilter');
+        const searchInput = document.getElementById('searchInput');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const formMessage = document.getElementById('formMessage');
+        const storeForm = document.getElementById('storeForm');
+
+        // Estado local para los likes del usuario
+        let userLikes = new Set();
         
-        const video = document.getElementById('video-stream');
-        const canvas = document.getElementById('photo-canvas');
-        const clientPhoneInput = document.getElementById('client-phone-input');
-        const ocrStatus = document.getElementById('ocr-status'); // Nuevo
-        
-        const snapButton = document.getElementById('snap-button');
-        const cancelButton = document.getElementById('cancel-button');
-        const shareButton = document.getElementById('share-button');
-        const retakeButton = document.getElementById('retake-button');
+        // =================================================================
+        // 1. INICIALIZACIÓN Y AUTENTICACIÓN
+        // =================================================================
 
-        // Variables para guardar el estado
-        let currentStream = null;
-        let tesseractScheduler = null; // Scheduler para Tesseract
-        let tesseractWorker = null; // Worker para Tesseract
+        if (Object.keys(firebaseConfig).length > 0) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+            } catch (error) {
+                console.error("Error al inicializar Firebase:", error);
+                loadingMessage.textContent = "Error al conectar con la base de datos.";
+            }
+        } else {
+             loadingMessage.textContent = "Configuración de Firebase no disponible.";
+             console.error("Configuración de Firebase no disponible.");
+        }
 
-        // --- MANEJADORES DE EVENTOS ---
-
-        // 1. Cuando se hace clic en "Iniciar Cámara"
-        startCameraButton.addEventListener('click', openCamera);
-
-        // 2. Cuando se hace clic en "Tomar Foto"
-        snapButton.addEventListener('click', takePhotoAndRecognize);
-
-        // 3. Cuando se hace clic en "Cancelar" (en la cámara)
-        cancelButton.addEventListener('click', returnToStart);
-
-        // 4. Cuando se hace clic en "Tomar Otra" (en la previsualización)
-        retakeButton.addEventListener('click', () => {
-            // Volvemos a mostrar la vista de la cámara
-            previewView.classList.add('hidden');
-            cameraView.classList.remove('hidden');
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                userIdDisplay.textContent = `Tu ID de usuario (necesario para likes): ${currentUserId}`;
+            } else {
+                // Si no hay token inicial, usa sign-in anónimo
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    // Una vez autenticado, currentUserId se actualizará con el siguiente onAuthStateChanged
+                } catch (error) {
+                    console.error("Error al autenticar:", error);
+                    loadingMessage.textContent = "Error de autenticación. Verifica las reglas de seguridad.";
+                }
+            }
+            isAuthReady = true;
+            if (db) {
+                // Ejecutar la siembra de datos de prueba (se ejecuta solo una vez)
+                await seedDatabase(); 
+                setupRealtimeListeners();
+            }
         });
 
-        // 5. Cuando se hace clic en "Compartir Foto y Número"
-        shareButton.addEventListener('click', sharePhotoWithDetails);
+        // =================================================================
+        // 2. LÓGICA DE FIRESTORE (LECTURA y ESCRITURA)
+        // =================================================================
+
+        // Define la ruta de la colección de tiendas
+        function getStoresCollectionRef() {
+            // Ruta para datos públicos: /artifacts/{appId}/public/data/tiendas
+            return collection(db, `artifacts/${appId}/public/data/tiendas`);
+        }
         
-        // --- FUNCIONES DE TESSERACT (OCR) ---
-
-        /**
-         * Inicializa el worker de Tesseract para que esté listo.
-         * Lo llamamos una vez al cargar la página.
-         */
-        async function initializeTesseract() {
-            try {
-                tesseractScheduler = Tesseract.createScheduler();
-                // Usamos 'spa' para español. Cambia 'spa' por 'eng' si es inglés.
-                tesseractWorker = await Tesseract.createWorker('spa'); 
-                tesseractScheduler.addWorker(tesseractWorker);
-                console.log("Tesseract (OCR) listo.");
-            } catch (err) {
-                console.error("Error inicializando Tesseract: ", err);
-                ocrStatus.innerText = "Error al cargar el módulo OCR.";
-            }
+        // Define la ruta de la colección de likes del usuario actual
+        function getLikesCollectionRef() {
+            if (!currentUserId) return null;
+            // Ruta privada del usuario: /artifacts/{appId}/users/{userId}/likes
+            return collection(db, `artifacts/${appId}/users/${currentUserId}/likes`);
         }
-        // Iniciar Tesseract al cargar la página
-        initializeTesseract();
 
-
-        // --- FUNCIONES PRINCIPALES ---
-
-        /**
-         * Pide permiso al usuario y abre la cámara del dispositivo.
-         */
-        async function openCamera() {
-            // Ocultar vista de inicio y mostrar cámara
-            startView.classList.add('hidden');
-            previewView.classList.add('hidden');
-            cameraView.classList.remove('hidden');
+        // --- SIEMBRA DE DATOS DE PRUEBA ---
+        async function seedDatabase() {
+            const storesColRef = getStoresCollectionRef();
+            const checkDocRef = doc(storesColRef, "ModaTrendy"); // Usar una tienda como marcador
 
             try {
-                // Pedir acceso a la cámara trasera (environment)
-                const constraints = {
-                    video: {
-                        facingMode: 'environment' // Usar cámara trasera
+                // Verificar si ya existe la tienda "ModaTrendy" para evitar duplicación
+                const checkDoc = await getDoc(checkDocRef);
+                if (checkDoc.exists()) {
+                    console.log("Datos de prueba ya existen. Omitiendo siembra.");
+                    return;
+                }
+                
+                console.log("Sembrando datos de prueba...");
+
+                const initialStores = [
+                    {
+                        id: "ModaTrendy",
+                        'nombre de la tienda': "Moda Trendy",
+                        galería: "El Rey",
+                        piso: "2",
+                        stand: "215",
+                        'descripción libre': "Especialistas en ropa urbana y juvenil.",
+                        tiktok: "https://tiktok.com/@modatrendy",
+                        likes: 15,
+                        createdAt: new Date().toISOString(),
+                        creatorId: 'system-seed'
                     },
-                    audio: false
-                };
-                
-                // Iniciar el stream de video
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = stream;
-                currentStream = stream;
+                    {
+                        id: "TextilSofia",
+                        'nombre de la tienda': "Textil Sofía",
+                        galería: "La Rotonda",
+                        piso: "5",
+                        stand: "501",
+                        'descripción libre': "Venta de telas por mayor, variedad de colores y diseños.",
+                        tiktok: "https://tiktok.com/@textilsofia",
+                        likes: 8,
+                        createdAt: new Date().toISOString(),
+                        creatorId: 'system-seed'
+                    },
+                    {
+                        id: "AccesoriosCool",
+                        'nombre de la tienda': "Accesorios Cool",
+                        galería: "Cyber Plaza",
+                        piso: "1",
+                        stand: "103",
+                        'descripción libre': "Joyas de fantasía, lentes y gorras de moda.",
+                        tiktok: "https://tiktok.com/@accesorioscool",
+                        likes: 22,
+                        createdAt: new Date().toISOString(),
+                        creatorId: 'system-seed'
+                    },
+                ];
 
-            } catch (err) {
-                console.error("Error al acceder a la cámara: ", err);
-                // Volver a la pantalla de inicio si hay un error
-                returnToStart();
-            }
-        }
-
-        /**
-         * Detiene el stream de la cámara y vuelve a la vista de inicio.
-         */
-        function returnToStart() {
-            if (currentStream) {
-                // Detener todas las pistas (apagar la luz de la cámara)
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-            currentStream = null;
-            
-            // Limpiar el campo de texto y estado
-            clientPhoneInput.value = '';
-            ocrStatus.innerText = '';
-
-            // Mostrar vista de inicio y ocultar las otras
-            cameraView.classList.add('hidden');
-            previewView.classList.add('hidden');
-            startView.classList.remove('hidden');
-        }
-
-        /**
-         * Captura un fotograma Y LANZA EL RECONOCIMIENTO OCR.
-         */
-        function takePhotoAndRecognize() {
-            const context = canvas.getContext('2d');
-            
-            // Ajustar el tamaño del canvas al del video
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Dibujar la imagen del video en el canvas
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Ocultar la cámara y mostrar la previsualización
-            cameraView.classList.add('hidden');
-            previewView.classList.remove('hidden');
-
-            // Iniciar el proceso de OCR
-            recognizeTextFromCanvas();
-        }
-
-        /**
-         * Procesa el canvas con Tesseract.js
-         */
-        async function recognizeTextFromCanvas() {
-            if (!tesseractScheduler) {
-                ocrStatus.innerText = "Error: El OCR no se inicializó.";
-                return;
-            }
-
-            // Desactivar botones mientras procesa
-            shareButton.disabled = true;
-            retakeButton.disabled = true;
-            clientPhoneInput.value = ''; // Limpiar campo
-            ocrStatus.innerText = 'Leyendo foto... (esto puede tardar)';
-
-            try {
-                // Iniciar el reconocimiento
-                const { data: { text } } = await tesseractScheduler.addJob('recognize', canvas);
-                
-                // ¡MODIFICACIÓN! En lugar de volcar el texto, lo filtramos.
-                const extractedNumber = extractNumber(text); // Nueva función de filtrado
-
-                if (extractedNumber) {
-                    clientPhoneInput.value = extractedNumber; // Poner solo el número
-                    clientPhoneInput.style.borderColor = 'rgb(34 197 94)'; // Borde verde
-                    ocrStatus.innerText = '¡Número encontrado!';
-                } else {
-                    clientPhoneInput.value = ''; // No se encontró, dejar vacío
-                    clientPhoneInput.style.borderColor = 'rgb(239 68 68)'; // Borde rojo
-                    ocrStatus.innerText = 'No se pudo encontrar un número (9 u 8 dígitos).';
+                for (const store of initialStores) {
+                    await setDoc(doc(storesColRef, store.id), store);
                 }
 
-            } catch (err) {
-                console.error("Error durante el OCR: ", err);
-                ocrStatus.innerText = 'Error al leer la foto.';
-            } finally {
-                // Reactivar botones
-                shareButton.disabled = false;
-                retakeButton.disabled = false;
+                console.log("¡Siembra de datos completada!");
+
+            } catch (error) {
+                console.error("Error al sembrar datos de prueba:", error);
             }
         }
-
-        /**
-         * Nueva función para extraer un número de 9 (celular) u 8 (DNI) dígitos
-         * del texto completo del OCR.
-         */
-        function extractNumber(ocrText) {
-            if (!ocrText) return null;
-
-            // 1. Quitar espacios, guiones, y puntos para unificar números.
-            // Ej: "912 345 678" se vuelve "912345678"
-            const cleanText = ocrText.replace(/[\s.-]/g, '');
-
-            // 2. Buscar un número de celular (9 dígitos, empieza con 9)
-            // Es la prioridad más alta, ideal para WhatsApp.
-            let phoneRegex = /(9\d{8})/; // Busca "912345678"
-            let match = cleanText.match(phoneRegex);
-            
-            if (match && match[0]) {
-                return match[0]; // Devuelve el número encontrado
+        
+        // --- INICIAR ESCUCHADORES EN TIEMPO REAL ---
+        function setupRealtimeListeners() {
+            // 1. Escuchar la lista de tiendas
+            setupStoreListener();
+            // 2. Escuchar los likes del usuario (si está autenticado)
+            if (currentUserId) {
+                setupLikesListener();
             }
-
-            // 3. Si no hay celular, buscar un DNI (8 dígitos exactos)
-            // Usamos un regex que busque 8 dígitos rodeados por algo que no sea dígito
-            // (o el inicio/fin de la cadena) para evitar capturar parte de un RUC.
-            let dniRegex = /(?:[^\d]|^)(\d{8})(?:[^\d]|$)/;
-            match = cleanText.match(dniRegex);
-            
-            if (match && match[1]) {
-                return match[1]; // Devuelve el grupo capturado (los 8 dígitos)
-            }
-            
-            // 4. No se encontró nada
-            return null;
         }
+        
+        // --- ESCUCHADOR DE TIENDAS ---
+        function setupStoreListener() {
+            const storesColRef = getStoresCollectionRef();
+            const q = query(storesColRef);
 
-        /**
-         * Utiliza la Web Share API para compartir la foto Y el número del campo de texto.
-         */
-        async function sharePhotoWithDetails() {
-            // El texto ahora es el texto completo del OCR
-            const ocrText = clientPhoneInput.value;
-
-            // Validación: asegurarse de que hay texto
-            if (ocrText.trim() === '') {
-                clientPhoneInput.focus();
-                clientPhoneInput.style.borderColor = 'red';
-                return;
-            }
-            clientPhoneInput.style.borderColor = 'rgb(209 213 219)'; // Resetear borde
-
-            // Comprobar si el navegador soporta la API de "Compartir" con archivos
-            if (!navigator.share || !navigator.canShare) {
-                console.error("La API de Web Share no es soportada en este navegador.");
-                return;
-            }
-
-            // Convertir la imagen del canvas a un archivo (Blob)
-            canvas.toBlob(async (blob) => {
-                const file = new File([blob], `boleta_ocr.jpg`, {
-                    type: 'image/jpeg'
+            onSnapshot(q, (snapshot) => {
+                loadingMessage.classList.add('hidden');
+                const stores = [];
+                const galleries = new Set();
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const storeData = {
+                        id: doc.id,
+                        likes: data.likes || 0,
+                        ...data
+                    };
+                    stores.push(storeData);
+                    galleries.add(data.galería);
                 });
 
-                // Comprobar si podemos compartir este tipo de archivo
-                if (navigator.canShare({ files: [file] })) {
-                    
-                    const shareData = {
-                        files: [file],
-                        title: `Boleta de Cliente`,
-                        // Adjuntamos el texto completo leído por el OCR
-                        text: `Texto de la boleta:\n${ocrText}`
-                    };
+                stores.sort((a, b) => b.likes - a.likes); 
+                populateGalleryFilter(galleries);
+                
+                // Pasa el estado actual de todas las tiendas y los likes al renderizador
+                displayStores(stores, userLikes); 
 
-                    try {
-                        // Abrir el diálogo nativo de "Compartir"
-                        await navigator.share(shareData);
-                        console.log("Foto y datos compartidos exitosamente");
-                        // Después de compartir, volver a la pantalla de inicio
-                        returnToStart(); 
-                    } catch (err) {
-                        console.error("Error al compartir: ", err);
-                    }
+                galleryFilter.onchange = () => displayStores(stores, userLikes);
+                searchInput.oninput = () => displayStores(stores, userLikes);
+            }, (error) => {
+                console.error("Error en onSnapshot (Tiendas): ", error);
+                loadingMessage.textContent = "Error al cargar los datos en tiempo real.";
+            });
+        }
+        
+        // --- ESCUCHADOR DE LIKES DEL USUARIO ---
+        function setupLikesListener() {
+            const likesColRef = getLikesCollectionRef();
+            if (!likesColRef) return;
+            
+            // Escucha todos los documentos (likes) del usuario actual
+            onSnapshot(likesColRef, (snapshot) => {
+                userLikes.clear(); // Limpia el set
+                snapshot.forEach(doc => {
+                    userLikes.add(doc.id); // Agrega el ID de la tienda que tiene like
+                });
+                
+                // Dispara una re-renderización para actualizar los corazones
+                // La función setupStoreListener ya llama a displayStores cuando cambia la lista de tiendas, 
+                // pero si solo cambian los likes, necesitamos una llamada explícita
+                if (!loadingMessage.classList.contains('hidden')) {
+                   // Si el mensaje de carga está visible, significa que displayStores aún no se ha llamado
+                   // No hacemos nada, setupStoreListener lo hará.
                 } else {
-                    console.error("No se pueden compartir estos archivos.");
+                    // Si ya se cargaron las tiendas, debemos re-renderizar para actualizar el corazón.
+                    // Para esto, necesitaríamos la lista de tiendas actual. Como no la guardamos globalmente,
+                    // confiaremos en que el listener de tiendas (que es la fuente principal) se dispare.
+                    // Sin embargo, para mayor robustez en un entorno de desarrollo:
+                    // Dejamos la instrucción anterior (que usa la lista de tiendas actual en el scope del listener de tiendas)
+                    // y nos aseguramos de que los filtros se apliquen correctamente.
+                    console.log("Likes de usuario actualizados, esperando re-renderizado de tiendas.");
                 }
-            }, 'image/jpeg');
+                
+            }, (error) => {
+                console.error("Error en onSnapshot (Likes): ", error);
+            });
         }
 
+        // --- ESCRITURA (Likes) ---
+        window.likeStore = async function(storeId) {
+            if (!currentUserId) {
+                alertUser("Necesitas estar autenticado para dar o quitar 'Me Gusta'.");
+                return;
+            }
+
+            const likeDocRef = doc(getLikesCollectionRef(), storeId);
+            const storeDocRef = doc(getStoresCollectionRef(), storeId);
+
+            try {
+                // 1. Verificar si el usuario ya dio like
+                const likeDoc = await getDoc(likeDocRef);
+
+                if (likeDoc.exists()) {
+                    // Ya dio like: Quitar like (Dislike)
+                    await deleteLike(likeDocRef, storeDocRef);
+                } else {
+                    // No ha dado like: Añadir like
+                    await addLike(likeDocRef, storeDocRef);
+                }
+                
+                // La UI se actualizará automáticamente gracias a los onSnapshot listeners
+            } catch (error) {
+                console.error("Error al gestionar el like:", error);
+                alertUser("Error de conexión al dar o quitar 'Me Gusta'.");
+            }
+        };
+
+        async function addLike(likeDocRef, storeDocRef) {
+            // Crea el documento de like en la colección privada del usuario
+            await setDoc(likeDocRef, { likedAt: new Date().toISOString() });
+            
+            // Incrementa el contador de likes en la tienda (colección pública)
+            await updateDoc(storeDocRef, {
+                likes: increment(1)
+            });
+        }
+
+        async function deleteLike(likeDocRef, storeDocRef) {
+            // Elimina el documento de like
+            await deleteDoc(likeDocRef);
+            
+            // Decrementa el contador de likes (asegurando que no baje de 0)
+            const storeSnapshot = await getDoc(storeDocRef);
+            if (storeSnapshot.exists() && storeSnapshot.data().likes > 0) {
+                 await updateDoc(storeDocRef, {
+                    likes: increment(-1)
+                });
+            }
+        }
+        
+        // --- ESCRITURA (Añadir Tienda) ---
+        window.addStore = async function(e) {
+            e.preventDefault();
+            formMessage.classList.add('hidden');
+            
+            const storeName = document.getElementById('storeName').value.trim();
+            
+            if (!storeName) {
+                displayFormMessage("El nombre de la tienda es obligatorio.", 'error');
+                return;
+            }
+
+            // Datos de la nueva tienda
+            const newStoreData = {
+                // Usamos el nombre de la tienda como Document ID
+                'nombre de la tienda': storeName,
+                galería: document.getElementById('gallery').value.trim(),
+                piso: document.getElementById('floor').value.trim(),
+                stand: document.getElementById('stand').value.trim(),
+                'descripción libre': document.getElementById('description').value.trim(),
+                tiktok: document.getElementById('tiktok').value.trim(),
+                likes: 0, // Inicializar siempre en 0
+                createdAt: new Date().toISOString(),
+                creatorId: currentUserId // Registrar quién la agregó
+            };
+            
+            const storeDocRef = doc(getStoresCollectionRef(), storeName);
+
+            try {
+                // Verificar si ya existe una tienda con ese nombre
+                const existingDoc = await getDoc(storeDocRef);
+                if (existingDoc.exists()) {
+                    displayFormMessage(`Ya existe una tienda con el nombre "${storeName}". Usa un nombre único.`, 'error');
+                    return;
+                }
+
+                // Guardar la nueva tienda usando el nombre como Document ID
+                await setDoc(storeDocRef, newStoreData);
+
+                // Éxito
+                displayFormMessage("¡Tienda registrada con éxito!", 'success');
+                storeForm.reset();
+                setTimeout(hideModal, 1500); // Cerrar después de 1.5 segundos
+            } catch (error) {
+                console.error("Error al añadir la tienda:", error);
+                displayFormMessage("Error al guardar la tienda. Verifica la consola.", 'error');
+            }
+        }
+        
+        // Asignar la función de envío al formulario
+        storeForm.addEventListener('submit', window.addStore);
+
+        // =================================================================
+        // 3. FUNCIONES DE UI Y LÓGICA DE FILTRADO
+        // =================================================================
+
+        function populateGalleryFilter(galleries) {
+            galleryFilter.innerHTML = '<option value="all">Todas las galerías</option>';
+            // Convertir Set a Array, ordenar alfabéticamente
+            const sortedGalleries = Array.from(galleries).sort();
+            sortedGalleries.forEach(gallery => {
+                const option = document.createElement('option');
+                option.value = gallery;
+                option.textContent = gallery;
+                galleryFilter.appendChild(option);
+            });
+        }
+
+        // La función ahora acepta el set de likes para renderizar el corazón correctamente
+        function displayStores(stores, likesSet) {
+            const selectedGallery = galleryFilter.value;
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            storesContainer.innerHTML = '';
+
+            const filteredStores = stores.filter(store => {
+                // Filtrar por galería
+                const galleryMatch = selectedGallery === 'all' || store.galería === selectedGallery;
+
+                // Filtrar por búsqueda
+                const searchMatch = store['nombre de la tienda'].toLowerCase().includes(searchTerm) ||
+                                    (store['descripción libre'] && store['descripción libre'].toLowerCase().includes(searchTerm));
+
+                return galleryMatch && searchMatch;
+            });
+
+            if (filteredStores.length === 0) {
+                storesContainer.innerHTML = `<p class="text-center text-gray-500 col-span-full">
+                                                No se encontraron tiendas que coincidan con los filtros.
+                                            </p>`;
+                return;
+            }
+
+            // Renderizar tarjetas de tiendas
+            filteredStores.forEach(store => {
+                // Determinar si el usuario actual ha dado like a esta tienda
+                const isLiked = likesSet.has(store.id);
+                // Clase del corazón: fill-red-500 si tiene like, stroke-red-500 (borde) si no
+                const heartClass = isLiked ? 'fill-red-500' : 'stroke-red-500';
+                
+                const card = document.createElement('div');
+                card.className = 'store-card bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg';
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold text-blue-600 mb-2">${store['nombre de la tienda']}</h3>
+                    <p class="text-sm text-gray-700 mb-3">${store['descripción libre']}</p>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4 border-t pt-3">
+                        <p><strong>Galería:</strong> ${store.galería}</p>
+                        <p><strong>Piso:</strong> ${store.piso}</p>
+                        <p><strong>Stand:</strong> ${store.stand}</p>
+                        <a href="${store.tiktok}" target="_blank" class="text-pink-500 hover:text-pink-600 font-medium truncate">
+                            <i data-lucide="tiktok" class="inline w-4 h-4 mr-1"></i>TikTok
+                        </a>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t">
+                        <button onclick="likeStore('${store.id}')" 
+                                class="flex items-center text-red-500 hover:text-red-700 transition duration-150">
+                            <i data-lucide="heart" class="w-5 h-5 mr-1 ${heartClass}"></i>
+                            <span class="font-bold">${store.likes}</span> Likes
+                        </button>
+                        <p class="text-xs text-gray-400">ID: ${store.id.substring(0, 10)}...</p>
+                    </div>
+                `;
+                storesContainer.appendChild(card);
+            });
+            // Reemplazar íconos de lucide después de renderizar
+            lucide.createIcons();
+        }
+
+        function alertUser(message) {
+            // Implementación de mensaje en lugar de alert()
+            const existingAlert = document.getElementById('customAlert');
+            if (existingAlert) existingAlert.remove();
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'customAlert';
+            alertDiv.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-xl z-[9999]';
+            alertDiv.textContent = message;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        function displayFormMessage(message, type) {
+            formMessage.textContent = message;
+            formMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (type === 'error') {
+                formMessage.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                formMessage.classList.add('bg-green-100', 'text-green-700');
+            }
+        }
+        
+        // =================================================================
+        // 4. FUNCIONES DEL MODAL
+        // =================================================================
+        
+        window.showModal = function() {
+            const modal = document.getElementById('addStoreModal');
+            modal.classList.remove('hidden');
+            // Inicializar íconos dentro del modal
+            lucide.createIcons();
+        }
+
+        window.hideModal = function() {
+            const modal = document.getElementById('addStoreModal');
+            modal.classList.add('hidden');
+            formMessage.classList.add('hidden');
+            storeForm.reset();
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('addStoreModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('addStoreModal')) {
+                window.hideModal();
+            }
+        });
+        
     </script>
 </body>
 </html>
