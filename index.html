@@ -55,7 +55,7 @@
         </h1>
         <p class="text-sm text-gray-500 mb-8 text-center">
             Muestra tiendas de Gamarra, filtradas por galería y ordenadas por **Nivel de Fuego** (Recomendaciones).
-            <span id="userIdDisplay" class="block mt-2 text-xs text-blue-600"></span>
+            <span id="userIdDisplay" class="block mt-2 text-xs text-blue-600 hidden"></span>
         </p>
 
         <!-- Filtros y Búsqueda -->
@@ -171,7 +171,7 @@
 
                         <button type="submit" id="saveReviewButton"
                                 class="w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
-                            Publicar Verificación ✅
+                            Publicar Verificación
                         </button>
                     </form>
                 </div>
@@ -728,7 +728,7 @@
                         </button>
                         
                     </div>
-                    <p class="text-xs text-gray-400 mt-2 text-right">ID: ${store.id.substring(0, 10)}...</p>
+                    <p class="text-xs text-gray-400 mt-2 text-right hidden">ID: ${store.id.substring(0, 10)}...</p>
                 `;
                 storesContainer.appendChild(card);
             });
@@ -755,7 +755,7 @@
                             <span>${verification.text}</span>
                         </p>
                         <div class="flex justify-between items-center mt-2 text-xs text-gray-400 border-t pt-2">
-                            <span>Usuario: ${verification.creatorId.substring(0, 8)}...</span>
+                            <span class="hidden">Usuario: ${verification.creatorId.substring(0, 8)}...</span>
                             <span>Fecha: ${verification.createdAt}</span>
                         </div>
                     `;
