@@ -3,178 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herramienta de Migración de Clientes</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Gestor de Clientes y Boletas</title>
+    <!-- Cargamos Tailwind CSS para un diseño limpio -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SDKs de Firebase (v8) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
     <style>
-        /* Estilo simple para los logs */
-        #logs div:nth-child(even) { background-color: #f9f9f9; }
-        #logs .success { color: green; font-weight: bold; }
-        #logs .error { color: red; font-weight: bold; }
+        /* Estilos adicionales para la cámara */
+        #video-stream {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 0.5rem;
+        }
+        #photo-canvas {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 0.5rem;
+        }
+        /* Ocultar elementos por defecto */
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
-<body class="bg-gray-100 font-sans p-5 md:p-10">
+<body class="bg-gray-100 font-sans p-4">
 
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <h1 class="text-2xl font-bold text-gray-800">Herramienta de Migración</h1>
-        <p class="text-gray-600 mt-2">Esta herramienta leerá tu colección `envios` y creará/actualizará tu colección `clientes` con el último registro de cada cliente. Úsala solo una vez.</p>
-        <p class="text-sm text-red-600 font-semibold mt-2">Importante: Debes haber actualizado tus Reglas de Firestore (Paso 1) para darle permisos de lectura a tu email de administrador.</p>
+    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
 
-        <!-- Estado de Autenticación -->
-        <div id="authStatus" class="mt-4 p-3 bg-gray-50 rounded text-gray-700">
-            Estado: No autenticado.
-        </div>
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Gestor de Boletas</h1>
 
-        <!-- Botones de Acción -->
-        <div class="flex gap-4 mt-4">
-            <button id="btnSignIn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                1. Iniciar Sesión con Google
-            </button>
-            <button id="btnMigrate" class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition" disabled>
-                2. Iniciar Migración
-            </button>
-        </div>
-
-        <!-- Logs de Salida -->
-        <div class="mt-6">
-            <h2 class="text-lg font-semibold">Logs de Ejecución:</h2>
-            <div id="logs" class="mt-2 h-64 overflow-y-auto bg-gray-50 border border-gray-300 p-3 rounded-lg text-sm font-mono">
-                <div>Esperando para iniciar...</div>
+        <!-- 1. Vista de Lista de Clientes -->
+        <div id="client-list-view">
+            <h2 class="text-2xl font-semibold mb-4">Selecciona un Cliente</h2>
+            <div id="client-list" class="space-y-3">
+                <!-- Aquí irían tus clientes. data-phone debe tener el código de país (ej. 51 para Perú) -->
+                <button data-name="Juan Pérez" data-phone="51912345678" class="client-button w-full text-left p-4 bg-gray-50 border rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="font-medium">Juan Pérez</div>
+                    <div class="text-sm text-gray-600">+51 912 345 678</div>
+                </button>
+                <button data-name="Maria Garcia" data-phone="51987654321" class="client-button w-full text-left p-4 bg-gray-50 border rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="font-medium">Maria Garcia</div>
+                    <div class="text-sm text-gray-600">+51 987 654 321</div>
+                </button>
+                <button data-name="Carlos Sánchez" data-phone="51999888777" class="client-button w-full text-left p-4 bg-gray-50 border rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="font-medium">Carlos Sánchez</div>
+                    <div class="text-sm text-gray-600">+51 999 888 777</div>
+                </button>
             </div>
         </div>
+
+        <!-- 2. Vista de Cámara -->
+        <div id="camera-view" class="hidden">
+            <h2 class="text-2xl font-semibold mb-4">Boleta para: <span id="client-name-title" class="text-blue-600"></span></h2>
+            <p class_="text-gray-700 mb-4">Apunta la cámara a la boleta y toma la foto.</p>
+            <!-- El stream de la cámara -->
+            <video id="video-stream" autoplay playsinline></video>
+            
+            <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                <button id="snap-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                    Tomar Foto
+                </button>
+                <button id="cancel-button" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. Vista de Previsualización y Compartir -->
+        <div id="preview-view" class="hidden">
+            <h2 class="text-2xl font-semibold mb-4">Foto Capturada</h2>
+            <!-- El canvas mostrará la foto tomada -->
+            <canvas id="photo-canvas"></canvas>
+
+            <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                <button id="share-button" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition duration-300">
+                    Compartir Foto
+                </button>
+                <button id="retake-button" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
+                    Tomar Otra
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // --- 1. CONFIGURACIÓN ---
-        // Pega el firebaseConfig de tu proyecto (el mismo de tu formulario)
-        const firebaseConfig = {
-          apiKey: "AIzaSyCzJ36uZ6Bh6DdZK3VBv5HMu2xcU4GqCMQ",
-          authDomain: "form-bedc2.firebaseapp.com",
-          projectId: "form-bedc2",
-          storageBucket: "form-bedc2.firebasestorage.app",
-          messagingSenderId: "942482653487",
-          appId: "1:942482653487:web:4193c16f078992659521da"
+        // Obtenemos los elementos principales del DOM
+        const clientListView = document.getElementById('client-list-view');
+        const cameraView = document.getElementById('camera-view');
+        const previewView = document.getElementById('preview-view');
+        
+        const clientList = document.getElementById('client-list');
+        const clientNameTitle = document.getElementById('client-name-title');
+        
+        const video = document.getElementById('video-stream');
+        const canvas = document.getElementById('photo-canvas');
+        
+        const snapButton = document.getElementById('snap-button');
+        const cancelButton = document.getElementById('cancel-button');
+        const shareButton = document.getElementById('share-button');
+        const retakeButton = document.getElementById('retake-button');
+
+        // Variables para guardar el estado
+        let currentStream = null;
+        let currentClient = {
+            name: '',
+            phone: ''
         };
 
-        // --- 2. INICIALIZACIÓN ---
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // --- MANEJADORES DE EVENTOS ---
 
-        // Referencias a elementos del DOM
-        const btnSignIn = document.getElementById('btnSignIn');
-        const btnMigrate = document.getElementById('btnMigrate');
-        const authStatus = document.getElementById('authStatus');
-        const logs = document.getElementById('logs');
+        // 1. Cuando se hace clic en un cliente
+        clientList.addEventListener('click', (e) => {
+            // Buscamos el botón de cliente más cercano
+            const clientButton = e.target.closest('.client-button');
+            if (clientButton) {
+                currentClient.name = clientButton.dataset.name;
+                currentClient.phone = clientButton.dataset.phone;
+                clientNameTitle.innerText = currentClient.name;
+                
+                // Abrimos la cámara
+                openCamera();
+            }
+        });
 
-        // Función para añadir logs a la pantalla
-        function log(message, type = 'info') {
-            const div = document.createElement('div');
-            div.className = `p-1 border-b border-gray-200 ${type}`;
-            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logs.appendChild(div);
-            // Auto-scroll hacia abajo
-            logs.scrollTop = logs.scrollHeight;
+        // 2. Cuando se hace clic en "Tomar Foto"
+        snapButton.addEventListener('click', takePhoto);
+
+        // 3. Cuando se hace clic en "Cancelar"
+        cancelButton.addEventListener('click', closeCamera);
+
+        // 4. Cuando se hace clic en "Tomar Otra"
+        retakeButton.addEventListener('click', () => {
+            // Simplemente volvemos a mostrar la vista de la cámara
+            previewView.classList.add('hidden');
+            cameraView.classList.remove('hidden');
+        });
+
+        // 5. Cuando se hace clic en "Compartir Foto"
+        shareButton.addEventListener('click', sharePhoto);
+
+
+        // --- FUNCIONES PRINCIPALES ---
+
+        /**
+         * Pide permiso al usuario y abre la cámara del dispositivo.
+         */
+        async function openCamera() {
+            // Ocultar lista de clientes y mostrar cámara
+            clientListView.classList.add('hidden');
+            previewView.classList.add('hidden');
+            cameraView.classList.remove('hidden');
+
+            try {
+                // Pedir acceso a la cámara trasera (environment)
+                const constraints = {
+                    video: {
+                        facingMode: 'environment' // Usar cámara trasera
+                    },
+                    audio: false
+                };
+                
+                // Iniciar el stream de video
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                currentStream = stream;
+
+            } catch (err) {
+                console.error("Error al acceder a la cámara: ", err);
+                // Manejar error: el usuario no dio permiso o no tiene cámara
+                // No usamos alert() por buenas prácticas
+                clientNameTitle.innerText = "Error de cámara";
+            }
         }
 
-        // --- 3. LÓGICA DE AUTENTICACIÓN ---
-        btnSignIn.addEventListener('click', async () => {
-            log("Iniciando autenticación con Google...");
-            const provider = new firebase.auth.GoogleAuthProvider();
-            try {
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                log(`¡Éxito! Autenticado como: ${user.email}`, 'success');
-                authStatus.textContent = `Estado: Autenticado como ${user.email}`;
-                authStatus.classList.add('bg-green-100');
-                btnSignIn.disabled = true;
-                btnMigrate.disabled = false;
-            } catch (error) {
-                log(`Error de autenticación: ${error.message}`, 'error');
-                authStatus.textContent = `Error: ${error.message}`;
-                authStatus.classList.add('bg-red-100');
+        /**
+         * Detiene el stream de la cámara y vuelve a la lista de clientes.
+         */
+        function closeCamera() {
+            if (currentStream) {
+                // Detener todas las pistas (apagar la luz de la cámara)
+                currentStream.getTracks().forEach(track => track.stop());
             }
-        });
+            currentStream = null;
+            
+            // Mostrar lista de clientes y ocultar cámara
+            cameraView.classList.add('hidden');
+            previewView.classList.add('hidden');
+            clientListView.classList.remove('hidden');
+        }
 
-        // --- 4. LÓGICA DE MIGRACIÓN ---
-        btnMigrate.addEventListener('click', async () => {
-            if (!auth.currentUser) {
-                log("No estás autenticado.", 'error');
+        /**
+         * Captura un fotograma del video y lo dibuja en el canvas.
+         */
+        function takePhoto() {
+            const context = canvas.getContext('2d');
+            
+            // Ajustar el tamaño del canvas al del video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Dibujar la imagen del video en el canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Ocultar la cámara y mostrar la previsualización
+            cameraView.classList.add('hidden');
+            previewView.classList.remove('hidden');
+        }
+
+        /**
+         * Utiliza la Web Share API para compartir la foto.
+         */
+        async function sharePhoto() {
+            // Comprobar si el navegador soporta la API de "Compartir"
+            if (!navigator.share) {
+                console.error("La API de Web Share no es soportada en este navegador.");
+                // Aquí podrías mostrar un mensaje modal en lugar de alert
+                // alert("Tu navegador no soporta la función de compartir.");
                 return;
             }
-            
-            btnMigrate.disabled = true;
-            btnMigrate.textContent = "Migrando...";
-            log("--- INICIANDO MIGRACIÓN ---");
-            log("Paso 1: Leyendo TODOS los documentos de 'envios'...");
 
-            try {
-                // 1. Obtener TODOS los envíos y ordenarlos por fecha
-                const enviosCollection = db.collection('envios');
-                const enviosSnapshot = await enviosCollection.orderBy('fechaRegistro', 'desc').get();
-                
-                log(`Paso 2: Se encontraron ${enviosSnapshot.docs.length} envíos. Ordenando...`);
+            // Convertir la imagen del canvas a un archivo (Blob)
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], `boleta-${currentClient.name.replace(' ', '-')}.jpg`, {
+                    type: 'image/jpeg'
+                });
 
-                const clientesCollection = db.collection('clientes');
-                let clientesProcesados = new Set();
-                let contadorClientesUnicos = 0;
-                let contadorErrores = 0;
+                const shareData = {
+                    files: [file],
+                    title: `Boleta para ${currentClient.name}`,
+                    text: `Aquí está la foto de la boleta para ${currentClient.name}.`
+                };
 
-                // 2. Iterar sobre cada envío (del más nuevo al más viejo)
-                for (const envioDoc of enviosSnapshot.docs) {
-                    const envioData = envioDoc.data();
-                    const telefonoCliente = envioData.cliente;
-
-                    // 3. Si tiene teléfono Y NO lo hemos procesado ya...
-                    if (telefonoCliente && !clientesProcesados.has(telefonoCliente)) {
-                        
-                        // 4. Marcarlo para no volver a procesarlo
-                        clientesProcesados.add(telefonoCliente);
-                        
-                        // 5. Preparar los datos del cliente
-                        const clienteData = {
-                            nombre: envioData.nombre || '',
-                            telefono: envioData.telefono || '',
-                            distrito: envioData.distrito || '',
-                            direccion: envioData.direccion || '',
-                            referencia: envioData.referencia || '',
-                            DNI: envioData.DNI || '',
-                            agencia: envioData.agencia || '',
-                            tipoUltimoEnvio: envioData.courier || ''
-                        };
-
-                        // 6. Escribir/Actualizar el documento en 'clientes'
-                        try {
-                            // Usamos el teléfono como ID del documento
-                            await clientesCollection.doc(telefonoCliente).set(clienteData, { merge: true });
-                            contadorClientesUnicos++;
-                            log(`Cliente ${telefonoCliente} guardado.`);
-                        } catch (writeError) {
-                            log(`Error al guardar cliente ${telefonoCliente}: ${writeError.message}`, 'error');
-                            contadorErrores++;
-                        }
-                    }
+                try {
+                    // Abrir el diálogo nativo de "Compartir"
+                    await navigator.share(shareData);
+                    console.log("Foto compartida exitosamente");
+                    // Después de compartir, volver a la lista de clientes
+                    closeCamera(); 
+                } catch (err) {
+                    console.error("Error al compartir: ", err);
                 }
-
-                log("--- ¡MIGRACIÓN COMPLETADA! ---", 'success');
-                log(`Total de clientes únicos encontrados y migrados: ${contadorClientesUnicos}`, 'success');
-                log(`Total de errores de escritura: ${contadorErrores}`, 'error');
-                btnMigrate.textContent = "Migración Completa";
-
-            } catch (readError) {
-                log(`Error FATAL al leer la colección 'envios': ${readError.message}`, 'error');
-                log("Verifica tus Reglas de Firestore (Paso 1). Debes dar permiso de 'read' a tu email.", 'error');
-                btnMigrate.disabled = false;
-                btnMigrate.textContent = "Reintentar Migración";
-            }
-        });
+            }, 'image/jpeg');
+        }
 
     </script>
 </body>
 </html>
-
