@@ -335,9 +335,9 @@
                                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">Agencia</label>
                                     <select id="demo-agency" class="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-800 text-white outline-none focus:ring-2 focus:ring-primary cursor-pointer text-sm">
                                         <option value="Shalom" selected>Shalom</option>
-                                        <option value="Olva" disabled class="text-gray-500 bg-gray-800">Olva Courier (Próximamente)</option>
-                                        <option value="Marvisur" disabled class="text-gray-500 bg-gray-800">Marvisur (Próximamente)</option>
-                                        <option value="Delivery" disabled class="text-gray-500 bg-gray-800">Delivery (Próximamente)</option>
+                                        <option value="Olva" disabled class="text-gray-500 bg-gray-800">Olva Courier</option>
+                                        <option value="Marvisur" disabled class="text-gray-500 bg-gray-800">Marvisur</option>
+                                        <option value="Delivery" disabled class="text-gray-500 bg-gray-800">Delivery</option>
                                     </select>
                                 </div>
                             </div>
@@ -354,7 +354,7 @@
                             </div>
 
                             <button type="submit" class="w-full py-4 mt-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-xl shadow-lg hover:shadow-green-500/20 transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1 group-hover:scale-[1.02]">
-                                <i class="fab fa-whatsapp text-2xl"></i> Generar Rótulo
+                                <i class="fab fa-whatsapp text-2xl"></i> Enviar por WhatsApp
                             </button>
                             <p class="text-[10px] text-center text-gray-500 mt-3">
                                 *Esto abrirá tu WhatsApp Web o App con los datos formateados.
@@ -515,62 +515,149 @@
             <h2 class="text-3xl font-bold mb-4 text-white">Precios Transparentes</h2>
             <p class="text-gray-400 mb-16">Elige el plan que se adapte a tu volumen de ventas.</p>
             
-            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
+            <!-- TARJETAS (Resumen) -->
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-start mb-16">
                 
-                <!-- Plan INICIAL (Free) -->
+                <!-- Plan INICIAL -->
                 <div class="glass-panel p-8 rounded-3xl border border-white/5 order-2 md:order-1 hover:bg-white/[0.02] transition-colors text-left">
                     <h3 class="font-bold text-gray-400 mb-2 tracking-widest text-sm uppercase">Inicial</h3>
                     <div class="text-4xl font-bold mb-4 text-white">$0</div>
-                    <p class="text-gray-500 text-sm mb-8 border-b border-white/10 pb-8">Para emprendedores que recién empiezan.</p>
+                    <p class="text-gray-500 text-sm mb-8 border-b border-white/10 pb-8">Para validar tu negocio.</p>
                     
                     <ul class="space-y-4 mb-8 text-sm text-gray-300">
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Link Genérico</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Hasta 50 pedidos/mes</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Gestión en Dashboard</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Validación de DNI</span></li>
-                        <li class="flex items-start gap-3 text-gray-600"><i data-feather="x" class="w-4 h-4 mt-0.5"></i> <span>Con Marca de Agua</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Respuestas Ilimitadas</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Respuestas a tu WhatsApp</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Respuestas a tu Correo</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4 mt-0.5"></i> <span>Link Genérico</span></li>                       
                     </ul>
                     
                     <a href="#live-test" class="block w-full py-3 border border-white/10 rounded-xl text-sm font-bold text-white text-center hover:bg-white/5 transition-colors">Crear Cuenta Gratis</a>
                 </div>
                 
-                <!-- Plan PRO (Destacado) -->
+                <!-- Plan PRO -->
                 <div class="bg-gradient-to-b from-[#1e293b] to-[#0f172a] p-8 rounded-3xl border border-primary/50 relative transform md:scale-105 shadow-2xl order-1 md:order-2 z-10 text-left">
                     <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-4 py-1 rounded-full shadow-lg tracking-wider">MÁS VENDIDO</div>
-                    <h3 class="font-bold text-primary_glow mb-2 tracking-widest text-sm uppercase">Profesional</h3>
-                    <div class="text-5xl font-bold mb-4 text-white tracking-tight">$19<span class="text-base font-normal text-gray-500">/mes</span></div>
-                    <p class="text-gray-400 text-sm mb-8 border-b border-white/10 pb-8">Automatización total para crecer.</p>
+                    <h3 class="font-bold text-primary_glow mb-2 tracking-widest text-sm uppercase">Pro</h3>
+                    <div class="text-5xl font-bold mb-4 text-white tracking-tight">$9<span class="text-base font-normal text-gray-500">/mes</span></div>
+                    <p class="text-gray-400 text-sm mb-8 border-b border-white/10 pb-8">Automatización total.</p>
                     
                     <ul class="space-y-4 mb-8 text-sm text-white">
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span class="font-bold">Link Personalizado (Tu Marca)</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span class="font-bold">Respuestas directas a WhatsApp</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span>Pedidos Ilimitados</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span>Rótulos PDF listos para imprimir</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span>Exportación a Excel</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span>Sin Marca de Agua</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span class="font-bold">Link Personalizado</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span>Elección de couriers</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span>Rótulos PDF</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-primary w-4 h-4 mt-0.5"></i> <span>Exportar Excel</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="plus" class="text-primary w-4 h-4 mt-0.5"></i> <span class="text-gray-400">Todo lo del plan Inicial</span></li>
                     </ul>
                     
                     <a href="#live-test" class="block w-full py-4 bg-primary text-white rounded-xl text-sm font-bold hover:bg-blue-600 shadow-neon transition-all text-center">Prueba 7 días gratis</a>
                 </div>
                 
-                <!-- Plan EMPRESA (Business) -->
+                <!-- Plan EMPRESA -->
                 <div class="glass-panel p-8 rounded-3xl border border-white/5 order-3 hover:bg-white/[0.02] transition-colors text-left">
                     <h3 class="font-bold text-purple-400 mb-2 tracking-widest text-sm uppercase">Empresa</h3>
-                    <div class="text-4xl font-bold mb-4 text-white">$49<span class="text-base font-normal text-gray-500">/mes</span></div>
-                    <p class="text-gray-500 text-sm mb-8 border-b border-white/10 pb-8">Para equipos y alto volumen.</p>
+                    <div class="text-4xl font-bold mb-4 text-white">$29<span class="text-base font-normal text-gray-500">/mes</span></div>
+                    <p class="text-gray-500 text-sm mb-8 border-b border-white/10 pb-8">Para equipos grandes.</p>
                     
                     <ul class="space-y-4 mb-8 text-sm text-gray-300">
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span class="font-bold">Enrutamiento de Agentes</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span>Scripts (Pixel Facebook / GA4)</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span>Integraciones API / Webhooks</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span>Soporte Prioritario</span></li>
-                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span>Todo lo del plan Pro</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span class="font-bold">Multi-Agente</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span>API & Webhooks</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="check" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span>Pixel / Scripts</span></li>
+                        <li class="flex items-start gap-3"><i data-feather="plus" class="text-purple-400 w-4 h-4 mt-0.5"></i> <span class="text-gray-500">Todo lo del plan Pro</span></li>
                     </ul>
                     
                     <a href="#live-test" class="block w-full py-3 border border-white/10 rounded-xl text-sm font-bold text-white text-center hover:bg-white/5 transition-colors">Contactar Ventas</a>
                 </div>
-
             </div>
+
+            <!-- BOTÓN COMPARAR -->
+            <button onclick="document.getElementById('compare-table').classList.toggle('hidden')" class="text-gray-400 hover:text-white text-sm font-semibold flex items-center justify-center gap-2 mx-auto transition-colors group">
+                Comparar todas las características
+                <i data-feather="chevron-down" class="group-hover:translate-y-1 transition-transform"></i>
+            </button>
+
+            <!-- TABLA COMPARATIVA (Oculta por defecto) -->
+            <div id="compare-table" class="hidden mt-12 max-w-5xl mx-auto overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md animate-fade-in-up">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="bg-white/5 text-white font-bold uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="p-4 md:p-6">Característica</th>
+                                <th class="p-4 md:p-6 text-center w-1/4">Inicial ($0)</th>
+                                <th class="p-4 md:p-6 text-center w-1/4 text-primary">Pro ($9)</th>
+                                <th class="p-4 md:p-6 text-center w-1/4 text-purple-400">Empresa ($29)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <!-- Core -->
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6 text-white font-medium">Pedidos Mensuales</td>
+                                <td class="p-4 md:p-6 text-center">50</td>
+                                <td class="p-4 md:p-6 text-center text-white font-bold">Ilimitados</td>
+                                <td class="p-4 md:p-6 text-center text-white font-bold">Ilimitados</td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6">Validación DNI y Celular</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6">Buscador de Agencias</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+
+                            <!-- Branding & Power -->
+                            <tr class="hover:bg-white/[0.02] bg-white/[0.01]">
+                                <td class="p-4 md:p-6 text-white">Link Personalizado</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6 text-white">Rótulos PDF</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6 text-white">Exportación Excel</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6 text-white">Sin Marca de Agua</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+
+                            <!-- Enterprise -->
+                            <tr class="hover:bg-white/[0.02] bg-white/[0.01]">
+                                <td class="p-4 md:p-6 text-white">Multi-Agente (Equipos)</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6 text-white">API / Webhooks</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+                             <tr class="hover:bg-white/[0.02]">
+                                <td class="p-4 md:p-6 text-white">Soporte Prioritario</td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="x" class="mx-auto text-gray-600 w-4 h-4"></i></td>
+                                <td class="p-4 md:p-6 text-center"><i data-feather="check" class="mx-auto text-green-500 w-4 h-4"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -753,7 +840,7 @@
                 // Mensaje en formato Markdown para WhatsApp
                 const message = `Hola Latam5S, quiero probar la demo:%0A%0A• *Courier:* ${agency.toUpperCase()}%0A• *Cliente:* ${n}%0A• *Cel:* ${p}%0A• *DNI/CE:* ${dni}%0A• *Agencia:* ${agency}%0A• *Sede:* ${sedeName}%0A• *Dirección:* ${direccion}%0A%0A•••••••••••••••••••••••••••••••••••••%0A%0AEsta información también la tienes en tu panel de control de envíos.`;
                 
-                window.open(`https://wa.me/51982767073?text=${message}`, '_blank');
+                window.open(`https://wa.me/51942096391?text=${message}`, '_blank');
                 btn.innerHTML = originalContent;
             }, 800);
         });
@@ -802,7 +889,7 @@
             const id = 'opt-messages'; const el = document.getElementById(id); if(!el) return;
             while(true) {
                 el.innerHTML = ''; await wait(1000);
-                addMsg(id, 'Quiero mi envío 📦', 'in'); await wait(800);
+                addMsg(id, 'Quiero envío a provincia 📦', 'in'); await wait(800);
                 addMsg(id, '¡Claro! Elige tu agencia aquí: <span class="text-[#53bdeb] underline">latam5s.com/envio</span>', 'out'); await wait(2000);
                 
                 // Mensaje estandarizado simulado en la animación (MEJORADO Y LLAMATIVO)
@@ -814,14 +901,16 @@
                     • <b>DNI/CE:</b> 12345678<br>
                     • <b>Agencia:</b> Shalom<br>
                     • <b>Sede:</b> Arequipa - Cercado<br>
-                    • <b>Dirección:</b> Av. Ejército 123 - Frente al mall
+                    • <b>Dirección:</b> Av. Ejército 123 - Frente al mall<br><br>
+                    •••••••••••••••••••••••••••••••••••••<br><br>
+                    Esta información también la tienes en tu panel de control de envíos.
                 `;
                 
                 // Lo enviamos como mensaje del usuario ('in') para simular que el cliente envía los datos
                 addMsg(id, card, 'in'); 
                 
                 await wait(1000); 
-                addMsg(id, '¡Perfecto! Gracias', 'out'); await wait(4000);
+                addMsg(id, '¡Perfecto! Generando rótulo... 🖨️', 'out'); await wait(4000);
             }
         }
         
