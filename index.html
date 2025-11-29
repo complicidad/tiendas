@@ -24,20 +24,7 @@
         <p id="loading-text" class="text-slate-600 font-medium mt-4 animate-pulse">Conectando...</p>
     </div>
 
-    <!-- MODAL API URL -->
-    <div id="modal-api" class="fixed inset-0 z-[9990] bg-black/50 flex items-center justify-center p-4 hidden backdrop-blur-sm fade-in">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md slide-up">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Servidor</h3>
-                <button onclick="document.getElementById('modal-api').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <p class="text-sm text-slate-500 mb-4">URL Google Apps Script:</p>
-            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/...">
-            <button onclick="app.setGlobalApi()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition">Guardar</button>
-        </div>
-    </div>
-
-    <!-- DEBUG FLOATING -->
+    <!-- DEBUG FLOATING (Solo en modo cliente) -->
     <div id="debug-panel" class="fixed bottom-4 right-4 z-[50] hidden">
         <button id="btn-toggle-view" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-full shadow-lg text-sm font-bold flex items-center gap-2 transition hover:scale-105">
             <i data-lucide="eye" class="w-4 h-4"></i> <span id="btn-toggle-label">Ver como Cliente</span>
@@ -46,15 +33,15 @@
 
     <!-- VISTA AUTH -->
     <div id="view-auth" class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-emerald-50 hidden">
-        <button onclick="document.getElementById('modal-api').classList.remove('hidden')" class="absolute top-6 left-6 p-3 bg-white rounded-full shadow-md text-slate-400 hover:text-emerald-600 transition" title="Configurar Servidor">
-            <i data-lucide="settings" class="w-6 h-6"></i>
-        </button>
-
+        
         <div class="bg-white w-full max-w-md rounded-3xl shadow-xl overflow-hidden border border-slate-100 slide-up">
-            <div class="bg-slate-900 p-8 text-center">
-                <h1 class="text-2xl font-bold text-white">Logística Pro</h1>
-                <div id="connection-status" class="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[10px] font-medium text-white/80 mt-2 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local
+            <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="box" class="w-32 h-32 text-white"></i></div>
+                <div class="relative z-10">
+                    <h1 class="text-2xl font-bold text-white">Logística Pro</h1>
+                    <div id="connection-status" class="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[10px] font-medium text-white/80 mt-2 backdrop-blur-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Seguro
+                    </div>
                 </div>
             </div>
 
@@ -74,7 +61,7 @@
                 </form>
                 <p id="auth-error" class="text-red-500 text-xs text-center mt-4 font-bold hidden"></p>
                 <div class="mt-6 text-center text-xs text-slate-400 border-t pt-4">
-                    ¿No tienes acceso? Solicita tu cuenta al administrador.
+                    Acceso exclusivo para socios registrados.
                 </div>
             </div>
         </div>
@@ -210,12 +197,8 @@
     </div>
 
     <script>
-        // CONFIG
-        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbx2rHIIp75oWLuFrCBvaWB4P5bJXa9PToJq1ypO-unv1ZEouanZV2rXGEWnjNe0ieBQqQ/exec";
-        const ADMIN_PHONE = "999000999";
-        const ADMIN_PASS  = "admin123";
+        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzOI9KxParRmyr5kZ9ULY-JTC1sCgufovt4hU6XSJoBF66C4qvEWpaEk2-E2u3oibILqg/exec";
 
-        // STORAGE
         const SafeStorage = {
             memory: {},
             setItem: function(key, value) { try { localStorage.setItem(key, value); } catch(e) { this.memory[key] = value; } },
@@ -226,7 +209,7 @@
         const ALL_COURIERS = ["Olva", "Shalom", "Rappi", "PedidosYa", "DHL", "FedEx", "Motorizado", "Tienda"];
         const ALL_DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
         const initialState = { merchantName: "", whatsapp: "", couriers: [], shippingDays: [], updateTime: "18:00" };
-        const state = { user: null, merchantId: null, apiUrl: "", isClientView: false, config: { ...initialState } };
+        const state = { user: null, merchantId: null, apiUrl: DEFAULT_API_URL, isClientView: false, config: { ...initialState } };
 
         window.app = {
             // --- AUTH ---
@@ -237,12 +220,6 @@
                 const errorEl = document.getElementById('auth-error');
                 
                 app.toggleLoading(true);
-
-                // ADMIN CHECK
-                if (phone === ADMIN_PHONE && pass === ADMIN_PASS) {
-                    app.loginSuccess({ uid: 'admin_master', phone: 'Administrador', isAdmin: true });
-                    return;
-                }
 
                 // REMOTE LOGIN
                 if (state.apiUrl) {
@@ -265,8 +242,11 @@
 
                 // LOCAL FALLBACK
                 const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                if(usersDB.length === 0) usersDB.push({uid: 'u_local', phone: phone, password: pass});
-                
+                // Auto-create Admin fallback
+                if(phone === '999000999' && pass === 'admin123') {
+                    app.loginSuccess({ uid: 'admin_master', phone: 'Administrador', isAdmin: true });
+                    return;
+                }
                 const user = usersDB.find(u => u.phone === phone && u.password === pass);
                 if (user) app.loginSuccess(user);
                 else { errorEl.innerText = "Usuario no encontrado (Local)"; errorEl.classList.remove('hidden'); app.toggleLoading(false); }
@@ -307,7 +287,7 @@
                     list.innerHTML = users.map(u => `
                         <tr class="bg-white border-b hover:bg-slate-50">
                             <td class="px-6 py-4 font-bold text-slate-700">${u.phone}</td>
-                            <td class="px-6 py-4 font-mono text-xs bg-slate-50 text-slate-500">${u.password}</td>
+                            <td class="px-6 py-4 font-mono text-xs bg-slate-50 text-slate-500">********</td>
                             <td class="px-6 py-4 text-xs text-slate-400">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
                             <td class="px-6 py-4 text-right">
                                 <button onclick="app.adminResend('${u.phone}','${u.password}')" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs">Re-enviar</button>
@@ -315,6 +295,7 @@
                         </tr>
                     `).join('');
                 }
+                app.toggleLoading(false);
             },
 
             adminCreateUser: async (e) => {
@@ -341,17 +322,15 @@
                     SafeStorage.setItem('app_users_db', JSON.stringify(users));
                 }
 
-                // Send WA
                 const msg = `Hola! Tu cuenta en Logística Pro ha sido creada.\n\n📱 Usuario: ${phone}\n🔑 Clave: *${newPass}*\n\nIngresa aquí: ${window.location.href}`;
                 window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
                 
                 document.getElementById('admin-new-phone').value = "";
                 app.adminLoadUsers();
-                app.toggleLoading(false);
             },
 
             adminResend: (phone, pass) => {
-                const msg = `Recordatorio Logística Pro:\n\n📱 Usuario: ${phone}\n🔑 Clave: *${pass}*`;
+                const msg = `Recordatorio Logística Pro:\n\n📱 Usuario: ${phone}\n(Clave encriptada, genera una nueva si la perdiste)`;
                 window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
             },
 
@@ -479,11 +458,7 @@
             },
 
             setGlobalApi: () => {
-                const url = document.getElementById('global-api-url').value.trim();
-                SafeStorage.setItem('gas_api_url', url);
-                state.apiUrl = url;
-                document.getElementById('modal-api').classList.add('hidden');
-                app.updateConnectionStatus();
+                // Not accessible from UI anymore
             },
             updateConnectionStatus: () => {
                 const el = document.getElementById('connection-status');
@@ -492,8 +467,7 @@
             },
 
             init: () => {
-                state.apiUrl = SafeStorage.getItem('gas_api_url') || DEFAULT_API_URL;
-                if(state.apiUrl) document.getElementById('global-api-url').value = state.apiUrl;
+                state.apiUrl = DEFAULT_API_URL;
                 app.updateConnectionStatus();
 
                 const params = new URLSearchParams(window.location.search);
