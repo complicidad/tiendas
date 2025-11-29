@@ -31,8 +31,8 @@
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Conectar Base de Datos</h3>
                 <button onclick="document.getElementById('modal-api').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <p class="text-sm text-slate-500 mb-4">Ingresa la URL de tu Google Apps Script para guardar usuarios, configuraciones y pedidos en la nube.</p>
-            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/macros/s/...">
+            <p class="text-sm text-slate-500 mb-4">La URL del servidor (Google Apps Script) para sincronizar datos.</p>
+            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/...">
             <button onclick="app.setGlobalApi()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition">Guardar Conexión</button>
         </div>
     </div>
@@ -175,6 +175,9 @@
     </div>
 
     <script>
+        // URL DE TU GOOGLE APPS SCRIPT
+        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbwlS1DOYUvO0qh95UTFKiW5_Mjj2p7fwp1ifyd0Ko08YCWLqN3UENwqFBW3bCFCdnP2pw/exec";
+
         // --- SAFE STORAGE WRAPPER ---
         const SafeStorage = {
             memory: {},
@@ -466,7 +469,7 @@
                 try { localStorage.setItem('test', 1); localStorage.removeItem('test'); }
                 catch(e) { document.getElementById('memory-warning').classList.remove('hidden'); }
 
-                state.apiUrl = SafeStorage.getItem('gas_api_url') || "";
+                state.apiUrl = SafeStorage.getItem('gas_api_url') || DEFAULT_API_URL;
                 if(state.apiUrl) document.getElementById('global-api-url').value = state.apiUrl;
                 app.updateConnectionStatus();
 
