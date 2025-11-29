@@ -31,8 +31,8 @@
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Conectar Base de Datos</h3>
                 <button onclick="document.getElementById('modal-api').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <p class="text-sm text-slate-500 mb-4">La URL del servidor (Google Apps Script) para sincronizar datos.</p>
-            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/...">
+            <p class="text-sm text-slate-500 mb-4">Ingresa la URL de tu Google Apps Script para guardar usuarios, configuraciones y pedidos en la nube.</p>
+            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/macros/s/...">
             <button onclick="app.setGlobalApi()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition">Guardar Conexión</button>
         </div>
     </div>
@@ -62,20 +62,41 @@
             </div>
 
             <div class="p-8">
+                <!-- TABS -->
                 <div class="flex border-b border-slate-100 mb-6">
                     <button onclick="app.toggleAuthMode('login')" id="tab-login" class="flex-1 pb-3 text-sm font-bold text-emerald-600 border-b-2 border-emerald-600 transition">Iniciar Sesión</button>
                     <button onclick="app.toggleAuthMode('register')" id="tab-register" class="flex-1 pb-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition">Crear Cuenta</button>
                 </div>
 
-                <form onsubmit="app.handleAuth(event)" class="space-y-4">
-                    <input id="auth-email" type="email" required placeholder="Correo Electrónico" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                    <input id="auth-pass" type="password" required placeholder="Contraseña" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                    <button type="submit" id="btn-auth-submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center gap-2">
+                <!-- LOGIN FORM -->
+                <form id="form-auth" onsubmit="app.handleAuth(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-1">Tu Número de WhatsApp</label>
+                        <div class="relative">
+                            <i data-lucide="phone" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input id="auth-phone" type="tel" maxlength="9" required placeholder="999888777" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono tracking-wide" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1 ml-1">Solo 9 dígitos (Perú)</p>
+                    </div>
+
+                    <div id="field-password">
+                        <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-1">Contraseña</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input id="auth-pass" type="text" placeholder="Código recibido" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono tracking-widest text-center uppercase">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-auth-submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center gap-2 mt-4">
                         Ingresar
                     </button>
                 </form>
-                <p id="auth-error" class="text-red-500 text-xs text-center mt-4 font-medium hidden"></p>
-                <p id="memory-warning" class="text-orange-500 text-xs text-center mt-4 font-medium hidden bg-orange-50 p-2 rounded">⚠️ Modo memoria temporal activado (Canvas)</p>
+                
+                <div id="auth-msg" class="mt-4 hidden p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 text-center">
+                    <p class="font-bold mb-1">ℹ️ Instrucciones:</p>
+                    Se abrirá tu WhatsApp. Envía el mensaje generado a tu mismo número para guardar tu contraseña.
+                </div>
+                <p id="auth-error" class="text-red-500 text-xs text-center mt-4 font-bold hidden"></p>
             </div>
         </div>
     </div>
@@ -93,7 +114,7 @@
                 <button onclick="app.setTab('orders')" id="nav-orders" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Pedidos</button>
             </nav>
             <div class="mt-auto p-4 border-t border-slate-100">
-                <div class="flex items-center gap-3 mb-3"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><i data-lucide="user" class="w-4 h-4 text-slate-500"></i></div><div class="overflow-hidden"><p id="user-display" class="text-sm font-bold text-slate-700 truncate">Usuario</p></div></div>
+                <div class="flex items-center gap-3 mb-3"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><i data-lucide="phone" class="w-4 h-4 text-slate-500"></i></div><div class="overflow-hidden"><p id="user-display" class="text-sm font-bold text-slate-700 truncate">...</p></div></div>
                 <button onclick="app.logout()" class="w-full text-red-500 text-xs font-bold hover:bg-red-50 py-2 rounded transition">Cerrar Sesión</button>
             </div>
         </aside>
@@ -103,7 +124,7 @@
                 <div class="flex justify-between items-center"><h2 class="text-xl font-bold text-slate-800">Configuración</h2><button onclick="app.saveConfig()" class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition flex gap-2"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button></div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                     <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre Tienda</label><input id="inp-store-name" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp Pedidos</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                     <label class="text-xs font-bold text-slate-400 uppercase">Couriers</label><div id="container-couriers" class="grid grid-cols-2 gap-2"></div>
@@ -112,39 +133,22 @@
                 </div>
             </div>
             
-            <!-- PESTAÑA COMPARTIR MEJORADA -->
             <div id="tab-share" class="tab-content hidden h-full flex flex-col items-center justify-center p-4">
                 <div class="bg-white rounded-3xl shadow-xl border border-slate-100 max-w-md w-full slide-up relative overflow-hidden">
-                    <!-- Banda decorativa -->
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-indigo-500"></div>
-                    
                     <div class="p-8 text-center">
                         <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-600 ring-4 ring-indigo-50/50">
                             <i data-lucide="share-2" class="w-10 h-10"></i>
                         </div>
-                        
                         <h2 class="text-2xl font-bold text-slate-800 mb-2">¡Tu Tienda está Lista!</h2>
-                        <p class="text-slate-500 text-sm mb-8 leading-relaxed">Este es tu enlace único. Compártelo con tus clientes para recibir pedidos estructurados.</p>
-                        
-                        <!-- Caja de Link -->
+                        <p class="text-slate-500 text-sm mb-8 leading-relaxed">Este es tu enlace único. Compártelo con tus clientes.</p>
                         <div class="bg-slate-50 p-2 rounded-xl border border-slate-200 mb-6 flex items-center shadow-inner group transition-colors focus-within:border-indigo-300 focus-within:bg-white">
-                            <div class="flex-1 px-3 py-2 overflow-hidden text-left">
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Enlace Público</p>
-                                <div id="share-link" class="text-sm text-indigo-600 font-mono truncate select-all font-bold">...</div>
-                            </div>
-                            <button onclick="app.copyLink()" class="p-2.5 bg-white hover:bg-slate-50 text-slate-500 rounded-lg border border-slate-200 shadow-sm transition active:scale-95" title="Copiar">
-                                <i data-lucide="copy" class="w-5 h-5"></i>
-                            </button>
+                            <div class="flex-1 px-3 py-2 overflow-hidden text-left"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Enlace Público</p><div id="share-link" class="text-sm text-indigo-600 font-mono truncate select-all font-bold">...</div></div>
+                            <button onclick="app.copyLink()" class="p-2.5 bg-white hover:bg-slate-50 text-slate-500 rounded-lg border border-slate-200 shadow-sm transition active:scale-95" title="Copiar"><i data-lucide="copy" class="w-5 h-5"></i></button>
                         </div>
-
-                        <!-- Botones de Acción -->
                         <div class="space-y-3">
-                            <button onclick="app.shareOnWhatsapp()" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-lg shadow-green-100">
-                                <i data-lucide="message-circle" class="w-5 h-5"></i> Enviar por WhatsApp
-                            </button>
-                            <button onclick="app.openLink()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95">
-                                <i data-lucide="external-link" class="w-4 h-4"></i> Abrir en otra pestaña
-                            </button>
+                            <button onclick="app.shareOnWhatsapp()" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-lg shadow-green-100"><i data-lucide="message-circle" class="w-5 h-5"></i> Enviar por WhatsApp</button>
+                            <button onclick="app.openLink()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir en otra pestaña</button>
                         </div>
                     </div>
                 </div>
@@ -175,55 +179,127 @@
     </div>
 
     <script>
-        // URL DE TU GOOGLE APPS SCRIPT
         const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbwlS1DOYUvO0qh95UTFKiW5_Mjj2p7fwp1ifyd0Ko08YCWLqN3UENwqFBW3bCFCdnP2pw/exec";
 
-        // --- SAFE STORAGE WRAPPER ---
         const SafeStorage = {
             memory: {},
-            setItem: function(key, value) {
-                try { localStorage.setItem(key, value); } 
-                catch(e) { this.memory[key] = value; console.warn("Storage bloqueado, usando memoria."); }
-            },
-            getItem: function(key) {
-                try { return localStorage.getItem(key); } 
-                catch(e) { return this.memory[key] || null; }
-            },
-            removeItem: function(key) {
-                try { localStorage.removeItem(key); }
-                catch(e) { delete this.memory[key]; }
-            }
+            setItem: function(key, value) { try { localStorage.setItem(key, value); } catch(e) { this.memory[key] = value; } },
+            getItem: function(key) { try { return localStorage.getItem(key); } catch(e) { return this.memory[key] || null; } },
+            removeItem: function(key) { try { localStorage.removeItem(key); } catch(e) { delete this.memory[key]; } }
         };
 
         const ALL_COURIERS = ["Olva", "Shalom", "Rappi", "PedidosYa", "DHL", "FedEx", "Motorizado", "Tienda"];
         const ALL_DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
         
-        // Estado inicial
-        const initialState = { 
-            merchantName: "", 
-            whatsapp: "", 
-            couriers: [], 
-            shippingDays: [], 
-            updateTime: "18:00" 
-        };
-
-        const state = { 
-            user: null, 
-            authMode: 'login', 
-            merchantId: null, 
-            apiUrl: "", 
-            isClientView: false, 
-            config: { ...initialState } 
-        };
+        const initialState = { merchantName: "", whatsapp: "", couriers: [], shippingDays: [], updateTime: "18:00" };
+        const state = { user: null, authMode: 'login', merchantId: null, apiUrl: "", isClientView: false, config: { ...initialState } };
 
         window.app = {
-            // --- AUTH ---
+            // --- AUTH LOGIC ---
             toggleAuthMode: (mode) => {
                 state.authMode = mode;
+                const passField = document.getElementById('field-password');
+                const authMsg = document.getElementById('auth-msg');
+                const btn = document.getElementById('btn-auth-submit');
+                
                 document.getElementById('auth-error').classList.add('hidden');
+                document.getElementById('auth-pass').value = '';
+
                 document.getElementById('tab-login').className = mode==='login' ? "flex-1 pb-3 text-sm font-bold text-emerald-600 border-b-2 border-emerald-600" : "flex-1 pb-3 text-sm font-bold text-slate-400 hover:text-slate-600";
                 document.getElementById('tab-register').className = mode==='register' ? "flex-1 pb-3 text-sm font-bold text-emerald-600 border-b-2 border-emerald-600" : "flex-1 pb-3 text-sm font-bold text-slate-400 hover:text-slate-600";
-                document.getElementById('btn-auth-submit').innerText = mode==='login' ? "Ingresar" : "Crear Cuenta";
+                
+                if (mode === 'register') {
+                    passField.classList.add('hidden');
+                    document.getElementById('auth-pass').removeAttribute('required');
+                    btn.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="key" class="w-4 h-4"></i> Generar & Enviar Pass</span>`;
+                    authMsg.classList.remove('hidden');
+                } else {
+                    passField.classList.remove('hidden');
+                    document.getElementById('auth-pass').setAttribute('required', 'true');
+                    btn.innerText = "Ingresar";
+                    authMsg.classList.add('hidden');
+                }
+                lucide.createIcons();
+            },
+
+            handleAuth: async (e) => {
+                e.preventDefault();
+                const phone = document.getElementById('auth-phone').value.trim();
+                const pass = document.getElementById('auth-pass').value.trim();
+                const errorEl = document.getElementById('auth-error');
+                
+                if (phone.length !== 9) {
+                    errorEl.innerText = "El celular debe tener 9 dígitos";
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                app.toggleLoading(true);
+
+                if (state.authMode === 'register') {
+                    // --- REGISTRO ---
+                    const newPass = Math.floor(1000 + Math.random() * 9000).toString(); // 4 digits
+                    
+                    // Remoto
+                    if (state.apiUrl) {
+                        try {
+                            const res = await fetch(state.apiUrl, {
+                                method: "POST", body: JSON.stringify({ action: "registerUser", data: { phone, password: newPass } })
+                            });
+                            const json = await res.json();
+                            if (json.status !== 'success') throw new Error(json.message);
+                        } catch (err) {
+                            errorEl.innerText = err.message || "Error al registrar";
+                            errorEl.classList.remove('hidden');
+                            app.toggleLoading(false);
+                            return;
+                        }
+                    } else {
+                        // Local Check
+                        const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                        if (usersDB.find(u => u.phone === phone)) {
+                            errorEl.innerText = "Número ya registrado (Local)"; errorEl.classList.remove('hidden'); app.toggleLoading(false); return;
+                        }
+                        const newUser = { uid: 'u_' + Math.random().toString(36).substr(2), phone, password: newPass };
+                        usersDB.push(newUser);
+                        SafeStorage.setItem('app_users_db', JSON.stringify(usersDB));
+                    }
+
+                    // ABRIR WHATSAPP AL MISMO NÚMERO
+                    const waText = `🔐 Clave generada para Logística Pro: *${newPass}*\n\nGuarda este mensaje.`;
+                    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
+
+                    app.toggleAuthMode('login'); // Switch to login UI
+                    document.getElementById('auth-phone').value = phone; // Keep phone
+                    alert("¡Contraseña generada! Se abrió WhatsApp para que te la envíes a ti mismo.");
+                    app.toggleLoading(false);
+
+                } else {
+                    // --- LOGIN ---
+                    let user = null;
+                    
+                    if (state.apiUrl) {
+                        try {
+                            const res = await fetch(state.apiUrl, {
+                                method: "POST", body: JSON.stringify({ action: "loginUser", data: { phone, password: pass } })
+                            });
+                            const json = await res.json();
+                            if (json.status === 'success') user = json.user;
+                            else throw new Error(json.message);
+                        } catch (err) {
+                            errorEl.innerText = err.message || "Error al conectar"; errorEl.classList.remove('hidden');
+                        }
+                    } else {
+                        const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                        user = usersDB.find(u => u.phone === phone && u.password === pass);
+                        if (!user) { errorEl.innerText = "Datos incorrectos (Local)"; errorEl.classList.remove('hidden'); }
+                    }
+
+                    if (user) {
+                        app.loginSuccess(user);
+                    }
+                    app.toggleLoading(false);
+                }
             },
 
             setGlobalApi: () => {
@@ -240,81 +316,26 @@
                 else el.innerHTML = `<span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local`;
             },
 
-            handleAuth: async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('auth-email').value.trim();
-                const pass = document.getElementById('auth-pass').value.trim();
-                const errorEl = document.getElementById('auth-error');
-                
-                app.toggleLoading(true);
-
-                // Remote
-                if (state.apiUrl) {
-                    try {
-                        const action = state.authMode === 'login' ? 'loginUser' : 'registerUser';
-                        const res = await fetch(state.apiUrl, {
-                            method: "POST", body: JSON.stringify({ action: action, data: { email, password: pass } })
-                        });
-                        const json = await res.json();
-                        if (json.status === 'success') {
-                            app.loginSuccess(json.user);
-                            return;
-                        } else {
-                            errorEl.innerText = json.message || "Error en el servidor";
-                            errorEl.classList.remove('hidden');
-                            app.toggleLoading(false);
-                            return;
-                        }
-                    } catch (err) { console.error("Fallo conexión, intentando local..."); }
-                }
-
-                // Local Fallback (SafeStorage)
-                const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                if (state.authMode === 'register') {
-                    if (usersDB.find(u => u.email === email)) {
-                        errorEl.innerText = "Correo ya registrado (Local)"; errorEl.classList.remove('hidden');
-                    } else {
-                        const newUser = { uid: 'u_' + Math.random().toString(36).substr(2), email, password: pass };
-                        usersDB.push(newUser);
-                        SafeStorage.setItem('app_users_db', JSON.stringify(usersDB));
-                        app.loginSuccess(newUser);
-                    }
-                } else {
-                    const user = usersDB.find(u => u.email === email && u.password === pass);
-                    if (user) app.loginSuccess(user);
-                    else { errorEl.innerText = "Credenciales inválidas (Local)"; errorEl.classList.remove('hidden'); }
-                }
-                app.toggleLoading(false);
-            },
-
             loginSuccess: (user) => {
-                state.user = user;
-                SafeStorage.setItem('app_current_user', JSON.stringify(user));
-                // NO RELOAD - Just re-init logic cleanly
+                state.user = { uid: user.uid, email: user.phone }; // Map phone to email prop for compat
+                SafeStorage.setItem('app_current_user', JSON.stringify(state.user));
                 app.init(); 
             },
 
             logout: () => { 
                 SafeStorage.removeItem('app_current_user'); 
-                state.user = null;
-                state.merchantId = null;
-                // LIMPIAR DATOS DE MEMORIA PARA EL SIGUIENTE USUARIO
-                state.config = { ...initialState };
-                document.getElementById('auth-email').value = "";
-                document.getElementById('auth-pass').value = "";
-                // NO RELOAD - Just re-init logic cleanly
+                state.user = null; state.merchantId = null; state.config = { ...initialState };
+                document.getElementById('auth-phone').value = ""; document.getElementById('auth-pass').value = "";
                 app.init(); 
             },
 
-            // --- CORE ---
+            // --- CORE FUNCTIONALITY ---
             saveConfig: async () => {
                 app.toggleLoading(true);
                 state.config.merchantName = document.getElementById('inp-store-name').value;
                 state.config.whatsapp = document.getElementById('inp-whatsapp').value;
                 state.config.updateTime = document.getElementById('inp-time').value;
-                
                 SafeStorage.setItem(`config_${state.user.uid}`, JSON.stringify(state.config));
-                
                 if (state.apiUrl) {
                     try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveConfig", merchantId: state.user.uid, data: state.config }) }); } catch(e){}
                 }
@@ -323,10 +344,7 @@
 
             loadData: async () => {
                 app.toggleLoading(true);
-                
-                // RESET CONFIG FIRST - Evitar contaminación cruzada
-                state.config = { ...initialState };
-
+                state.config = { ...initialState }; // Reset
                 let loaded = false;
                 if (state.apiUrl) {
                     try {
@@ -339,10 +357,8 @@
                     const local = SafeStorage.getItem(`config_${state.merchantId}`);
                     if (local) state.config = JSON.parse(local);
                 }
-                
                 if (state.isClientView) app.renderClient();
                 else app.renderDashboard();
-                
                 app.loadOrders();
                 app.toggleLoading(false);
             },
@@ -351,7 +367,6 @@
                 const list = document.getElementById('orders-list');
                 list.innerHTML = '<p class="text-center text-sm text-slate-400">Cargando...</p>';
                 let orders = [];
-                
                 if (state.apiUrl) {
                     try {
                         const res = await fetch(`${state.apiUrl}?action=getOrders&merchantId=${state.merchantId}`);
@@ -363,7 +378,6 @@
                     const local = JSON.parse(SafeStorage.getItem(`orders_${state.merchantId}`) || '[]');
                     if (local.length > 0) orders = local;
                 }
-
                 if (orders.length === 0) list.innerHTML = '<div class="text-center py-10 border-2 border-dashed rounded-xl text-slate-400">Sin pedidos</div>';
                 else list.innerHTML = orders.map(o => `<div class="bg-white p-3 rounded-lg shadow-sm border border-slate-100"><div class="flex justify-between"><span class="font-bold text-slate-800">${o.clientName}</span><span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">${o.shippingDate}</span></div><p class="text-xs text-slate-500 mt-1">${o.product} - ${o.courier}</p></div>`).join('');
             },
@@ -379,140 +393,72 @@
                     shippingDate: document.querySelector('.day-btn.bg-slate-800')?.innerText,
                     createdAt: Date.now()
                 };
-                
                 if(!order.courier || !order.shippingDate) { alert("Faltan datos"); app.toggleLoading(false); return; }
-
                 const localKey = `orders_${state.merchantId}`;
                 const existing = JSON.parse(SafeStorage.getItem(localKey) || '[]');
                 existing.push(order);
                 SafeStorage.setItem(localKey, JSON.stringify(existing));
-
                 if (state.apiUrl) {
                     try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveOrder", merchantId: state.merchantId, data: order }) }); } catch(e){}
                 }
-
-                const text = `Hola, soy ${order.clientName}. Nuevo pedido: ${order.product} (${order.courier}, ${order.shippingDate})`;
+                const text = `Hola *${state.config.merchantName}*, soy *${order.clientName}*.%0A%0AHe registrado un envío:%0A🛍️ *Producto:* ${order.product}%0A📦 *Courier:* ${order.courier}%0A📅 *Entrega:* ${order.shippingDate}`;
                 window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(text)}`, '_blank');
                 app.toggleLoading(false);
             },
 
-            // --- UI HELPERS ---
-            setTab: (t) => {
-                ['config','share','orders'].forEach(x => {
-                    document.getElementById(`tab-${x}`).classList.add('hidden');
-                    document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition";
-                });
-                document.getElementById(`tab-${t}`).classList.remove('hidden');
-                document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100";
-                
-                // ACTUALIZACIÓN AUTOMÁTICA DEL LINK
-                if(t === 'share') app.updateShareLink();
-            },
-            
-            updateShareLink: () => {
-                const url = `${window.location.origin}${window.location.pathname}?merchant=${state.user.uid}`;
-                document.getElementById('share-link').innerText = url;
-            },
-
-            shareOnWhatsapp: () => {
-                const link = document.getElementById('share-link').innerText;
-                const text = `¡Hola! Haz tu pedido aquí: ${link}`;
-                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-            },
-
-            copyLink: () => { 
-                const txt = document.getElementById('share-link').innerText;
-                navigator.clipboard.writeText(txt);
-                alert("¡Link copiado!"); 
-            },
-
-            openLink: () => {
-                window.open(document.getElementById('share-link').innerText, '_blank');
-            },
-            
-            toggleConfigItem: (k, v) => {
-                if (state.config[k].includes(v)) state.config[k] = state.config[k].filter(i => i !== v);
-                else state.config[k].push(v);
-                app.renderDashboard();
-            },
-
+            // --- UI ---
+            toggleConfigItem: (k, v) => { if (state.config[k].includes(v)) state.config[k] = state.config[k].filter(i => i !== v); else state.config[k].push(v); app.renderDashboard(); },
             renderDashboard: () => {
-                document.getElementById('inp-store-name').value = state.config.merchantName || '';
-                document.getElementById('inp-whatsapp').value = state.config.whatsapp || '';
-                document.getElementById('inp-time').value = state.config.updateTime || '';
-                
-                document.getElementById('container-couriers').innerHTML = ALL_COURIERS.map(c => `
-                    <div onclick="app.toggleConfigItem('couriers','${c}')" class="cursor-pointer border rounded p-2 text-xs font-bold flex items-center gap-2 select-none ${state.config.couriers.includes(c)?'bg-blue-50 border-blue-500 text-blue-700':'bg-white hover:bg-slate-50 text-slate-600'}">
-                        <div class="w-3 h-3 border rounded flex items-center justify-center ${state.config.couriers.includes(c)?'bg-blue-600 border-blue-600':''}">${state.config.couriers.includes(c)?'<i data-lucide="check" class="w-2 h-2 text-white"></i>':''}</div>${c}
-                    </div>`).join('');
-                
-                document.getElementById('container-days').innerHTML = ALL_DAYS.map(d => `
-                    <button onclick="app.toggleConfigItem('shippingDays','${d}')" class="px-3 py-1 rounded text-xs font-bold border ${state.config.shippingDays.includes(d)?'bg-emerald-500 text-white border-emerald-500':'bg-white text-slate-500 hover:bg-slate-50'}">${d}</button>`).join('');
-                
+                document.getElementById('inp-store-name').value = state.config.merchantName || ''; document.getElementById('inp-whatsapp').value = state.config.whatsapp || ''; document.getElementById('inp-time').value = state.config.updateTime || '';
+                document.getElementById('container-couriers').innerHTML = ALL_COURIERS.map(c => `<div onclick="app.toggleConfigItem('couriers','${c}')" class="cursor-pointer border rounded p-2 text-xs font-bold flex items-center gap-2 select-none ${state.config.couriers.includes(c)?'bg-blue-50 border-blue-500 text-blue-700':'bg-white hover:bg-slate-50 text-slate-600'}"><div class="w-3 h-3 border rounded flex items-center justify-center ${state.config.couriers.includes(c)?'bg-blue-600 border-blue-600':''}">${state.config.couriers.includes(c)?'<i data-lucide="check" class="w-2 h-2 text-white"></i>':''}</div>${c}</div>`).join('');
+                document.getElementById('container-days').innerHTML = ALL_DAYS.map(d => `<button onclick="app.toggleConfigItem('shippingDays','${d}')" class="px-3 py-1 rounded text-xs font-bold border ${state.config.shippingDays.includes(d)?'bg-emerald-500 text-white border-emerald-500':'bg-white text-slate-500 hover:bg-slate-50'}">${d}</button>`).join('');
                 lucide.createIcons();
             },
-
             renderClient: () => {
-                document.getElementById('client-title').innerText = state.config.merchantName || "Tienda";
-                document.getElementById('client-time').innerText = state.config.updateTime || "--:--";
-                
-                document.getElementById('client-couriers-list').innerHTML = (state.config.couriers||[]).map(c => `
-                    <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer bg-white has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500"><span class="text-sm font-bold text-slate-700">${c}</span><input type="radio" name="courier" value="${c}" class="accent-emerald-600 w-4 h-4"></label>`).join('');
-                
-                document.getElementById('client-days-list').innerHTML = (state.config.shippingDays||[]).map(d => `
-                    <div onclick="document.querySelectorAll('.day-btn').forEach(e=>{e.className='day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer'}); this.className='day-btn px-4 py-2 rounded-lg bg-slate-800 text-white text-xs font-bold cursor-pointer shadow-lg'" class="day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer transition">${d}</div>`).join('');
+                document.getElementById('client-title').innerText = state.config.merchantName || "Tienda"; document.getElementById('client-time').innerText = state.config.updateTime || "--:--";
+                document.getElementById('client-couriers-list').innerHTML = (state.config.couriers||[]).map(c => `<label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer bg-white has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500"><span class="text-sm font-bold text-slate-700">${c}</span><input type="radio" name="courier" value="${c}" class="accent-emerald-600 w-4 h-4"></label>`).join('');
+                document.getElementById('client-days-list').innerHTML = (state.config.shippingDays||[]).map(d => `<div onclick="document.querySelectorAll('.day-btn').forEach(e=>{e.className='day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer'}); this.className='day-btn px-4 py-2 rounded-lg bg-slate-800 text-white text-xs font-bold cursor-pointer shadow-lg'" class="day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer transition">${d}</div>`).join('');
             },
-
-            toggleLoading: (show) => { const el = document.getElementById('loading-overlay'); show ? (el.classList.remove('hidden'), setTimeout(()=>el.classList.remove('opacity-0'),10)) : (el.classList.add('opacity-0'), setTimeout(()=>el.classList.add('hidden'),300)); },
             
-            init: () => {
-                try { localStorage.setItem('test', 1); localStorage.removeItem('test'); }
-                catch(e) { document.getElementById('memory-warning').classList.remove('hidden'); }
+            setTab: (t) => {
+                ['config','share','orders'].forEach(x => { document.getElementById(`tab-${x}`).classList.add('hidden'); document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition"; });
+                document.getElementById(`tab-${t}`).classList.remove('hidden'); document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100";
+                if(t==='share') app.updateShareLink();
+            },
+            updateShareLink: () => { document.getElementById('share-link').innerText = `${window.location.origin}${window.location.pathname}?merchant=${state.user.uid}`; },
+            copyLink: () => { navigator.clipboard.writeText(document.getElementById('share-link').innerText); alert("¡Copiado!"); },
+            openLink: () => { window.open(document.getElementById('share-link').innerText, '_blank'); },
+            shareOnWhatsapp: () => { window.open(`https://wa.me/?text=${encodeURIComponent("Haz tu pedido aquí: " + document.getElementById('share-link').innerText)}`, '_blank'); },
+            toggleLoading: (show) => { const el = document.getElementById('loading-overlay'); show ? (el.classList.remove('hidden'), setTimeout(()=>el.classList.remove('opacity-0'),10)) : (el.classList.add('opacity-0'), setTimeout(()=>el.classList.add('hidden'),300)); },
 
+            init: () => {
                 state.apiUrl = SafeStorage.getItem('gas_api_url') || DEFAULT_API_URL;
                 if(state.apiUrl) document.getElementById('global-api-url').value = state.apiUrl;
                 app.updateConnectionStatus();
 
                 const params = new URLSearchParams(window.location.search);
                 const mid = params.get('merchant');
-                
-                // HIDE ALL
-                document.getElementById('view-client').classList.add('hidden');
-                document.getElementById('view-dashboard').classList.add('hidden');
-                document.getElementById('view-auth').classList.add('hidden');
+                document.getElementById('view-client').classList.add('hidden'); document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-auth').classList.add('hidden');
 
-                if (mid) { // Client View
+                if (mid) { 
                     state.isClientView = true; state.merchantId = mid;
                     document.getElementById('view-client').classList.remove('hidden');
                     document.getElementById('debug-panel').classList.remove('hidden');
                     document.getElementById('btn-toggle-label').innerText = "Ir a Login";
-                    document.getElementById('btn-toggle-view').onclick = () => {
-                        // Soft Navigate back
-                        try { const url = new URL(window.location); url.searchParams.delete('merchant'); window.history.pushState({}, '', url); } catch(e){}
-                        app.init();
-                    };
+                    document.getElementById('btn-toggle-view').onclick = () => { try { const url = new URL(window.location); url.searchParams.delete('merchant'); window.history.pushState({}, '', url); } catch(e){} app.init(); };
                     app.loadData();
                 } else {
                     const storedUser = SafeStorage.getItem('app_current_user');
-                    if (storedUser) { // Dashboard
+                    if (storedUser) { 
                         state.user = JSON.parse(storedUser); state.merchantId = state.user.uid;
                         document.getElementById('view-dashboard').classList.remove('hidden');
-                        document.getElementById('user-display').innerText = state.user.email;
+                        document.getElementById('user-display').innerText = state.user.email; // Phone
                         document.getElementById('debug-panel').classList.remove('hidden');
                         document.getElementById('btn-toggle-view').onclick = () => { 
-                            app.saveConfig().then(() => {
-                                try { const url = new URL(window.location); url.searchParams.set('merchant', state.user.uid); window.history.pushState({}, '', url); } catch(e){}
-                                // Manually switch to client mode (No reload)
-                                state.isClientView = true; state.merchantId = state.user.uid;
-                                document.getElementById('view-dashboard').classList.add('hidden');
-                                document.getElementById('view-client').classList.remove('hidden');
-                                document.getElementById('btn-toggle-label').innerText = "Volver al Panel";
-                                document.getElementById('btn-toggle-view').onclick = () => app.init(); // Reset to init logic which will find user
-                                app.loadData();
-                            });
+                            app.saveConfig().then(() => { try { const url = new URL(window.location); url.searchParams.set('merchant', state.user.uid); window.history.pushState({}, '', url); } catch(e){} state.isClientView = true; state.merchantId = state.user.uid; document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-client').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText = "Volver al Panel"; document.getElementById('btn-toggle-view').onclick = () => app.init(); app.loadData(); });
                         };
                         app.setTab('config'); app.loadData();
-                    } else { // Auth
+                    } else { 
                         document.getElementById('view-auth').classList.remove('hidden');
                         document.getElementById('debug-panel').classList.add('hidden');
                     }
@@ -520,7 +466,6 @@
                 lucide.createIcons();
             }
         };
-
         app.init();
     </script>
 </body>
