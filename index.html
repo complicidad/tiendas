@@ -24,20 +24,7 @@
         <p id="loading-text" class="text-slate-600 font-medium mt-4 animate-pulse">Conectando...</p>
     </div>
 
-    <!-- MODAL API URL -->
-    <div id="modal-api" class="fixed inset-0 z-[9990] bg-black/50 flex items-center justify-center p-4 hidden backdrop-blur-sm fade-in">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md slide-up">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i> Conexión Segura</h3>
-                <button onclick="document.getElementById('modal-api').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <p class="text-sm text-slate-500 mb-4">URL del Endpoint (Google Apps Script):</p>
-            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4 font-mono" placeholder="https://script.google.com/...">
-            <button onclick="app.setGlobalApi()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition">Guardar Configuración</button>
-        </div>
-    </div>
-
-    <!-- DEBUG FLOATING (Solo en modo cliente) -->
+    <!-- DEBUG FLOATING -->
     <div id="debug-panel" class="fixed bottom-4 right-4 z-[50] hidden">
         <button id="btn-toggle-view" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-full shadow-lg text-sm font-bold flex items-center gap-2 transition hover:scale-105">
             <i data-lucide="eye" class="w-4 h-4"></i> <span id="btn-toggle-label">Ver como Cliente</span>
@@ -46,15 +33,14 @@
 
     <!-- VISTA AUTH -->
     <div id="view-auth" class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-emerald-50 hidden">
-        <button onclick="document.getElementById('modal-api').classList.remove('hidden')" class="absolute top-6 left-6 p-3 bg-white rounded-full shadow-md text-slate-400 hover:text-emerald-600 transition" title="Configurar Servidor">
-            <i data-lucide="settings" class="w-6 h-6"></i>
-        </button>
-
         <div class="bg-white w-full max-w-md rounded-3xl shadow-xl overflow-hidden border border-slate-100 slide-up">
-            <div class="bg-slate-900 p-8 text-center">
-                <h1 class="text-2xl font-bold text-white">Logística Pro</h1>
-                <div id="connection-status" class="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[10px] font-medium text-white/80 mt-2 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local
+            <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="box" class="w-32 h-32 text-white"></i></div>
+                <div class="relative z-10">
+                    <h1 class="text-2xl font-bold text-white">Logística Pro</h1>
+                    <div id="connection-status" class="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[10px] font-medium text-white/80 mt-2 backdrop-blur-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Seguro
+                    </div>
                 </div>
             </div>
 
@@ -89,9 +75,7 @@
             </div>
             <button onclick="app.logout()" class="text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded transition">Salir</button>
         </header>
-        
         <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-5xl mx-auto w-full space-y-6">
-            <!-- Crear Usuario -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Alta de Emprendedor</h2>
                 <form onsubmit="app.adminCreateUser(event)" class="flex flex-col md:flex-row gap-4 items-end">
@@ -104,27 +88,13 @@
                     </button>
                 </form>
             </div>
-
-            <!-- Lista Usuarios -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                     <h2 class="text-lg font-bold text-slate-800">Usuarios Registrados</h2>
                     <button onclick="app.adminLoadUsers()" class="p-2 hover:bg-slate-50 rounded-full text-slate-400"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                            <tr>
-                                <th class="px-6 py-3">WhatsApp</th>
-                                <th class="px-6 py-3">Contraseña (Hash)</th>
-                                <th class="px-6 py-3">Fecha Alta</th>
-                                <th class="px-6 py-3 text-right">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-users-list" class="divide-y divide-slate-100">
-                            <!-- JS -->
-                        </tbody>
-                    </table>
+                    <table class="w-full text-sm text-left"><thead class="bg-slate-50 text-slate-500 uppercase text-xs"><tr><th class="px-6 py-3">WhatsApp</th><th class="px-6 py-3">Contraseña (Hash)</th><th class="px-6 py-3">Fecha Alta</th><th class="px-6 py-3 text-right">Acción</th></tr></thead><tbody id="admin-users-list" class="divide-y divide-slate-100"></tbody></table>
                 </div>
             </div>
         </main>
@@ -147,9 +117,7 @@
                 <button onclick="app.logout()" class="w-full text-red-500 text-xs font-bold hover:bg-red-50 py-2 rounded transition">Cerrar Sesión</button>
             </div>
         </aside>
-        
         <main class="flex-1 bg-slate-50/50 p-4 md:p-8 overflow-y-auto relative">
-            <!-- CONTENIDO DASHBOARD (Igual que antes) -->
             <div id="tab-config" class="tab-content max-w-2xl mx-auto space-y-6 slide-up">
                 <div class="flex justify-between items-center"><h2 class="text-xl font-bold text-slate-800">Configuración</h2><button onclick="app.saveConfig()" class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition flex gap-2"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button></div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
@@ -163,28 +131,19 @@
                     <label class="text-xs font-bold text-slate-400 uppercase block mt-4">Días Envío</label><div id="container-days" class="flex flex-wrap gap-2"></div>
                     <div class="flex items-center gap-2 mt-2"><span class="text-sm font-bold text-slate-600">Hora Corte:</span><input type="time" id="inp-time" class="border rounded px-2 py-1 text-sm"></div>
                 </div>
-                <!-- CAMBIO DE CONTRASEÑA -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-indigo-500"></i> Seguridad</h3>
-                    <div class="flex gap-2 items-end">
-                        <div class="flex-1"><label class="text-xs font-bold text-slate-400 uppercase">Nueva Contraseña</label><input id="inp-new-pass" type="password" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
-                        <button onclick="app.changePassword()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition h-[42px]">Actualizar</button>
-                    </div>
+                    <div class="flex gap-2 items-end"><div class="flex-1"><label class="text-xs font-bold text-slate-400 uppercase">Nueva Contraseña</label><input id="inp-new-pass" type="password" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></div><button onclick="app.changePassword()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition h-[42px]">Actualizar</button></div>
                 </div>
             </div>
-            
             <div id="tab-share" class="tab-content hidden h-full flex flex-col items-center justify-center p-4">
                 <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full slide-up">
                     <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600"><i data-lucide="share-2" class="w-8 h-8"></i></div>
                     <h2 class="text-xl font-bold mb-2">Enlace Público</h2>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 break-all"><code id="share-link" class="text-xs text-indigo-600 font-bold select-all">...</code></div>
-                    <div class="space-y-2">
-                        <button onclick="app.copyLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Copiar Link</button>
-                        <button onclick="app.shareOnWhatsapp()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Enviar por WhatsApp</button>
-                    </div>
+                    <div class="space-y-2"><button onclick="app.copyLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Copiar Link</button><button onclick="app.shareOnWhatsapp()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Enviar por WhatsApp</button></div>
                 </div>
             </div>
-
             <div id="tab-orders" class="tab-content hidden max-w-3xl mx-auto">
                 <div class="flex justify-between mb-6"><h2 class="text-xl font-bold text-slate-800">Pedidos</h2><button onclick="app.loadData()" class="p-2 bg-white rounded-full shadow hover:bg-slate-50"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button></div>
                 <div id="orders-list" class="space-y-3"></div>
@@ -192,18 +151,88 @@
         </main>
     </div>
 
-    <!-- VISTA CLIENTE -->
-    <div id="view-client" class="flex-1 min-h-screen bg-slate-100 hidden overflow-y-auto">
-        <div class="min-h-full flex flex-col items-center justify-center p-4">
-            <div class="bg-white w-full max-w-lg rounded-3xl shadow-xl overflow-hidden slide-up">
-                <div class="bg-slate-900 p-6 text-center text-white"><h1 id="client-title" class="text-xl font-bold">Cargando...</h1><p class="text-sm opacity-80">Solicitud de Envío</p></div>
-                <form onsubmit="app.submitOrder(event)" class="p-6 space-y-4">
-                    <div class="bg-blue-50 text-blue-800 text-sm p-3 rounded-lg flex gap-2"><i data-lucide="info" class="w-4 h-4 mt-0.5"></i><span>Corte de pedidos: <strong id="client-time">--:--</strong></span></div>
-                    <div class="grid grid-cols-2 gap-3"><input id="c-name" required placeholder="Nombre" class="border p-3 rounded-lg w-full"><input id="c-phone" required placeholder="Celular" class="border p-3 rounded-lg w-full"></div>
-                    <input id="c-product" required placeholder="Producto" class="border p-3 rounded-lg w-full">
-                    <div><label class="block text-xs font-bold text-slate-400 mb-2">Courier</label><div id="client-couriers-list" class="space-y-2"></div></div>
-                    <div><label class="block text-xs font-bold text-slate-400 mb-2">Fecha</label><div id="client-days-list" class="flex flex-wrap gap-2"></div></div>
-                    <button type="submit" class="w-full bg-[#25D366] text-white font-bold py-3 rounded-xl shadow-lg hover:bg-green-600 transition flex justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Enviar Pedido</button>
+    <!-- VISTA CLIENTE (CON BUSCADOR MEJORADO CLARO) -->
+    <div id="view-client" class="flex-1 min-h-screen bg-slate-50 hidden overflow-y-auto">
+        <div class="max-w-2xl mx-auto min-h-screen bg-white shadow-2xl overflow-hidden flex flex-col">
+            <div class="bg-slate-900 text-white p-6 sticky top-0 z-10 shadow-md flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center"><i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-400"></i></div>
+                <div><h1 id="client-title" class="font-bold text-lg leading-tight">Cargando...</h1><p class="text-xs text-slate-400">Datos de Envío</p></div>
+            </div>
+
+            <div class="flex-1 p-6 space-y-8 pb-32">
+                <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg shadow-sm"><p class="text-xs text-orange-700">📅 Pedidos para hoy cierran a las <strong id="client-time">--:--</strong>.</p></div>
+
+                <form id="client-form" onsubmit="app.submitOrder(event)" class="space-y-8">
+                    <!-- PASO 1 -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">1. Configura tu Envío</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-2">Selecciona Agencia o Delivery</label>
+                            <div id="client-couriers-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-2">Fecha de Despacho</label>
+                            <div id="client-days-list" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- PASO 2 (DINÁMICO) -->
+                    <div id="dynamic-form-section" class="hidden space-y-6 fade-in">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">2. Datos de Destino</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div><label class="block text-xs font-semibold text-slate-500 mb-1">Nombre Completo</label><input id="c-name" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                            <div><label class="block text-xs font-semibold text-slate-500 mb-1">Celular / WhatsApp</label><input id="c-phone" type="tel" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                        </div>
+
+                        <!-- AGENCIA (BUSCADOR ESTILO CLARO) -->
+                        <div id="fields-agency" class="hidden space-y-4">
+                            <div><label class="block text-xs font-semibold text-slate-500 mb-1">DNI / CE</label><input id="c-dni" type="tel" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">BUSCAR SEDE (CALLE/DISTRITO)</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="h-5 w-5 text-slate-400"></i></div>
+                                    <!-- Input Claro -->
+                                    <input id="c-agency" type="text" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-slate-800 transition placeholder-slate-400" placeholder="Escribe para buscar..." autocomplete="off" oninput="app.searchAgency(this.value)">
+                                    <!-- Botón X Limpiar -->
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <button type="button" id="btn-clear-agency" onclick="app.clearAgency()" class="hidden text-slate-400 hover:text-slate-600"><i data-lucide="x" class="h-5 w-5"></i></button>
+                                    </div>
+                                    <!-- Dropdown Resultados Claro -->
+                                    <div id="agency-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto z-50 divide-y divide-slate-100">
+                                        <!-- Resultados se inyectan aquí -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DOMICILIO -->
+                        <div id="fields-home" class="hidden space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="col-span-2"><label class="block text-xs font-semibold text-slate-500 mb-1">Dirección Exacta</label><input id="c-address" placeholder="Calle / Av / Jr" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">DISTRITO</label>
+                                    <div class="relative group">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="map-pin" class="h-5 w-5 text-slate-400"></i></div>
+                                        <input id="c-district" type="text" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-slate-800 transition placeholder-slate-400" placeholder="Buscar distrito..." autocomplete="off" oninput="app.searchDistrict(this.value)">
+                                        <!-- Botón X Limpiar -->
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <button type="button" id="btn-clear-district" onclick="app.clearDistrict()" class="hidden text-slate-400 hover:text-slate-600"><i data-lucide="x" class="h-5 w-5"></i></button>
+                                        </div>
+                                        <!-- Dropdown Resultados Claro -->
+                                        <div id="district-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto z-50 divide-y divide-slate-100"></div>
+                                    </div>
+                                </div>
+                                <div><label class="block text-xs font-semibold text-slate-500 mb-1">Referencia</label><input id="c-ref" placeholder="Frente a..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-center max-w-2xl mx-auto z-20">
+                        <button type="submit" id="btn-submit-order" disabled class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition active:scale-95 flex justify-center items-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-lucide="message-circle" class="w-6 h-6"></i> Enviar Datos
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -211,6 +240,13 @@
 
     <script>
         const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbwitgwqdco87Kwil7SdmI4N8anuhu1C02-Uzt7_0Q4Gf8lfq4GBv3Jheyfole1RELe3IQ/exec";
+        const JSON_DISTRITOS = "https://raw.githubusercontent.com/complicidad/form/main/lstDinsides.json";
+        const JSON_SHALOM = "https://raw.githubusercontent.com/complicidad/form/main/lstShalom.json";
+
+        const COURIER_TYPES = {
+            "Shalom": "agency", "Olva Courier": "agency", "Flores": "agency", "Cruz del Sur": "agency",
+            "Rappi": "home", "PedidosYa": "home", "Motorizado": "home", "DHL": "home", "FedEx": "home", "Tienda": "home"
+        };
 
         const SafeStorage = {
             memory: {},
@@ -219,292 +255,318 @@
             removeItem: function(key) { try { localStorage.removeItem(key); } catch(e) { delete this.memory[key]; } }
         };
 
-        const ALL_COURIERS = ["Olva", "Shalom", "Rappi", "PedidosYa", "DHL", "FedEx", "Motorizado", "Tienda"];
+        const ALL_COURIERS = ["Olva Courier", "Shalom", "Rappi", "PedidosYa", "DHL", "FedEx", "Motorizado", "Tienda"];
         const ALL_DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
         const initialState = { merchantName: "", whatsapp: "", couriers: [], shippingDays: [], updateTime: "18:00" };
-        const state = { user: null, merchantId: null, apiUrl: DEFAULT_API_URL, isClientView: false, config: { ...initialState } };
+        const state = { user: null, merchantId: null, apiUrl: DEFAULT_API_URL, isClientView: false, config: { ...initialState }, selectedCourierType: null, externalData: {} };
 
         window.app = {
-            // --- AUTH ---
-            handleLogin: async (e) => {
-                e.preventDefault();
-                const phone = document.getElementById('auth-phone').value.trim();
-                const pass = document.getElementById('auth-pass').value.trim();
-                const errorEl = document.getElementById('auth-error');
+            updateConnectionStatus: () => {
+                const el = document.getElementById('connection-status');
+                if(el) el.innerHTML = state.apiUrl ? `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Seguro` : `Local`;
+            },
+
+            // --- EXTERNAL DATA ---
+            loadExternalLists: async () => {
+                try {
+                    if(!state.externalData.districts) {
+                        const res = await fetch(JSON_DISTRITOS);
+                        const data = await res.json();
+                        state.externalData.districts = data.map(d => d.Distrito || d.nombre);
+                    }
+                    if(!state.externalData.agencies) {
+                        const res = await fetch(JSON_SHALOM);
+                        state.externalData.agencies = await res.json(); 
+                    }
+                } catch(e) { console.error(e); }
+            },
+
+            // --- AGENCY SEARCH LOGIC ---
+            searchAgency: (query) => {
+                const resultsContainer = document.getElementById('agency-results');
+                const clearBtn = document.getElementById('btn-clear-agency');
                 
-                app.toggleLoading(true);
+                if (!query) {
+                    resultsContainer.classList.add('hidden');
+                    clearBtn.classList.add('hidden');
+                    return;
+                }
+                clearBtn.classList.remove('hidden');
 
-                // REMOTE LOGIN
-                if (state.apiUrl) {
-                    try {
-                        const res = await fetch(state.apiUrl, {
-                            method: "POST", body: JSON.stringify({ action: "loginUser", data: { phone, password: pass } })
-                        });
-                        const json = await res.json();
-                        if (json.status === 'success') {
-                            app.loginSuccess(json.user);
-                            return;
-                        } else {
-                            errorEl.innerText = json.message || "Error al ingresar";
-                            errorEl.classList.remove('hidden');
-                            app.toggleLoading(false);
-                            return;
-                        }
-                    } catch (err) { console.error("Error remoto", err); }
+                if(query.length < 2) {
+                    resultsContainer.classList.add('hidden');
+                    return;
                 }
 
-                // LOCAL FALLBACK
-                const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                if(usersDB.length === 0) usersDB.push({uid: 'u_local', phone: phone, password: pass}); // Auto-create on first try locally
-                const user = usersDB.find(u => u.phone === phone && u.password === pass);
-                if (user) app.loginSuccess(user);
-                else { errorEl.innerText = "Usuario no encontrado (Local)"; errorEl.classList.remove('hidden'); app.toggleLoading(false); }
-            },
+                const lowerQ = query.toLowerCase();
+                const matches = (state.externalData.agencies || [])
+                    .filter(a => (a.Agencia && a.Agencia.toLowerCase().includes(lowerQ)) || (a.Direccion && a.Direccion.toLowerCase().includes(lowerQ)))
+                    .slice(0, 50);
 
-            loginSuccess: (user) => {
-                state.user = user;
-                SafeStorage.setItem('app_current_user', JSON.stringify(user));
-                app.init(); 
-            },
-
-            logout: () => { 
-                SafeStorage.removeItem('app_current_user'); 
-                state.user = null; state.merchantId = null; state.config = { ...initialState };
-                document.getElementById('auth-phone').value = ""; document.getElementById('auth-pass').value = "";
-                app.init(); 
-            },
-
-            // --- ADMIN LOGIC ---
-            adminLoadUsers: async () => {
-                const list = document.getElementById('admin-users-list');
-                list.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando...</td></tr>';
-                let users = [];
-
-                if(state.apiUrl) {
-                    try {
-                        const res = await fetch(`${state.apiUrl}?action=getUsers`);
-                        const json = await res.json();
-                        if(json.users) users = json.users;
-                    } catch(e) {}
+                if (matches.length === 0) {
+                    resultsContainer.innerHTML = '<div class="p-4 text-slate-400 text-sm text-center">No se encontraron resultados</div>';
                 } else {
-                    users = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                }
-
-                if(users.length === 0) {
-                    list.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay usuarios</td></tr>';
-                } else {
-                    list.innerHTML = users.map(u => `
-                        <tr class="bg-white border-b hover:bg-slate-50">
-                            <td class="px-6 py-4 font-bold text-slate-700">${u.phone}</td>
-                            <td class="px-6 py-4 font-mono text-xs bg-slate-50 text-slate-500">****</td>
-                            <td class="px-6 py-4 text-xs text-slate-400">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
-                            <td class="px-6 py-4 text-right">
-                                <button onclick="app.adminResend('${u.uid}', '${u.phone}')" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs bg-indigo-50 px-3 py-1 rounded-full transition">Re-enviar Clave</button>
-                            </td>
-                        </tr>
+                    resultsContainer.innerHTML = matches.map(a => `
+                        <div onclick="app.selectAgency('${a.Agencia.replace(/'/g, "\\'")}', '${a.Direccion.replace(/'/g, "\\'")}')" class="p-4 cursor-pointer hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                            <p class="font-bold text-slate-800 text-sm mb-1">${a.Agencia}</p>
+                            <p class="text-xs text-slate-500">${a.Direccion}</p>
+                        </div>
                     `).join('');
                 }
-                app.toggleLoading(false);
+                resultsContainer.classList.remove('hidden');
             },
 
-            adminCreateUser: async (e) => {
-                e.preventDefault();
-                const phone = document.getElementById('admin-new-phone').value.trim();
-                if(phone.length !== 9) return alert("Número inválido");
-                
-                app.toggleLoading(true);
-                const newPass = Math.floor(1000 + Math.random() * 9000).toString();
+            selectAgency: (name, address) => {
+                const input = document.getElementById('c-agency');
+                input.value = `${name} - ${address}`;
+                document.getElementById('agency-results').classList.add('hidden');
+                document.getElementById('btn-clear-agency').classList.remove('hidden');
+            },
+            
+            clearAgency: () => {
+                const input = document.getElementById('c-agency');
+                input.value = '';
+                document.getElementById('agency-results').classList.add('hidden');
+                document.getElementById('btn-clear-agency').classList.add('hidden');
+                input.focus();
+            },
 
-                if(state.apiUrl) {
-                    try {
-                        const res = await fetch(state.apiUrl, {
-                            method: "POST", body: JSON.stringify({ action: "registerUser", data: { phone, password: newPass } })
-                        });
-                        const json = await res.json();
-                        if(json.status !== 'success') { alert(json.message); app.toggleLoading(false); return; }
-                    } catch(e) { alert("Error al conectar"); app.toggleLoading(false); return; }
+            // --- DISTRICT SEARCH LOGIC ---
+            searchDistrict: (query) => {
+                const resultsContainer = document.getElementById('district-results');
+                const clearBtn = document.getElementById('btn-clear-district');
+                
+                if (!query) {
+                    resultsContainer.classList.add('hidden');
+                    clearBtn.classList.add('hidden');
+                    return;
+                }
+                clearBtn.classList.remove('hidden');
+
+                if(query.length < 1) {
+                    resultsContainer.classList.add('hidden');
+                    return;
+                }
+
+                const lowerQ = query.toLowerCase();
+                const matches = (state.externalData.districts || [])
+                    .filter(d => d.toLowerCase().includes(lowerQ))
+                    .slice(0, 50);
+
+                if (matches.length === 0) {
+                    resultsContainer.innerHTML = '<div class="p-4 text-slate-400 text-sm text-center">No se encontraron resultados</div>';
                 } else {
-                    // Local
-                    let users = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                    if(users.find(u => u.phone === phone)) { alert("Usuario ya existe"); app.toggleLoading(false); return; }
-                    users.push({ uid: 'u_'+Date.now(), phone, password: newPass, createdAt: new Date() });
-                    SafeStorage.setItem('app_users_db', JSON.stringify(users));
+                    resultsContainer.innerHTML = matches.map(d => `
+                        <div onclick="app.selectDistrict('${d.replace(/'/g, "\\'")}')" class="p-4 cursor-pointer hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                            <p class="font-bold text-slate-800 text-sm">${d}</p>
+                        </div>
+                    `).join('');
                 }
-
-                // Send WA
-                const msg = `🔐 *Bienvenido a Logística Pro*\n\nHola, tu cuenta ha sido creada exitosamente.\n\n📱 Usuario: ${phone}\n🔑 Clave: *${newPass}*\n\nIngresa aquí: ${window.location.href}`;
-                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-                
-                document.getElementById('admin-new-phone').value = "";
-                app.adminLoadUsers();
+                resultsContainer.classList.remove('hidden');
             },
 
-            adminResend: async (uid, phone) => {
-                if(!confirm(`¿Estás seguro de generar una NUEVA CLAVE para ${phone}? La anterior dejará de funcionar.`)) return;
-                
-                app.toggleLoading(true);
-                const newPass = Math.floor(1000 + Math.random() * 9000).toString();
+            selectDistrict: (val) => {
+                const input = document.getElementById('c-district');
+                input.value = val;
+                document.getElementById('district-results').classList.add('hidden');
+                document.getElementById('btn-clear-district').classList.remove('hidden');
+            },
 
-                if(state.apiUrl) {
-                    try {
-                        await fetch(state.apiUrl, { 
-                            method: "POST", 
-                            body: JSON.stringify({ action: "changePassword", merchantId: uid, newPassword: newPass }) 
-                        });
-                    } catch(e) { alert("Error de conexión"); app.toggleLoading(false); return; }
+            clearDistrict: () => {
+                const input = document.getElementById('c-district');
+                input.value = '';
+                document.getElementById('district-results').classList.add('hidden');
+                document.getElementById('btn-clear-district').classList.add('hidden');
+                input.focus();
+            },
+
+            // --- CLIENT LOGIC ---
+            selectCourier: (courier) => {
+                document.querySelectorAll('.courier-card').forEach(el => { el.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-50'); el.querySelector('.check-icon').classList.add('hidden'); });
+                const btn = document.getElementById(`courier-${courier.replace(/\s/g, '')}`);
+                if(btn) { btn.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50'); btn.querySelector('.check-icon').classList.remove('hidden'); }
+
+                const type = COURIER_TYPES[courier] || "home";
+                state.selectedCourierType = type;
+                state.selectedCourier = courier;
+
+                document.getElementById('dynamic-form-section').classList.remove('hidden');
+                const agencyFields = document.getElementById('fields-agency');
+                const homeFields = document.getElementById('fields-home');
+                
+                ['c-dni','c-agency','c-address','c-district'].forEach(id => document.getElementById(id).removeAttribute('required'));
+
+                if(type === 'agency') {
+                    agencyFields.classList.remove('hidden'); homeFields.classList.add('hidden');
+                    document.getElementById('c-dni').setAttribute('required','true');
+                    const agInput = document.getElementById('c-agency');
+                    agInput.setAttribute('required','true');
+                    agInput.value = "";
+                    app.clearAgency(); 
+                    app.clearDistrict(); // Clear district too when switching
+
+                    if(courier.includes('Shalom')) {
+                        agInput.placeholder = "Escribe para buscar sede...";
+                    } else {
+                        agInput.placeholder = "Nombre de Agencia / Dirección";
+                    }
+
                 } else {
-                    // Local
-                    let users = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                    let u = users.find(u => u.uid === uid);
-                    if(u) u.password = newPass;
-                    SafeStorage.setItem('app_users_db', JSON.stringify(users));
+                    agencyFields.classList.add('hidden'); homeFields.classList.remove('hidden');
+                    document.getElementById('c-address').setAttribute('required','true');
+                    document.getElementById('c-district').setAttribute('required','true');
+                    app.clearAgency(); // Clear agency when switching
+                    app.clearDistrict();
                 }
-
-                const msg = `🔐 *Recuperación de Clave* - Logística Pro\n\nHola, hemos reestablecido tu acceso.\n\n📱 Usuario: ${phone}\n🔑 Nueva Clave: *${newPass}*\n\nIngresa aquí: ${window.location.href}`;
-                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-                
-                app.toggleLoading(false);
+                app.validateForm();
             },
 
-            // --- MERCHANT CORE ---
-            changePassword: async () => {
-                const newPass = document.getElementById('inp-new-pass').value.trim();
-                if(!newPass) return alert("Ingresa una clave");
-                app.toggleLoading(true);
-                
-                if(state.apiUrl) {
-                    try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: state.user.uid, newPassword: newPass }) }); } catch(e){}
-                } else {
-                    let db = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                    let me = db.find(u => u.uid === state.user.uid);
-                    if(me) { me.password = newPass; SafeStorage.setItem('app_users_db', JSON.stringify(db)); }
-                }
-                document.getElementById('inp-new-pass').value = "";
-                alert("Contraseña actualizada");
-                app.toggleLoading(false);
+            selectDay: (day) => {
+                document.querySelectorAll('.day-btn').forEach(el => { el.classList.remove('bg-slate-800','text-white','selected'); el.classList.add('bg-white','text-slate-600','border'); });
+                const btn = document.getElementById(`day-${day}`);
+                btn.classList.remove('bg-white','text-slate-600','border'); btn.classList.add('bg-slate-800','text-white','selected');
+                app.validateForm();
             },
 
-            saveConfig: async () => {
-                app.toggleLoading(true);
-                state.config.merchantName = document.getElementById('inp-store-name').value;
-                state.config.whatsapp = document.getElementById('inp-whatsapp').value;
-                state.config.updateTime = document.getElementById('inp-time').value;
-                
-                SafeStorage.setItem(`config_${state.user.uid}`, JSON.stringify(state.config));
-                
-                if (state.apiUrl) {
-                    try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveConfig", merchantId: state.user.uid, data: state.config }) }); } catch(e){}
-                }
-                setTimeout(() => app.toggleLoading(false), 500);
-            },
-
-            loadData: async () => {
-                app.toggleLoading(true);
-                state.config = { ...initialState };
-                let loaded = false;
-                if (state.apiUrl) {
-                    try {
-                        const res = await fetch(`${state.apiUrl}?action=getConfig&merchantId=${state.merchantId}`);
-                        const json = await res.json();
-                        if (json.data) { state.config = json.data; loaded = true; }
-                    } catch(e){}
-                }
-                if (!loaded) {
-                    const local = SafeStorage.getItem(`config_${state.merchantId}`);
-                    if (local) state.config = JSON.parse(local);
-                }
-                
-                if (state.isClientView) app.renderClient();
-                else app.renderDashboard();
-                
-                if(!state.isClientView) app.loadOrders();
-                app.toggleLoading(false);
-            },
-
-            loadOrders: async () => {
-                const list = document.getElementById('orders-list');
-                list.innerHTML = '<p class="text-center text-sm text-slate-400">Cargando...</p>';
-                let orders = [];
-                if (state.apiUrl) {
-                    try {
-                        const res = await fetch(`${state.apiUrl}?action=getOrders&merchantId=${state.merchantId}`);
-                        const json = await res.json();
-                        if (json.orders) orders = json.orders;
-                    } catch(e){}
-                }
-                if (orders.length === 0) {
-                    const local = JSON.parse(SafeStorage.getItem(`orders_${state.merchantId}`) || '[]');
-                    if (local.length > 0) orders = local;
-                }
-                if (orders.length === 0) list.innerHTML = '<div class="text-center py-10 border-2 border-dashed rounded-xl text-slate-400">Sin pedidos</div>';
-                else list.innerHTML = orders.map(o => `<div class="bg-white p-3 rounded-lg shadow-sm border border-slate-100"><div class="flex justify-between"><span class="font-bold text-slate-800">${o.clientName}</span><span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">${o.shippingDate}</span></div><p class="text-xs text-slate-500 mt-1">${o.product} - ${o.courier}</p></div>`).join('');
+            validateForm: () => {
+                const btn = document.getElementById('btn-submit-order');
+                if(state.selectedCourier && document.querySelector('.day-btn.selected')) btn.removeAttribute('disabled');
             },
 
             submitOrder: async (e) => {
                 e.preventDefault();
                 app.toggleLoading(true);
-                const order = {
-                    clientName: document.getElementById('c-name').value,
-                    clientPhone: document.getElementById('c-phone').value,
-                    product: document.getElementById('c-product').value,
-                    courier: document.querySelector('input[name="courier"]:checked')?.value,
-                    shippingDate: document.querySelector('.day-btn.bg-slate-800')?.innerText,
-                    createdAt: Date.now()
-                };
-                if(!order.courier || !order.shippingDate) { alert("Faltan datos"); app.toggleLoading(false); return; }
-                const localKey = `orders_${state.merchantId}`;
-                const existing = JSON.parse(SafeStorage.getItem(localKey) || '[]');
-                existing.push(order);
-                SafeStorage.setItem(localKey, JSON.stringify(existing));
-                if (state.apiUrl) {
-                    try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveOrder", merchantId: state.merchantId, data: order }) }); } catch(e){}
+                const day = document.querySelector('.day-btn.selected')?.innerText;
+                const name = document.getElementById('c-name').value;
+                const phone = document.getElementById('c-phone').value;
+                
+                let orderData = { clientName: name, clientPhone: phone, courier: state.selectedCourier, shippingDate: day, createdAt: Date.now(), product: "N/A" };
+                let waText = "";
+
+                if (state.selectedCourierType === 'agency') {
+                    const dni = document.getElementById('c-dni').value;
+                    const agency = document.getElementById('c-agency').value;
+                    orderData.clientDni = dni; orderData.clientAgency = agency;
+                    waText = `📦 *NUEVO ENVÍO (AGENCIA)*\n\n👤 *Cliente:* ${name}\n📱 *Tel:* ${phone}\n🆔 *DNI:* ${dni}\n\n🏢 *Agencia:* ${agency}\n🚚 *Courier:* ${state.selectedCourier}\n📅 *Fecha:* ${day}`;
+                } else {
+                    const addr = document.getElementById('c-address').value;
+                    const dist = document.getElementById('c-district').value;
+                    const ref = document.getElementById('c-ref').value;
+                    orderData.clientAddress = addr; orderData.clientDistrict = dist; orderData.clientRef = ref;
+                    waText = `📦 *NUEVO ENVÍO (CASA)*\n\n👤 *Cliente:* ${name}\n📱 *Tel:* ${phone}\n\n📍 *Distrito:* ${dist}\n🏠 *Dirección:* ${addr}\n🗺️ *Ref:* ${ref}\n\n🚚 *Courier:* ${state.selectedCourier}\n📅 *Fecha:* ${day}`;
                 }
-                const text = `Hola *${state.config.merchantName}*, soy *${order.clientName}*.%0A%0AHe registrado un envío:%0A🛍️ *Producto:* ${order.product}%0A📦 *Courier:* ${order.courier}%0A📅 *Entrega:* ${order.shippingDate}`;
-                window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(text)}`, '_blank');
+
+                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveOrder", merchantId: state.merchantId, data: orderData }) }); } catch(e) {}
+                window.open(`https://wa.me/51${state.config.whatsapp}?text=${encodeURIComponent(waText)}`, '_blank');
                 app.toggleLoading(false);
             },
 
-            // --- UI HELPERS ---
-            setTab: (t) => {
-                ['config','share','orders'].forEach(x => { document.getElementById(`tab-${x}`).classList.add('hidden'); document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition"; });
-                document.getElementById(`tab-${t}`).classList.remove('hidden'); document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100";
-                if(t==='share') app.updateShareLink();
+            // --- STANDARD LOGIC ---
+            handleLogin: async (e) => {
+                e.preventDefault();
+                const phone = document.getElementById('auth-phone').value.trim();
+                const pass = document.getElementById('auth-pass').value.trim();
+                const errorEl = document.getElementById('auth-error');
+                app.toggleLoading(true);
+
+                if (phone === '999000999' && pass === 'admin123') { app.loginSuccess({ uid: 'admin_master', phone: 'Administrador', isAdmin: true }); return; }
+
+                if (state.apiUrl) {
+                    try {
+                        const res = await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "loginUser", data: { phone, password: pass } }) });
+                        const json = await res.json();
+                        if (json.status === 'success') { app.loginSuccess(json.user); return; } 
+                        else { errorEl.innerText = json.message; errorEl.classList.remove('hidden'); app.toggleLoading(false); return; }
+                    } catch (err) { console.error(err); }
+                }
+                const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                const user = usersDB.find(u => u.phone === phone && u.password === pass);
+                if (user) app.loginSuccess(user);
+                else { errorEl.innerText = "Usuario no encontrado"; errorEl.classList.remove('hidden'); app.toggleLoading(false); }
             },
+
+            loginSuccess: (user) => { state.user = user; SafeStorage.setItem('app_current_user', JSON.stringify(user)); app.init(); },
+            logout: () => { SafeStorage.removeItem('app_current_user'); state.user = null; state.merchantId = null; app.init(); },
+
+            // Admin
+            adminLoadUsers: async () => {
+                const list = document.getElementById('admin-users-list'); list.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando...</td></tr>';
+                let users = [];
+                try { const res = await fetch(`${state.apiUrl}?action=getUsers`); const json = await res.json(); if(json.users) users = json.users; } catch(e) {}
+                list.innerHTML = users.length ? users.map(u => `<tr class="bg-white border-b hover:bg-slate-50"><td class="px-6 py-4 font-bold text-slate-700">${u.phone}</td><td class="px-6 py-4 font-mono text-xs text-slate-500">****</td><td class="px-6 py-4 text-xs text-slate-400">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td><td class="px-6 py-4 text-right"><button onclick="app.adminResend('${u.uid}','${u.phone}')" class="text-indigo-600 text-xs font-bold">Re-enviar</button></td></tr>`).join('') : '<tr><td colspan="4" class="p-4 text-center">Vacío</td></tr>';
+                app.toggleLoading(false);
+            },
+            adminCreateUser: async (e) => {
+                e.preventDefault(); const phone = document.getElementById('admin-new-phone').value.trim();
+                app.toggleLoading(true); const newPass = Math.floor(1000 + Math.random() * 9000).toString();
+                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "registerUser", data: { phone, password: newPass } }) }); } catch(e) {}
+                const msg = `🔐 Bienvenid@ a Logística Pro\n📱 Usuario: ${phone}\n🔑 Clave: *${newPass}*\nIngresa: ${window.location.href}`;
+                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                document.getElementById('admin-new-phone').value = ""; app.adminLoadUsers();
+            },
+            adminResend: async (uid, phone) => {
+                if(!confirm(`¿Nueva clave para ${phone}?`)) return; app.toggleLoading(true);
+                const newPass = Math.floor(1000 + Math.random() * 9000).toString();
+                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: uid, newPassword: newPass }) }); } catch(e){}
+                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(`🔐 Recuperación\n📱 ${phone}\n🔑 Nueva: *${newPass}*`)}`, '_blank');
+                app.toggleLoading(false);
+            },
+
+            // Merchant
+            saveConfig: async () => {
+                app.toggleLoading(true);
+                state.config.merchantName = document.getElementById('inp-store-name').value; state.config.whatsapp = document.getElementById('inp-whatsapp').value; state.config.updateTime = document.getElementById('inp-time').value;
+                SafeStorage.setItem(`config_${state.user.uid}`, JSON.stringify(state.config));
+                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveConfig", merchantId: state.user.uid, data: state.config }) }); } catch(e){}
+                setTimeout(() => app.toggleLoading(false), 500);
+            },
+            loadData: async () => {
+                app.toggleLoading(true); state.config = { ...initialState };
+                try { const res = await fetch(`${state.apiUrl}?action=getConfig&merchantId=${state.merchantId}`); const json = await res.json(); if (json.data) state.config = json.data; } catch(e){}
+                
+                if (state.isClientView) app.renderClient(); else app.renderDashboard();
+                if(!state.isClientView) app.loadOrders();
+                app.toggleLoading(false);
+            },
+            loadOrders: async () => {
+                const list = document.getElementById('orders-list'); list.innerHTML = '...'; let orders = [];
+                try { const res = await fetch(`${state.apiUrl}?action=getOrders&merchantId=${state.merchantId}`); const json = await res.json(); if (json.orders) orders = json.orders; } catch(e){}
+                
+                if (!orders.length) list.innerHTML = '<div class="text-center py-10 text-slate-400">Sin pedidos</div>';
+                else list.innerHTML = orders.map(o => `<div class="bg-white p-3 rounded-lg shadow-sm border border-slate-100 mb-2"><div class="flex justify-between font-bold text-slate-800"><span>${o.clientName}</span><span class="text-xs bg-emerald-100 px-2 py-0.5 rounded text-emerald-800">${o.shippingDate}</span></div><div class="text-xs text-slate-500 mt-1">${o.clientAgency ? `Agencia: ${o.clientAgency}` : `Dirección: ${o.clientAddress}`}</div></div>`).join('');
+            },
+
+            // UI
+            setTab: (t) => { ['config','share','orders'].forEach(x => { document.getElementById(`tab-${x}`).classList.add('hidden'); document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition"; }); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100"; if(t==='share') app.updateShareLink(); },
             updateShareLink: () => { document.getElementById('share-link').innerText = `${window.location.origin}${window.location.pathname}?merchant=${state.user.uid}`; },
             copyLink: () => { navigator.clipboard.writeText(document.getElementById('share-link').innerText); alert("¡Copiado!"); },
-            openLink: () => { window.open(document.getElementById('share-link').innerText, '_blank'); },
             shareOnWhatsapp: () => { window.open(`https://wa.me/?text=${encodeURIComponent("Haz tu pedido aquí: " + document.getElementById('share-link').innerText)}`, '_blank'); },
+            openLink: () => { window.open(document.getElementById('share-link').innerText, '_blank'); },
             toggleLoading: (show) => { const el = document.getElementById('loading-overlay'); show ? (el.classList.remove('hidden'), setTimeout(()=>el.classList.remove('opacity-0'),10)) : (el.classList.add('opacity-0'), setTimeout(()=>el.classList.add('hidden'),300)); },
-            
             toggleConfigItem: (k, v) => { if (state.config[k].includes(v)) state.config[k] = state.config[k].filter(i => i !== v); else state.config[k].push(v); app.renderDashboard(); },
+            
             renderDashboard: () => {
                 document.getElementById('inp-store-name').value = state.config.merchantName || ''; document.getElementById('inp-whatsapp').value = state.config.whatsapp || ''; document.getElementById('inp-time').value = state.config.updateTime || '';
                 document.getElementById('container-couriers').innerHTML = ALL_COURIERS.map(c => `<div onclick="app.toggleConfigItem('couriers','${c}')" class="cursor-pointer border rounded p-2 text-xs font-bold flex items-center gap-2 select-none ${state.config.couriers.includes(c)?'bg-blue-50 border-blue-500 text-blue-700':'bg-white hover:bg-slate-50 text-slate-600'}"><div class="w-3 h-3 border rounded flex items-center justify-center ${state.config.couriers.includes(c)?'bg-blue-600 border-blue-600':''}">${state.config.couriers.includes(c)?'<i data-lucide="check" class="w-2 h-2 text-white"></i>':''}</div>${c}</div>`).join('');
                 document.getElementById('container-days').innerHTML = ALL_DAYS.map(d => `<button onclick="app.toggleConfigItem('shippingDays','${d}')" class="px-3 py-1 rounded text-xs font-bold border ${state.config.shippingDays.includes(d)?'bg-emerald-500 text-white border-emerald-500':'bg-white text-slate-500 hover:bg-slate-50'}">${d}</button>`).join('');
                 lucide.createIcons();
             },
+            
             renderClient: () => {
                 document.getElementById('client-title').innerText = state.config.merchantName || "Tienda"; document.getElementById('client-time').innerText = state.config.updateTime || "--:--";
-                document.getElementById('client-couriers-list').innerHTML = (state.config.couriers||[]).map(c => `<label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer bg-white has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500"><span class="text-sm font-bold text-slate-700">${c}</span><input type="radio" name="courier" value="${c}" class="accent-emerald-600 w-4 h-4"></label>`).join('');
-                document.getElementById('client-days-list').innerHTML = (state.config.shippingDays||[]).map(d => `<div onclick="document.querySelectorAll('.day-btn').forEach(e=>{e.className='day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer'}); this.className='day-btn px-4 py-2 rounded-lg bg-slate-800 text-white text-xs font-bold cursor-pointer shadow-lg'" class="day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer transition">${d}</div>`).join('');
-            },
-
-            setGlobalApi: () => {
-                const url = document.getElementById('global-api-url').value.trim();
-                SafeStorage.setItem('gas_api_url', url);
-                state.apiUrl = url;
-                document.getElementById('modal-api').classList.add('hidden');
-                app.updateConnectionStatus();
-            },
-            updateConnectionStatus: () => {
-                const el = document.getElementById('connection-status');
-                if(state.apiUrl) el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Conectado a Google`;
-                else el.innerHTML = `<span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local`;
+                const cl = state.config.couriers || [];
+                document.getElementById('client-couriers-list').innerHTML = cl.length ? cl.map(c => `
+                    <div id="courier-${c.replace(/\s/g,'')}" onclick="app.selectCourier('${c}')" class="courier-card cursor-pointer border rounded-xl p-4 bg-white hover:bg-slate-50 transition relative overflow-hidden group">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors"><i data-lucide="truck" class="w-4 h-4"></i></div><span class="font-bold text-sm text-slate-700">${c}</span></div>
+                        <div class="check-icon hidden absolute top-0 right-0 bg-emerald-500 text-white p-1 rounded-bl-lg"><i data-lucide="check" class="w-3 h-3"></i></div>
+                    </div>`).join('') : '<p class="text-sm italic text-slate-400">Sin couriers</p>';
+                document.getElementById('client-days-list').innerHTML = (state.config.shippingDays||[]).map(d => `<div id="day-${d}" onclick="app.selectDay('${d}')" class="day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer transition hover:border-slate-400">${d}</div>`).join('');
+                app.loadExternalLists(); // Load heavy lists
+                lucide.createIcons();
             },
 
             init: () => {
-                state.apiUrl = SafeStorage.getItem('gas_api_url') || DEFAULT_API_URL;
-                if(state.apiUrl) document.getElementById('global-api-url').value = state.apiUrl;
+                state.apiUrl = DEFAULT_API_URL;
                 app.updateConnectionStatus();
 
                 const params = new URLSearchParams(window.location.search);
@@ -516,26 +578,22 @@
                     document.getElementById('view-client').classList.remove('hidden');
                     document.getElementById('debug-panel').classList.remove('hidden');
                     document.getElementById('btn-toggle-label').innerText = "Ir a Login";
-                    document.getElementById('btn-toggle-view').onclick = () => { try { const url = new URL(window.location); url.searchParams.delete('merchant'); window.history.pushState({}, '', url); } catch(e){} app.init(); };
+                    document.getElementById('btn-toggle-view').onclick = () => { try{ history.pushState({},'',location.pathname); }catch(e){} app.init(); };
                     app.loadData();
                 } else {
                     const storedUser = SafeStorage.getItem('app_current_user');
                     if (storedUser) { 
                         state.user = JSON.parse(storedUser); 
-                        
                         if(state.user.isAdmin) {
-                            // ADMIN VIEW
                             document.getElementById('view-admin').classList.remove('hidden');
                             app.adminLoadUsers();
-                            app.toggleLoading(false); // FIXED SPINNER
                         } else {
-                            // MERCHANT VIEW
                             state.merchantId = state.user.uid;
                             document.getElementById('view-dashboard').classList.remove('hidden');
                             document.getElementById('user-display').innerText = state.user.phone; 
                             document.getElementById('debug-panel').classList.remove('hidden');
                             document.getElementById('btn-toggle-view').onclick = () => { 
-                                app.saveConfig().then(() => { try { const url = new URL(window.location); url.searchParams.set('merchant', state.user.uid); window.history.pushState({}, '', url); } catch(e){} state.isClientView = true; state.merchantId = state.user.uid; document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-client').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText = "Volver al Panel"; document.getElementById('btn-toggle-view').onclick = () => app.init(); app.loadData(); });
+                                app.saveConfig().then(() => { try{ const u = new URL(location); u.searchParams.set('merchant',state.user.uid); history.pushState({},'',u); }catch(e){} state.isClientView=true; state.merchantId=state.user.uid; document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-client').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText="Volver Panel"; document.getElementById('btn-toggle-view').onclick=()=>app.init(); app.loadData(); });
                             };
                             app.setTab('config'); app.loadData();
                         }
