@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logística MVP</title>
+    <title>Logística B2B</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -28,10 +28,10 @@
     <div id="modal-api" class="fixed inset-0 z-[9990] bg-black/50 flex items-center justify-center p-4 hidden backdrop-blur-sm fade-in">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md slide-up">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Configurar Servidor</h3>
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Servidor</h3>
                 <button onclick="document.getElementById('modal-api').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <p class="text-sm text-slate-500 mb-4">URL del Google Apps Script:</p>
+            <p class="text-sm text-slate-500 mb-4">URL Google Apps Script:</p>
             <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/...">
             <button onclick="app.setGlobalApi()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition">Guardar</button>
         </div>
@@ -44,60 +44,98 @@
         </button>
     </div>
 
-    <!-- VISTA AUTH (SOLO LOGIN) -->
+    <!-- VISTA AUTH -->
     <div id="view-auth" class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-emerald-50 hidden">
         <button onclick="document.getElementById('modal-api').classList.remove('hidden')" class="absolute top-6 left-6 p-3 bg-white rounded-full shadow-md text-slate-400 hover:text-emerald-600 transition" title="Configurar Servidor">
             <i data-lucide="settings" class="w-6 h-6"></i>
         </button>
 
         <div class="bg-white w-full max-w-md rounded-3xl shadow-xl overflow-hidden border border-slate-100 slide-up">
-            <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="box" class="w-32 h-32 text-white"></i></div>
-                <div class="relative z-10">
-                    <h1 class="text-2xl font-bold text-white">Acceso Emprendedor</h1>
-                    <div id="connection-status" class="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[10px] font-medium text-white/80 mt-2 backdrop-blur-sm">
-                        <span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local
-                    </div>
+            <div class="bg-slate-900 p-8 text-center">
+                <h1 class="text-2xl font-bold text-white">Logística Pro</h1>
+                <div id="connection-status" class="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[10px] font-medium text-white/80 mt-2 backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local
                 </div>
             </div>
 
             <div class="p-8">
-                <form id="form-auth" onsubmit="app.handleLogin(event)" class="space-y-5">
+                <form onsubmit="app.handleLogin(event)" class="space-y-5">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-1">WhatsApp</label>
-                        <div class="relative">
-                            <i data-lucide="phone" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
-                            <input id="auth-phone" type="tel" maxlength="9" required placeholder="Ingresa tu número" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                        </div>
+                        <input id="auth-phone" type="tel" required placeholder="Ingresa tu número" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono">
                     </div>
-
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-1">Contraseña</label>
-                        <div class="relative">
-                            <i data-lucide="lock" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
-                            <input id="auth-pass" type="password" required placeholder="Tu clave secreta" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                        </div>
+                        <input id="auth-pass" type="password" required placeholder="Tu clave asignada" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-emerald-500 transition">
                     </div>
-
-                    <button type="submit" id="btn-auth-submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center gap-2 mt-4">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition active:scale-95 flex justify-center items-center gap-2">
                         Iniciar Sesión
                     </button>
                 </form>
-                
                 <p id="auth-error" class="text-red-500 text-xs text-center mt-4 font-bold hidden"></p>
-                <div class="mt-6 text-center text-xs text-slate-400">
-                    ¿No tienes cuenta? Contacta al administrador.
+                <div class="mt-6 text-center text-xs text-slate-400 border-t pt-4">
+                    ¿No tienes acceso? Solicita tu cuenta al administrador.
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- VISTA DASHBOARD -->
+    <!-- VISTA ADMIN -->
+    <div id="view-admin" class="flex-1 flex flex-col h-full hidden bg-slate-100">
+        <header class="bg-slate-900 text-white p-4 flex justify-between items-center shadow-md z-20">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-500 p-2 rounded-lg"><i data-lucide="shield" class="w-5 h-5"></i></div>
+                <h1 class="font-bold text-lg">Panel Administrador</h1>
+            </div>
+            <button onclick="app.logout()" class="text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded transition">Salir</button>
+        </header>
+        
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-5xl mx-auto w-full space-y-6">
+            <!-- Crear Usuario -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Alta de Emprendedor</h2>
+                <form onsubmit="app.adminCreateUser(event)" class="flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">WhatsApp del Cliente</label>
+                        <input id="admin-new-phone" type="tel" required placeholder="Ej: 999888777" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full md:w-auto bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-100">
+                        <i data-lucide="zap" class="w-4 h-4"></i> Generar & Enviar
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lista Usuarios -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-800">Usuarios Registrados</h2>
+                    <button onclick="app.adminLoadUsers()" class="p-2 hover:bg-slate-50 rounded-full text-slate-400"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-3">WhatsApp</th>
+                                <th class="px-6 py-3">Contraseña</th>
+                                <th class="px-6 py-3">Fecha Alta</th>
+                                <th class="px-6 py-3 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-list" class="divide-y divide-slate-100">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VISTA DASHBOARD (EMPRENDEDOR) -->
     <div id="view-dashboard" class="flex-1 flex flex-col md:flex-row h-full hidden">
         <aside class="w-full md:w-72 bg-white border-b md:border-r border-slate-200 flex flex-col shadow-sm z-20">
             <div class="p-6 border-b border-slate-100 flex items-center gap-3">
                 <div class="bg-emerald-100 p-2 rounded-xl text-emerald-600"><i data-lucide="package" class="w-6 h-6"></i></div>
-                <div><h1 class="font-bold text-lg text-slate-800">Mi Panel</h1><p class="text-xs text-slate-400">Administración</p></div>
+                <div><h1 class="font-bold text-lg text-slate-800">Mi Panel</h1><p class="text-xs text-slate-400">Emprendedor</p></div>
             </div>
             <nav class="flex md:flex-col p-2 gap-1 overflow-x-auto">
                 <button onclick="app.setTab('config')" id="nav-config" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center bg-emerald-50 text-emerald-700"><i data-lucide="settings" class="w-4 h-4"></i> Configurar</button>
@@ -111,56 +149,38 @@
         </aside>
         
         <main class="flex-1 bg-slate-50/50 p-4 md:p-8 overflow-y-auto relative">
+            <!-- CONTENIDO DASHBOARD (Igual que antes) -->
             <div id="tab-config" class="tab-content max-w-2xl mx-auto space-y-6 slide-up">
-                
-                <!-- Datos Tienda -->
+                <div class="flex justify-between items-center"><h2 class="text-xl font-bold text-slate-800">Configuración</h2><button onclick="app.saveConfig()" class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition flex gap-2"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button></div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                    <h3 class="font-bold text-slate-800 text-lg mb-4">Datos de la Tienda</h3>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre Comercial</label><input id="inp-store-name" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp para Pedidos</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    <h3 class="font-bold text-slate-800">Datos Públicos</h3>
+                    <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre Tienda</label><input id="inp-store-name" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp Pedidos</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                 </div>
-
-                <!-- Configuración Logística -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                    <h3 class="font-bold text-slate-800 text-lg mb-4">Logística</h3>
-                    <label class="text-xs font-bold text-slate-400 uppercase">Couriers Disponibles</label><div id="container-couriers" class="grid grid-cols-2 gap-2"></div>
-                    <label class="text-xs font-bold text-slate-400 uppercase block mt-4">Días de Envío</label><div id="container-days" class="flex flex-wrap gap-2"></div>
+                    <h3 class="font-bold text-slate-800">Logística</h3>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Couriers</label><div id="container-couriers" class="grid grid-cols-2 gap-2"></div>
+                    <label class="text-xs font-bold text-slate-400 uppercase block mt-4">Días Envío</label><div id="container-days" class="flex flex-wrap gap-2"></div>
                     <div class="flex items-center gap-2 mt-2"><span class="text-sm font-bold text-slate-600">Hora Corte:</span><input type="time" id="inp-time" class="border rounded px-2 py-1 text-sm"></div>
                 </div>
-
-                <!-- Cambio de Contraseña -->
+                <!-- CAMBIO DE CONTRASEÑA -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5 text-indigo-500"></i> Seguridad</h3>
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-indigo-500"></i> Seguridad</h3>
                     <div class="flex gap-2 items-end">
-                        <div class="flex-1">
-                            <label class="text-xs font-bold text-slate-400 uppercase">Nueva Contraseña</label>
-                            <input id="inp-new-pass" type="password" placeholder="Escribe la nueva clave" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        </div>
+                        <div class="flex-1"><label class="text-xs font-bold text-slate-400 uppercase">Nueva Contraseña</label><input id="inp-new-pass" type="password" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                         <button onclick="app.changePassword()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition h-[42px]">Actualizar</button>
                     </div>
                 </div>
-
-                <button onclick="app.saveConfig()" class="w-full bg-emerald-600 text-white px-5 py-3 rounded-xl text-lg font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-100"><i data-lucide="save" class="w-5 h-5"></i> Guardar Configuración</button>
-                <div class="h-10"></div>
             </div>
             
             <div id="tab-share" class="tab-content hidden h-full flex flex-col items-center justify-center p-4">
-                <div class="bg-white rounded-3xl shadow-xl border border-slate-100 max-w-md w-full slide-up relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-indigo-500"></div>
-                    <div class="p-8 text-center">
-                        <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-600 ring-4 ring-indigo-50/50">
-                            <i data-lucide="share-2" class="w-10 h-10"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold text-slate-800 mb-2">¡Tu Tienda está Lista!</h2>
-                        <p class="text-slate-500 text-sm mb-8 leading-relaxed">Comparte este enlace con tus clientes.</p>
-                        <div class="bg-slate-50 p-2 rounded-xl border border-slate-200 mb-6 flex items-center shadow-inner group transition-colors focus-within:border-indigo-300 focus-within:bg-white">
-                            <div class="flex-1 px-3 py-2 overflow-hidden text-left"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Enlace Público</p><div id="share-link" class="text-sm text-indigo-600 font-mono truncate select-all font-bold">...</div></div>
-                            <button onclick="app.copyLink()" class="p-2.5 bg-white hover:bg-slate-50 text-slate-500 rounded-lg border border-slate-200 shadow-sm transition active:scale-95" title="Copiar"><i data-lucide="copy" class="w-5 h-5"></i></button>
-                        </div>
-                        <div class="space-y-3">
-                            <button onclick="app.shareOnWhatsapp()" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-lg shadow-green-100"><i data-lucide="message-circle" class="w-5 h-5"></i> Enviar por WhatsApp</button>
-                            <button onclick="app.openLink()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir en otra pestaña</button>
-                        </div>
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full slide-up">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600"><i data-lucide="share-2" class="w-8 h-8"></i></div>
+                    <h2 class="text-xl font-bold mb-2">Enlace Público</h2>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 break-all"><code id="share-link" class="text-xs text-indigo-600 font-bold select-all">...</code></div>
+                    <div class="space-y-2">
+                        <button onclick="app.copyLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Copiar Link</button>
+                        <button onclick="app.shareOnWhatsapp()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Enviar por WhatsApp</button>
                     </div>
                 </div>
             </div>
@@ -190,8 +210,12 @@
     </div>
 
     <script>
-        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbz-cn5ECrLbFjQ7Qjxhunb_Q37eARoyg1pPLFYl6rM9s8sgvAounIZm6gesG0xOAtoJCw/exec";
+        // CONFIG
+        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbx2rHIIp75oWLuFrCBvaWB4P5bJXa9PToJq1ypO-unv1ZEouanZV2rXGEWnjNe0ieBQqQ/exec";
+        const ADMIN_PHONE = "999000999";
+        const ADMIN_PASS  = "admin123";
 
+        // STORAGE
         const SafeStorage = {
             memory: {},
             setItem: function(key, value) { try { localStorage.setItem(key, value); } catch(e) { this.memory[key] = value; } },
@@ -201,36 +225,26 @@
 
         const ALL_COURIERS = ["Olva", "Shalom", "Rappi", "PedidosYa", "DHL", "FedEx", "Motorizado", "Tienda"];
         const ALL_DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-        
         const initialState = { merchantName: "", whatsapp: "", couriers: [], shippingDays: [], updateTime: "18:00" };
         const state = { user: null, merchantId: null, apiUrl: "", isClientView: false, config: { ...initialState } };
 
         window.app = {
-            setGlobalApi: () => {
-                const url = document.getElementById('global-api-url').value.trim();
-                SafeStorage.setItem('gas_api_url', url);
-                state.apiUrl = url;
-                document.getElementById('modal-api').classList.add('hidden');
-                app.updateConnectionStatus();
-            },
-
-            updateConnectionStatus: () => {
-                const el = document.getElementById('connection-status');
-                if(state.apiUrl) el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Conectado a Google`;
-                else el.innerHTML = `<span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local`;
-            },
-
-            // --- AUTH: SOLO LOGIN ---
+            // --- AUTH ---
             handleLogin: async (e) => {
                 e.preventDefault();
                 const phone = document.getElementById('auth-phone').value.trim();
                 const pass = document.getElementById('auth-pass').value.trim();
                 const errorEl = document.getElementById('auth-error');
                 
-                if (phone.length !== 9) { errorEl.innerText = "Celular de 9 dígitos"; errorEl.classList.remove('hidden'); return; }
                 app.toggleLoading(true);
 
-                // Intento Remoto
+                // ADMIN CHECK
+                if (phone === ADMIN_PHONE && pass === ADMIN_PASS) {
+                    app.loginSuccess({ uid: 'admin_master', phone: 'Administrador', isAdmin: true });
+                    return;
+                }
+
+                // REMOTE LOGIN
                 if (state.apiUrl) {
                     try {
                         const res = await fetch(state.apiUrl, {
@@ -246,29 +260,21 @@
                             app.toggleLoading(false);
                             return;
                         }
-                    } catch (err) { console.error("Fallo conexión, intentando local..."); }
+                    } catch (err) { console.error("Error remoto", err); }
                 }
 
-                // Local Fallback (Simulación admin)
-                // Para probar localmente, asumimos que si el número es "999888777" y clave "1234" entra (o si existe en storage local simulado)
-                // O mejor, creamos un usuario local "admin" por defecto si no existe ninguno
-                let usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                // LOCAL FALLBACK
+                const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                if(usersDB.length === 0) usersDB.push({uid: 'u_local', phone: phone, password: pass});
                 
-                // Si está vacío, creamos un usuario de prueba automáticamente para que no se queden trabados en local
-                if(usersDB.length === 0) {
-                    const demoUser = { uid: 'u_demo', phone: phone, password: pass }; // Auto-create on first try locally for convenience
-                    usersDB.push(demoUser);
-                    SafeStorage.setItem('app_users_db', JSON.stringify(usersDB));
-                }
-
                 const user = usersDB.find(u => u.phone === phone && u.password === pass);
                 if (user) app.loginSuccess(user);
-                else { errorEl.innerText = "Usuario no encontrado o clave incorrecta (Local)"; errorEl.classList.remove('hidden'); app.toggleLoading(false); }
+                else { errorEl.innerText = "Usuario no encontrado (Local)"; errorEl.classList.remove('hidden'); app.toggleLoading(false); }
             },
 
             loginSuccess: (user) => {
-                state.user = { uid: user.uid, email: user.phone };
-                SafeStorage.setItem('app_current_user', JSON.stringify(state.user));
+                state.user = user;
+                SafeStorage.setItem('app_current_user', JSON.stringify(user));
                 app.init(); 
             },
 
@@ -279,37 +285,102 @@
                 app.init(); 
             },
 
-            changePassword: async () => {
-                const newPass = document.getElementById('inp-new-pass').value.trim();
-                if(!newPass) return alert("Escribe una contraseña");
-                
-                app.toggleLoading(true);
-                // Update Remoto
+            // --- ADMIN LOGIC ---
+            adminLoadUsers: async () => {
+                const list = document.getElementById('admin-users-list');
+                list.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando...</td></tr>';
+                let users = [];
+
                 if(state.apiUrl) {
                     try {
-                        await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: state.user.uid, newPassword: newPass }) });
+                        const res = await fetch(`${state.apiUrl}?action=getUsers`);
+                        const json = await res.json();
+                        if(json.users) users = json.users;
                     } catch(e) {}
+                } else {
+                    users = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
                 }
-                // Update Local (DB simulada)
-                let usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                const uIndex = usersDB.findIndex(u => u.uid === state.user.uid);
-                if(uIndex >= 0) {
-                    usersDB[uIndex].password = newPass;
-                    SafeStorage.setItem('app_users_db', JSON.stringify(usersDB));
+
+                if(users.length === 0) {
+                    list.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay usuarios</td></tr>';
+                } else {
+                    list.innerHTML = users.map(u => `
+                        <tr class="bg-white border-b hover:bg-slate-50">
+                            <td class="px-6 py-4 font-bold text-slate-700">${u.phone}</td>
+                            <td class="px-6 py-4 font-mono text-xs bg-slate-50 text-slate-500">${u.password}</td>
+                            <td class="px-6 py-4 text-xs text-slate-400">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="app.adminResend('${u.phone}','${u.password}')" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs">Re-enviar</button>
+                            </td>
+                        </tr>
+                    `).join('');
                 }
+            },
+
+            adminCreateUser: async (e) => {
+                e.preventDefault();
+                const phone = document.getElementById('admin-new-phone').value.trim();
+                if(phone.length !== 9) return alert("Número inválido");
                 
-                document.getElementById('inp-new-pass').value = "";
-                alert("Contraseña actualizada correctamente");
+                app.toggleLoading(true);
+                const newPass = Math.floor(1000 + Math.random() * 9000).toString();
+
+                if(state.apiUrl) {
+                    try {
+                        const res = await fetch(state.apiUrl, {
+                            method: "POST", body: JSON.stringify({ action: "registerUser", data: { phone, password: newPass } })
+                        });
+                        const json = await res.json();
+                        if(json.status !== 'success') { alert(json.message); app.toggleLoading(false); return; }
+                    } catch(e) { alert("Error al conectar"); app.toggleLoading(false); return; }
+                } else {
+                    // Local
+                    let users = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                    if(users.find(u => u.phone === phone)) { alert("Usuario ya existe"); app.toggleLoading(false); return; }
+                    users.push({ uid: 'u_'+Date.now(), phone, password: newPass, createdAt: new Date() });
+                    SafeStorage.setItem('app_users_db', JSON.stringify(users));
+                }
+
+                // Send WA
+                const msg = `Hola! Tu cuenta en Logística Pro ha sido creada.\n\n📱 Usuario: ${phone}\n🔑 Clave: *${newPass}*\n\nIngresa aquí: ${window.location.href}`;
+                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                
+                document.getElementById('admin-new-phone').value = "";
+                app.adminLoadUsers();
                 app.toggleLoading(false);
             },
 
-            // --- CORE ---
+            adminResend: (phone, pass) => {
+                const msg = `Recordatorio Logística Pro:\n\n📱 Usuario: ${phone}\n🔑 Clave: *${pass}*`;
+                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            },
+
+            // --- MERCHANT CORE ---
+            changePassword: async () => {
+                const newPass = document.getElementById('inp-new-pass').value.trim();
+                if(!newPass) return alert("Ingresa una clave");
+                app.toggleLoading(true);
+                
+                if(state.apiUrl) {
+                    try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: state.user.uid, newPassword: newPass }) }); } catch(e){}
+                } else {
+                    let db = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                    let me = db.find(u => u.uid === state.user.uid);
+                    if(me) { me.password = newPass; SafeStorage.setItem('app_users_db', JSON.stringify(db)); }
+                }
+                document.getElementById('inp-new-pass').value = "";
+                alert("Contraseña actualizada");
+                app.toggleLoading(false);
+            },
+
             saveConfig: async () => {
                 app.toggleLoading(true);
                 state.config.merchantName = document.getElementById('inp-store-name').value;
                 state.config.whatsapp = document.getElementById('inp-whatsapp').value;
                 state.config.updateTime = document.getElementById('inp-time').value;
+                
                 SafeStorage.setItem(`config_${state.user.uid}`, JSON.stringify(state.config));
+                
                 if (state.apiUrl) {
                     try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveConfig", merchantId: state.user.uid, data: state.config }) }); } catch(e){}
                 }
@@ -331,9 +402,11 @@
                     const local = SafeStorage.getItem(`config_${state.merchantId}`);
                     if (local) state.config = JSON.parse(local);
                 }
+                
                 if (state.isClientView) app.renderClient();
                 else app.renderDashboard();
-                app.loadOrders();
+                
+                if(!state.isClientView) app.loadOrders();
                 app.toggleLoading(false);
             },
 
@@ -380,7 +453,18 @@
                 app.toggleLoading(false);
             },
 
-            // --- UI ---
+            // --- UI HELPERS ---
+            setTab: (t) => {
+                ['config','share','orders'].forEach(x => { document.getElementById(`tab-${x}`).classList.add('hidden'); document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition"; });
+                document.getElementById(`tab-${t}`).classList.remove('hidden'); document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100";
+                if(t==='share') app.updateShareLink();
+            },
+            updateShareLink: () => { document.getElementById('share-link').innerText = `${window.location.origin}${window.location.pathname}?merchant=${state.user.uid}`; },
+            copyLink: () => { navigator.clipboard.writeText(document.getElementById('share-link').innerText); alert("¡Copiado!"); },
+            openLink: () => { window.open(document.getElementById('share-link').innerText, '_blank'); },
+            shareOnWhatsapp: () => { window.open(`https://wa.me/?text=${encodeURIComponent("Haz tu pedido aquí: " + document.getElementById('share-link').innerText)}`, '_blank'); },
+            toggleLoading: (show) => { const el = document.getElementById('loading-overlay'); show ? (el.classList.remove('hidden'), setTimeout(()=>el.classList.remove('opacity-0'),10)) : (el.classList.add('opacity-0'), setTimeout(()=>el.classList.add('hidden'),300)); },
+            
             toggleConfigItem: (k, v) => { if (state.config[k].includes(v)) state.config[k] = state.config[k].filter(i => i !== v); else state.config[k].push(v); app.renderDashboard(); },
             renderDashboard: () => {
                 document.getElementById('inp-store-name').value = state.config.merchantName || ''; document.getElementById('inp-whatsapp').value = state.config.whatsapp || ''; document.getElementById('inp-time').value = state.config.updateTime || '';
@@ -393,17 +477,19 @@
                 document.getElementById('client-couriers-list').innerHTML = (state.config.couriers||[]).map(c => `<label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer bg-white has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500"><span class="text-sm font-bold text-slate-700">${c}</span><input type="radio" name="courier" value="${c}" class="accent-emerald-600 w-4 h-4"></label>`).join('');
                 document.getElementById('client-days-list').innerHTML = (state.config.shippingDays||[]).map(d => `<div onclick="document.querySelectorAll('.day-btn').forEach(e=>{e.className='day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer'}); this.className='day-btn px-4 py-2 rounded-lg bg-slate-800 text-white text-xs font-bold cursor-pointer shadow-lg'" class="day-btn px-4 py-2 rounded-lg bg-white border text-slate-600 text-xs font-bold cursor-pointer transition">${d}</div>`).join('');
             },
-            
-            setTab: (t) => {
-                ['config','share','orders'].forEach(x => { document.getElementById(`tab-${x}`).classList.add('hidden'); document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition"; });
-                document.getElementById(`tab-${t}`).classList.remove('hidden'); document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100";
-                if(t==='share') app.updateShareLink();
+
+            setGlobalApi: () => {
+                const url = document.getElementById('global-api-url').value.trim();
+                SafeStorage.setItem('gas_api_url', url);
+                state.apiUrl = url;
+                document.getElementById('modal-api').classList.add('hidden');
+                app.updateConnectionStatus();
             },
-            updateShareLink: () => { document.getElementById('share-link').innerText = `${window.location.origin}${window.location.pathname}?merchant=${state.user.uid}`; },
-            copyLink: () => { navigator.clipboard.writeText(document.getElementById('share-link').innerText); alert("¡Copiado!"); },
-            openLink: () => { window.open(document.getElementById('share-link').innerText, '_blank'); },
-            shareOnWhatsapp: () => { window.open(`https://wa.me/?text=${encodeURIComponent("Haz tu pedido aquí: " + document.getElementById('share-link').innerText)}`, '_blank'); },
-            toggleLoading: (show) => { const el = document.getElementById('loading-overlay'); show ? (el.classList.remove('hidden'), setTimeout(()=>el.classList.remove('opacity-0'),10)) : (el.classList.add('opacity-0'), setTimeout(()=>el.classList.add('hidden'),300)); },
+            updateConnectionStatus: () => {
+                const el = document.getElementById('connection-status');
+                if(state.apiUrl) el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Conectado a Google`;
+                else el.innerHTML = `<span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local`;
+            },
 
             init: () => {
                 state.apiUrl = SafeStorage.getItem('gas_api_url') || DEFAULT_API_URL;
@@ -412,7 +498,7 @@
 
                 const params = new URLSearchParams(window.location.search);
                 const mid = params.get('merchant');
-                document.getElementById('view-client').classList.add('hidden'); document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-auth').classList.add('hidden');
+                document.getElementById('view-client').classList.add('hidden'); document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-admin').classList.add('hidden');
 
                 if (mid) { 
                     state.isClientView = true; state.merchantId = mid;
@@ -424,14 +510,24 @@
                 } else {
                     const storedUser = SafeStorage.getItem('app_current_user');
                     if (storedUser) { 
-                        state.user = JSON.parse(storedUser); state.merchantId = state.user.uid;
-                        document.getElementById('view-dashboard').classList.remove('hidden');
-                        document.getElementById('user-display').innerText = state.user.email; // Phone
-                        document.getElementById('debug-panel').classList.remove('hidden');
-                        document.getElementById('btn-toggle-view').onclick = () => { 
-                            app.saveConfig().then(() => { try { const url = new URL(window.location); url.searchParams.set('merchant', state.user.uid); window.history.pushState({}, '', url); } catch(e){} state.isClientView = true; state.merchantId = state.user.uid; document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-client').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText = "Volver al Panel"; document.getElementById('btn-toggle-view').onclick = () => app.init(); app.loadData(); });
-                        };
-                        app.setTab('config'); app.loadData();
+                        state.user = JSON.parse(storedUser); 
+                        
+                        if(state.user.isAdmin) {
+                            // ADMIN VIEW
+                            document.getElementById('view-admin').classList.remove('hidden');
+                            app.adminLoadUsers();
+                            app.toggleLoading(false); // FIXED SPINNER
+                        } else {
+                            // MERCHANT VIEW
+                            state.merchantId = state.user.uid;
+                            document.getElementById('view-dashboard').classList.remove('hidden');
+                            document.getElementById('user-display').innerText = state.user.phone; 
+                            document.getElementById('debug-panel').classList.remove('hidden');
+                            document.getElementById('btn-toggle-view').onclick = () => { 
+                                app.saveConfig().then(() => { try { const url = new URL(window.location); url.searchParams.set('merchant', state.user.uid); window.history.pushState({}, '', url); } catch(e){} state.isClientView = true; state.merchantId = state.user.uid; document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-client').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText = "Volver al Panel"; document.getElementById('btn-toggle-view').onclick = () => app.init(); app.loadData(); });
+                            };
+                            app.setTab('config'); app.loadData();
+                        }
                     } else { 
                         document.getElementById('view-auth').classList.remove('hidden');
                         document.getElementById('debug-panel').classList.add('hidden');
