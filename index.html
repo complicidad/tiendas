@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logística Conectada</title>
+    <title>Logística MVP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -28,12 +28,12 @@
     <div id="modal-api" class="fixed inset-0 z-[9990] bg-black/50 flex items-center justify-center p-4 hidden backdrop-blur-sm fade-in">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md slide-up">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Conectar Base de Datos</h3>
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Configurar Servidor</h3>
                 <button onclick="document.getElementById('modal-api').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <p class="text-sm text-slate-500 mb-4">Ingresa la URL de tu Google Apps Script para guardar usuarios, configuraciones y pedidos en la nube.</p>
-            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/macros/s/...">
-            <button onclick="app.setGlobalApi()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition">Guardar Conexión</button>
+            <p class="text-sm text-slate-500 mb-4">URL del Google Apps Script:</p>
+            <input id="global-api-url" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="https://script.google.com/...">
+            <button onclick="app.setGlobalApi()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition">Guardar</button>
         </div>
     </div>
 
@@ -44,7 +44,7 @@
         </button>
     </div>
 
-    <!-- VISTA AUTH -->
+    <!-- VISTA AUTH (SOLO LOGIN) -->
     <div id="view-auth" class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-emerald-50 hidden">
         <button onclick="document.getElementById('modal-api').classList.remove('hidden')" class="absolute top-6 left-6 p-3 bg-white rounded-full shadow-md text-slate-400 hover:text-emerald-600 transition" title="Configurar Servidor">
             <i data-lucide="settings" class="w-6 h-6"></i>
@@ -54,7 +54,7 @@
             <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="box" class="w-32 h-32 text-white"></i></div>
                 <div class="relative z-10">
-                    <h1 class="text-2xl font-bold text-white">Logística Pro</h1>
+                    <h1 class="text-2xl font-bold text-white">Acceso Emprendedor</h1>
                     <div id="connection-status" class="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-[10px] font-medium text-white/80 mt-2 backdrop-blur-sm">
                         <span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local
                     </div>
@@ -62,41 +62,32 @@
             </div>
 
             <div class="p-8">
-                <!-- TABS -->
-                <div class="flex border-b border-slate-100 mb-6">
-                    <button onclick="app.toggleAuthMode('login')" id="tab-login" class="flex-1 pb-3 text-sm font-bold text-emerald-600 border-b-2 border-emerald-600 transition">Iniciar Sesión</button>
-                    <button onclick="app.toggleAuthMode('register')" id="tab-register" class="flex-1 pb-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition">Crear Cuenta</button>
-                </div>
-
-                <!-- LOGIN FORM -->
-                <form id="form-auth" onsubmit="app.handleAuth(event)" class="space-y-4">
+                <form id="form-auth" onsubmit="app.handleLogin(event)" class="space-y-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-1">Tu Número de WhatsApp</label>
+                        <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-1">WhatsApp</label>
                         <div class="relative">
                             <i data-lucide="phone" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
-                            <input id="auth-phone" type="tel" maxlength="9" required placeholder="999888777" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono tracking-wide" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <input id="auth-phone" type="tel" maxlength="9" required placeholder="Ingresa tu número" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
-                        <p class="text-[10px] text-slate-400 mt-1 ml-1">Solo 9 dígitos (Perú)</p>
                     </div>
 
-                    <div id="field-password">
+                    <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase ml-1 mb-1">Contraseña</label>
                         <div class="relative">
                             <i data-lucide="lock" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
-                            <input id="auth-pass" type="text" placeholder="Código recibido" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono tracking-widest text-center uppercase">
+                            <input id="auth-pass" type="password" required placeholder="Tu clave secreta" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition">
                         </div>
                     </div>
 
                     <button type="submit" id="btn-auth-submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center gap-2 mt-4">
-                        Ingresar
+                        Iniciar Sesión
                     </button>
                 </form>
                 
-                <div id="auth-msg" class="mt-4 hidden p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 text-center">
-                    <p class="font-bold mb-1">ℹ️ Instrucciones:</p>
-                    Se abrirá tu WhatsApp. Envía el mensaje generado a tu mismo número para guardar tu contraseña.
-                </div>
                 <p id="auth-error" class="text-red-500 text-xs text-center mt-4 font-bold hidden"></p>
+                <div class="mt-6 text-center text-xs text-slate-400">
+                    ¿No tienes cuenta? Contacta al administrador.
+                </div>
             </div>
         </div>
     </div>
@@ -121,16 +112,36 @@
         
         <main class="flex-1 bg-slate-50/50 p-4 md:p-8 overflow-y-auto relative">
             <div id="tab-config" class="tab-content max-w-2xl mx-auto space-y-6 slide-up">
-                <div class="flex justify-between items-center"><h2 class="text-xl font-bold text-slate-800">Configuración</h2><button onclick="app.saveConfig()" class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition flex gap-2"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button></div>
+                
+                <!-- Datos Tienda -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                    <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre Tienda</label><input id="inp-store-name" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp Pedidos</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-4">Datos de la Tienda</h3>
+                    <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre Comercial</label><input id="inp-store-name" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp para Pedidos</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                 </div>
+
+                <!-- Configuración Logística -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                    <label class="text-xs font-bold text-slate-400 uppercase">Couriers</label><div id="container-couriers" class="grid grid-cols-2 gap-2"></div>
-                    <label class="text-xs font-bold text-slate-400 uppercase block mt-4">Días Envío</label><div id="container-days" class="flex flex-wrap gap-2"></div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-4">Logística</h3>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Couriers Disponibles</label><div id="container-couriers" class="grid grid-cols-2 gap-2"></div>
+                    <label class="text-xs font-bold text-slate-400 uppercase block mt-4">Días de Envío</label><div id="container-days" class="flex flex-wrap gap-2"></div>
                     <div class="flex items-center gap-2 mt-2"><span class="text-sm font-bold text-slate-600">Hora Corte:</span><input type="time" id="inp-time" class="border rounded px-2 py-1 text-sm"></div>
                 </div>
+
+                <!-- Cambio de Contraseña -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5 text-indigo-500"></i> Seguridad</h3>
+                    <div class="flex gap-2 items-end">
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-slate-400 uppercase">Nueva Contraseña</label>
+                            <input id="inp-new-pass" type="password" placeholder="Escribe la nueva clave" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <button onclick="app.changePassword()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition h-[42px]">Actualizar</button>
+                    </div>
+                </div>
+
+                <button onclick="app.saveConfig()" class="w-full bg-emerald-600 text-white px-5 py-3 rounded-xl text-lg font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-100"><i data-lucide="save" class="w-5 h-5"></i> Guardar Configuración</button>
+                <div class="h-10"></div>
             </div>
             
             <div id="tab-share" class="tab-content hidden h-full flex flex-col items-center justify-center p-4">
@@ -141,7 +152,7 @@
                             <i data-lucide="share-2" class="w-10 h-10"></i>
                         </div>
                         <h2 class="text-2xl font-bold text-slate-800 mb-2">¡Tu Tienda está Lista!</h2>
-                        <p class="text-slate-500 text-sm mb-8 leading-relaxed">Este es tu enlace único. Compártelo con tus clientes.</p>
+                        <p class="text-slate-500 text-sm mb-8 leading-relaxed">Comparte este enlace con tus clientes.</p>
                         <div class="bg-slate-50 p-2 rounded-xl border border-slate-200 mb-6 flex items-center shadow-inner group transition-colors focus-within:border-indigo-300 focus-within:bg-white">
                             <div class="flex-1 px-3 py-2 overflow-hidden text-left"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Enlace Público</p><div id="share-link" class="text-sm text-indigo-600 font-mono truncate select-all font-bold">...</div></div>
                             <button onclick="app.copyLink()" class="p-2.5 bg-white hover:bg-slate-50 text-slate-500 rounded-lg border border-slate-200 shadow-sm transition active:scale-95" title="Copiar"><i data-lucide="copy" class="w-5 h-5"></i></button>
@@ -179,7 +190,7 @@
     </div>
 
     <script>
-        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbwlS1DOYUvO0qh95UTFKiW5_Mjj2p7fwp1ifyd0Ko08YCWLqN3UENwqFBW3bCFCdnP2pw/exec";
+        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbz-cn5ECrLbFjQ7Qjxhunb_Q37eARoyg1pPLFYl6rM9s8sgvAounIZm6gesG0xOAtoJCw/exec";
 
         const SafeStorage = {
             memory: {},
@@ -192,116 +203,9 @@
         const ALL_DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
         
         const initialState = { merchantName: "", whatsapp: "", couriers: [], shippingDays: [], updateTime: "18:00" };
-        const state = { user: null, authMode: 'login', merchantId: null, apiUrl: "", isClientView: false, config: { ...initialState } };
+        const state = { user: null, merchantId: null, apiUrl: "", isClientView: false, config: { ...initialState } };
 
         window.app = {
-            // --- AUTH LOGIC ---
-            toggleAuthMode: (mode) => {
-                state.authMode = mode;
-                const passField = document.getElementById('field-password');
-                const authMsg = document.getElementById('auth-msg');
-                const btn = document.getElementById('btn-auth-submit');
-                
-                document.getElementById('auth-error').classList.add('hidden');
-                document.getElementById('auth-pass').value = '';
-
-                document.getElementById('tab-login').className = mode==='login' ? "flex-1 pb-3 text-sm font-bold text-emerald-600 border-b-2 border-emerald-600" : "flex-1 pb-3 text-sm font-bold text-slate-400 hover:text-slate-600";
-                document.getElementById('tab-register').className = mode==='register' ? "flex-1 pb-3 text-sm font-bold text-emerald-600 border-b-2 border-emerald-600" : "flex-1 pb-3 text-sm font-bold text-slate-400 hover:text-slate-600";
-                
-                if (mode === 'register') {
-                    passField.classList.add('hidden');
-                    document.getElementById('auth-pass').removeAttribute('required');
-                    btn.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="key" class="w-4 h-4"></i> Generar & Enviar Pass</span>`;
-                    authMsg.classList.remove('hidden');
-                } else {
-                    passField.classList.remove('hidden');
-                    document.getElementById('auth-pass').setAttribute('required', 'true');
-                    btn.innerText = "Ingresar";
-                    authMsg.classList.add('hidden');
-                }
-                lucide.createIcons();
-            },
-
-            handleAuth: async (e) => {
-                e.preventDefault();
-                const phone = document.getElementById('auth-phone').value.trim();
-                const pass = document.getElementById('auth-pass').value.trim();
-                const errorEl = document.getElementById('auth-error');
-                
-                if (phone.length !== 9) {
-                    errorEl.innerText = "El celular debe tener 9 dígitos";
-                    errorEl.classList.remove('hidden');
-                    return;
-                }
-
-                app.toggleLoading(true);
-
-                if (state.authMode === 'register') {
-                    // --- REGISTRO ---
-                    const newPass = Math.floor(1000 + Math.random() * 9000).toString(); // 4 digits
-                    
-                    // Remoto
-                    if (state.apiUrl) {
-                        try {
-                            const res = await fetch(state.apiUrl, {
-                                method: "POST", body: JSON.stringify({ action: "registerUser", data: { phone, password: newPass } })
-                            });
-                            const json = await res.json();
-                            if (json.status !== 'success') throw new Error(json.message);
-                        } catch (err) {
-                            errorEl.innerText = err.message || "Error al registrar";
-                            errorEl.classList.remove('hidden');
-                            app.toggleLoading(false);
-                            return;
-                        }
-                    } else {
-                        // Local Check
-                        const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                        if (usersDB.find(u => u.phone === phone)) {
-                            errorEl.innerText = "Número ya registrado (Local)"; errorEl.classList.remove('hidden'); app.toggleLoading(false); return;
-                        }
-                        const newUser = { uid: 'u_' + Math.random().toString(36).substr(2), phone, password: newPass };
-                        usersDB.push(newUser);
-                        SafeStorage.setItem('app_users_db', JSON.stringify(usersDB));
-                    }
-
-                    // ABRIR WHATSAPP AL MISMO NÚMERO
-                    const waText = `🔐 Clave generada para Logística Pro: *${newPass}*\n\nGuarda este mensaje.`;
-                    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
-
-                    app.toggleAuthMode('login'); // Switch to login UI
-                    document.getElementById('auth-phone').value = phone; // Keep phone
-                    alert("¡Contraseña generada! Se abrió WhatsApp para que te la envíes a ti mismo.");
-                    app.toggleLoading(false);
-
-                } else {
-                    // --- LOGIN ---
-                    let user = null;
-                    
-                    if (state.apiUrl) {
-                        try {
-                            const res = await fetch(state.apiUrl, {
-                                method: "POST", body: JSON.stringify({ action: "loginUser", data: { phone, password: pass } })
-                            });
-                            const json = await res.json();
-                            if (json.status === 'success') user = json.user;
-                            else throw new Error(json.message);
-                        } catch (err) {
-                            errorEl.innerText = err.message || "Error al conectar"; errorEl.classList.remove('hidden');
-                        }
-                    } else {
-                        const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                        user = usersDB.find(u => u.phone === phone && u.password === pass);
-                        if (!user) { errorEl.innerText = "Datos incorrectos (Local)"; errorEl.classList.remove('hidden'); }
-                    }
-
-                    if (user) {
-                        app.loginSuccess(user);
-                    }
-                    app.toggleLoading(false);
-                }
-            },
-
             setGlobalApi: () => {
                 const url = document.getElementById('global-api-url').value.trim();
                 SafeStorage.setItem('gas_api_url', url);
@@ -316,8 +220,54 @@
                 else el.innerHTML = `<span class="w-2 h-2 rounded-full bg-orange-400"></span> Modo Local`;
             },
 
+            // --- AUTH: SOLO LOGIN ---
+            handleLogin: async (e) => {
+                e.preventDefault();
+                const phone = document.getElementById('auth-phone').value.trim();
+                const pass = document.getElementById('auth-pass').value.trim();
+                const errorEl = document.getElementById('auth-error');
+                
+                if (phone.length !== 9) { errorEl.innerText = "Celular de 9 dígitos"; errorEl.classList.remove('hidden'); return; }
+                app.toggleLoading(true);
+
+                // Intento Remoto
+                if (state.apiUrl) {
+                    try {
+                        const res = await fetch(state.apiUrl, {
+                            method: "POST", body: JSON.stringify({ action: "loginUser", data: { phone, password: pass } })
+                        });
+                        const json = await res.json();
+                        if (json.status === 'success') {
+                            app.loginSuccess(json.user);
+                            return;
+                        } else {
+                            errorEl.innerText = json.message || "Error al ingresar";
+                            errorEl.classList.remove('hidden');
+                            app.toggleLoading(false);
+                            return;
+                        }
+                    } catch (err) { console.error("Fallo conexión, intentando local..."); }
+                }
+
+                // Local Fallback (Simulación admin)
+                // Para probar localmente, asumimos que si el número es "999888777" y clave "1234" entra (o si existe en storage local simulado)
+                // O mejor, creamos un usuario local "admin" por defecto si no existe ninguno
+                let usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                
+                // Si está vacío, creamos un usuario de prueba automáticamente para que no se queden trabados en local
+                if(usersDB.length === 0) {
+                    const demoUser = { uid: 'u_demo', phone: phone, password: pass }; // Auto-create on first try locally for convenience
+                    usersDB.push(demoUser);
+                    SafeStorage.setItem('app_users_db', JSON.stringify(usersDB));
+                }
+
+                const user = usersDB.find(u => u.phone === phone && u.password === pass);
+                if (user) app.loginSuccess(user);
+                else { errorEl.innerText = "Usuario no encontrado o clave incorrecta (Local)"; errorEl.classList.remove('hidden'); app.toggleLoading(false); }
+            },
+
             loginSuccess: (user) => {
-                state.user = { uid: user.uid, email: user.phone }; // Map phone to email prop for compat
+                state.user = { uid: user.uid, email: user.phone };
                 SafeStorage.setItem('app_current_user', JSON.stringify(state.user));
                 app.init(); 
             },
@@ -329,7 +279,31 @@
                 app.init(); 
             },
 
-            // --- CORE FUNCTIONALITY ---
+            changePassword: async () => {
+                const newPass = document.getElementById('inp-new-pass').value.trim();
+                if(!newPass) return alert("Escribe una contraseña");
+                
+                app.toggleLoading(true);
+                // Update Remoto
+                if(state.apiUrl) {
+                    try {
+                        await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: state.user.uid, newPassword: newPass }) });
+                    } catch(e) {}
+                }
+                // Update Local (DB simulada)
+                let usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
+                const uIndex = usersDB.findIndex(u => u.uid === state.user.uid);
+                if(uIndex >= 0) {
+                    usersDB[uIndex].password = newPass;
+                    SafeStorage.setItem('app_users_db', JSON.stringify(usersDB));
+                }
+                
+                document.getElementById('inp-new-pass').value = "";
+                alert("Contraseña actualizada correctamente");
+                app.toggleLoading(false);
+            },
+
+            // --- CORE ---
             saveConfig: async () => {
                 app.toggleLoading(true);
                 state.config.merchantName = document.getElementById('inp-store-name').value;
@@ -344,7 +318,7 @@
 
             loadData: async () => {
                 app.toggleLoading(true);
-                state.config = { ...initialState }; // Reset
+                state.config = { ...initialState };
                 let loaded = false;
                 if (state.apiUrl) {
                     try {
