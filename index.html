@@ -461,8 +461,8 @@
                 const card = el.firstElementChild; 
                 el.classList.add('opacity-0'); 
                 if(card) {
-                    card.classList.remove('scale-100', 'translate-y-0', 'md:translate-y-10'); 
-                    card.classList.add('scale-95', 'translate-y-full');
+                    card.classList.remove('scale-100'); 
+                    card.classList.add('scale-95');
                 }
                 setTimeout(() => el.classList.add('hidden'), 300);
             },
@@ -474,8 +474,8 @@
                 el.classList.remove('hidden');
                 setTimeout(() => { 
                     el.classList.remove('opacity-0'); 
-                    card.classList.remove('translate-y-full'); 
-                    card.classList.add('translate-y-0'); // Mobile reset
+                    card.classList.remove('scale-95'); 
+                    card.classList.add('scale-100'); 
                 }, 10);
             },
 
