@@ -21,12 +21,17 @@
         .modal-exit { opacity: 1; transform: scale(1); }
         .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 0.2s, transform 0.2s; }
 
-        /* Estilos de Impresión */
+        /* Estilos de Impresión - Tarjeta */
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            
+            #print-area { 
+                position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0;
+                background-color: white; display: block !important; z-index: 9999;
+            }
             .no-print { display: none !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
@@ -38,7 +43,7 @@
         <p id="loading-text" class="text-slate-600 font-medium mt-4 animate-pulse">Conectando...</p>
     </div>
 
-    <!-- MODAL CONFIRMACIÓN (Admin & User) -->
+    <!-- MODAL CONFIRMACIÓN -->
     <div id="modal-confirm" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm hidden flex items-center justify-center transition-opacity duration-200 opacity-0">
         <div id="modal-card" class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl transform scale-95 transition-transform duration-200">
             <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4 text-indigo-600">
@@ -66,7 +71,7 @@
         </button>
     </div>
 
-    <!-- ÁREA DE IMPRESIÓN (OCULTA POR DEFECTO) -->
+    <!-- ÁREA DE IMPRESIÓN -->
     <div id="print-area" class="hidden bg-white p-4"></div>
 
     <!-- VISTA AUTH -->
@@ -196,24 +201,51 @@
                     <div class="space-y-2"><button id="btn-copy-link" onclick="app.copyLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Copiar Link</button><button onclick="app.shareOnWhatsapp()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Enviar por WhatsApp</button></div>
                 </div>
             </div>
-            <div id="tab-orders" class="tab-content hidden max-w-4xl mx-auto h-full flex flex-col">
-                <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
-                    <div class="flex-1 w-full">
-                        <h2 class="text-xl font-bold text-slate-800 mb-2">Mis Envíos</h2>
-                        <div class="relative">
-                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
-                            <input id="inp-search-orders" oninput="app.renderOrders()" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Buscar por cliente, celular o distrito...">
-                        </div>
-                    </div>
+            
+            <!-- PANEL DE ENVÍOS CON NUEVAS HERRAMIENTAS -->
+            <div id="tab-orders" class="tab-content hidden max-w-5xl mx-auto h-full flex flex-col">
+                <!-- Header: Título + Herramientas Globales -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-slate-800">Mis Envíos</h2>
                     <div class="flex gap-2 w-full md:w-auto">
                         <button onclick="app.printLabels()" class="flex-1 md:flex-none px-4 py-2 bg-slate-800 text-white rounded-lg text-xs font-bold hover:bg-slate-900 transition flex items-center justify-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Etiquetas</button>
                         <button onclick="app.exportExcel()" class="flex-1 md:flex-none px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-2"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel</button>
                         <button onclick="app.loadOrders()" class="p-2 bg-white border rounded-lg hover:bg-slate-50 text-slate-600"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
                     </div>
                 </div>
-                
-                <div class="flex-1 overflow-hidden flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm">
-                    <div class="overflow-y-auto p-2 space-y-1" id="orders-list">
+
+                <!-- Toolbar de Filtros y Acciones Masivas -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <!-- Filtros -->
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center flex-1">
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                            <input id="inp-search-orders" oninput="app.renderOrders()" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Buscar cliente...">
+                        </div>
+                        <div class="w-full sm:w-auto">
+                            <input type="date" id="date-specific" onchange="app.renderOrders()" class="border rounded-lg px-3 py-2 text-sm w-full text-slate-600 focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+                    
+                    <!-- Acciones en Lote -->
+                    <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 border-t md:border-t-0 md:border-l border-slate-100 pt-3 md:pt-0 md:pl-4">
+                        <button onclick="app.toggleAllSelection()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2"><i data-lucide="check-square" class="w-4 h-4"></i> Todo</button>
+                        
+                        <div class="flex items-center gap-1 bg-slate-50 rounded-lg p-1 border border-slate-200">
+                            <select id="batch-status-select" class="bg-transparent text-xs font-bold text-slate-600 outline-none px-2 py-1 cursor-pointer">
+                                <option value="ENVIADO">ENVIADO</option>
+                                <option value="PENDIENTE">PENDIENTE</option>
+                            </select>
+                            <button onclick="app.updateBatchStatus()" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-bold whitespace-nowrap transition">Aplicar</button>
+                        </div>
+
+                        <button onclick="app.deleteSelected()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
+                <!-- Lista de Pedidos -->
+                <div class="flex-1 overflow-hidden flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm relative">
+                    <div class="overflow-y-auto p-2 space-y-1 h-full" id="orders-list">
                         <!-- Items inyectados -->
                     </div>
                 </div>
@@ -314,7 +346,7 @@
     </div>
 
     <script>
-        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzWQ_j4OzEZcbGvrNNB8UcmbBk644m9Ta70xeLU7CfvVZUwY03LpHezAgqj2G9BxBxqnQ/exec";
+        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzr9niK_Hj25Gqea0VhiSZb-NA3-qLTnGFWzg4y-Fe2Y7k40-3qzOlxJPqXoREguosCUA/exec";
         const JSON_DISTRITOS = "https://raw.githubusercontent.com/complicidad/form/main/lstDinsides.json";
         const JSON_SHALOM = "https://raw.githubusercontent.com/complicidad/form/main/lstShalom.json";
 
@@ -326,7 +358,7 @@
         const DAY_NAMES_FULL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
         const MONTH_NAMES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const initialState = { merchantName: "", whatsapp: "", couriers: [], shippingDays: [], updateTime: "18:00" };
-        const state = { user: null, merchantId: null, apiUrl: DEFAULT_API_URL, isClientView: false, config: { ...initialState }, selectedCourierType: null, externalData: {}, allOrders: [], selectedOrders: new Set() };
+        const state = { user: null, merchantId: null, apiUrl: DEFAULT_API_URL, isClientView: false, config: { ...initialState }, selectedCourierType: null, externalData: {}, allOrders: [], selectedOrders: new Set(), visibleOrders: [] };
 
         // Helper para sanitizar XSS
         const escapeHtml = (unsafe) => {
@@ -534,11 +566,27 @@
             renderOrders: () => {
                 const l = document.getElementById('orders-list');
                 const q = (document.getElementById('inp-search-orders').value || '').toLowerCase();
+                const dSpec = document.getElementById('date-specific').value;
                 
                 const filtered = state.allOrders.filter(x => {
                     const txt = `${x.clientName} ${x.clientPhone} ${x.clientDistrict || ''} ${x.clientAgency || ''}`.toLowerCase();
-                    return txt.includes(q);
+                    if (!txt.includes(q)) return false;
+                    
+                    if (dSpec) {
+                        // Comparamos timestamps convirtiendo ambos a "YYYY-MM-DD" local
+                        // Nota: x.createdAt es timestamp. 
+                        const dateA = new Date(x.createdAt || x.date).toLocaleDateString();
+                        // dSpec viene como "2023-11-29" -> Ajustar al local
+                        // Truco rápido: crear fecha con hora 12 para evitar lios de zona horaria al convertir a string local
+                        const [y, m, d] = dSpec.split('-');
+                        const dateB = new Date(y, m-1, d).toLocaleDateString();
+                        
+                        if (dateA !== dateB) return false;
+                    }
+                    return true;
                 });
+                
+                state.visibleOrders = filtered;
 
                 if (!filtered.length) {
                     l.innerHTML = '<div class="text-center py-10 text-slate-400">Sin envíos encontrados</div>';
@@ -546,8 +594,12 @@
                 }
 
                 l.innerHTML = filtered.map((x, idx) => {
-                    const id = x.createdAt || idx; // Fallback ID
+                    const id = String(x.orderId || x.createdAt); // FORCE STRING ID
                     const isSel = state.selectedOrders.has(id);
+                    const status = x.status || 'PENDIENTE';
+                    let badgeClass = 'bg-yellow-100 text-yellow-800';
+                    if(status === 'ENVIADO') badgeClass = 'bg-emerald-100 text-emerald-800';
+
                     return `
                     <div class="bg-white p-3 rounded-lg shadow-sm border ${isSel ? 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50/10' : 'border-slate-100'} hover:border-emerald-200 transition group flex gap-3 items-start">
                         <div class="pt-1">
@@ -556,7 +608,10 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between font-bold text-slate-800">
                                 <span class="truncate">${escapeHtml(x.clientName)}</span>
-                                <span class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600 whitespace-nowrap ml-2">${escapeHtml(x.shippingDate)}</span>
+                                <div class="flex gap-2">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${badgeClass}">${status}</span>
+                                    <span class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600 whitespace-nowrap">${escapeHtml(x.shippingDate)}</span>
+                                </div>
                             </div>
                             <div class="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
                                 <span class="flex items-center gap-1"><i data-lucide="phone" class="w-3 h-3"></i> ${escapeHtml(x.clientPhone)}</span>
@@ -572,104 +627,91 @@
             },
 
             toggleOrderSelection: (id) => {
-                // El ID viene como string desde el HTML
-                // Necesitamos guardarlo como numérico si en el origen es numérico, pero createdAt suele ser timestamp number
-                // Convertimos id a number para comparar con x.createdAt
-                const numericId = Number(id); 
-                
-                if (state.selectedOrders.has(numericId)) state.selectedOrders.delete(numericId);
-                else state.selectedOrders.add(numericId);
-                
-                // Re-render ligero solo para actualizar estilos visuales
-                // (Opcional: podríamos hacerlo manipulando DOM directo para más performance, pero renderOrders es rápido aquí)
+                const strId = String(id); // Ensure string type for Set
+                if (state.selectedOrders.has(strId)) state.selectedOrders.delete(strId);
+                else state.selectedOrders.add(strId);
                 app.renderOrders(); 
+            },
+            
+            toggleAllSelection: () => {
+                const allSelected = state.visibleOrders.every(x => state.selectedOrders.has(String(x.orderId || x.createdAt)));
+                if (allSelected) state.visibleOrders.forEach(x => state.selectedOrders.delete(String(x.orderId || x.createdAt)));
+                else state.visibleOrders.forEach(x => state.selectedOrders.add(String(x.orderId || x.createdAt)));
+                app.renderOrders();
+            },
+            
+            deleteSelected: () => {
+                if (state.selectedOrders.size === 0) return app.showToast('Selecciona al menos un envío');
+                app.showModal(`¿Eliminar ${state.selectedOrders.size} envíos?`, async () => {
+                    app.toggleLoading(true);
+                    const ids = Array.from(state.selectedOrders);
+                    try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "deleteOrders", merchantId: state.merchantId, orderIds: ids }) }); app.showToast('Envíos eliminados'); app.loadOrders(); } catch(e) {}
+                    app.toggleLoading(false);
+                });
+            },
+            
+            updateBatchStatus: () => {
+                if (state.selectedOrders.size === 0) return app.showToast('Selecciona envíos');
+                const newStatus = document.getElementById('batch-status-select').value;
+                app.showModal(`¿Cambiar ${state.selectedOrders.size} envíos a ${newStatus}?`, async () => {
+                    app.toggleLoading(true);
+                    const ids = Array.from(state.selectedOrders);
+                    try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "updateOrdersStatus", merchantId: state.merchantId, orderIds: ids, newStatus: newStatus }) }); app.showToast('Estados actualizados'); app.loadOrders(); } catch(e) {}
+                    app.toggleLoading(false);
+                });
             },
 
             exportExcel: () => {
-                if(!state.allOrders.length) return app.showToast('No hay datos para exportar');
-                
-                // CSV Header
-                let csvContent = "\uFEFFFecha,Courier,Cliente,Teléfono,Destino,Referencia/DNI\n";
-                
-                // Filas (Usamos allOrders o filtered? Usaremos filtered para ser consistentes con lo que ve el usuario)
-                const q = (document.getElementById('inp-search-orders').value || '').toLowerCase();
-                const filtered = state.allOrders.filter(x => {
-                    const txt = `${x.clientName} ${x.clientPhone} ${x.clientDistrict || ''} ${x.clientAgency || ''}`.toLowerCase();
-                    return txt.includes(q);
-                });
-
-                filtered.forEach(x => {
+                const list = state.visibleOrders;
+                if(!list.length) return app.showToast('No hay datos');
+                let csvContent = "\uFEFFFecha,Courier,Cliente,Teléfono,Destino,Referencia/DNI,Estado\n";
+                list.forEach(x => {
                     const destino = x.clientAgency ? `AGENCIA: ${x.clientAgency}` : `CASA: ${x.clientDistrict} - ${x.clientAddress}`;
                     const ref = x.clientAgency ? `DNI: ${x.clientDni}` : `REF: ${x.clientRef}`;
-                    // Limpiar comas para no romper CSV
-                    const row = [
-                        x.shippingDate, 
-                        x.courier, 
-                        x.clientName.replace(/,/g, ''), 
-                        x.clientPhone, 
-                        destino.replace(/,/g, ''), 
-                        ref.replace(/,/g, '')
-                    ].join(",");
+                    const row = [ x.shippingDate, x.courier, x.clientName.replace(/,/g, ''), x.clientPhone, destino.replace(/,/g, ''), ref.replace(/,/g, ''), x.status || 'PENDIENTE' ].join(",");
                     csvContent += row + "\n";
                 });
-
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
                 link.setAttribute("download", `envios_${new Date().toLocaleDateString()}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
                 app.showToast('Descargando Excel...');
             },
 
             printLabels: () => {
-                const targets = state.selectedOrders.size > 0 
-                    ? state.allOrders.filter(x => state.selectedOrders.has(x.createdAt)) 
-                    : state.allOrders; // Si no hay seleccionados, imprime todos (o los filtrados en pantalla)
-                
-                // Si quiero imprimir lo que veo en pantalla cuando no hay selección:
-                if (state.selectedOrders.size === 0) {
-                    const q = (document.getElementById('inp-search-orders').value || '').toLowerCase();
-                    const filtered = state.allOrders.filter(x => (`${x.clientName} ${x.clientPhone}`.toLowerCase().includes(q)));
-                    if(!filtered.length) return app.showToast('Nada para imprimir');
-                    // Usamos filtered
-                    app.doPrint(filtered);
-                } else {
-                    app.doPrint(targets);
-                }
+                const targets = state.selectedOrders.size > 0 ? state.allOrders.filter(x => state.selectedOrders.has(String(x.orderId || x.createdAt))) : state.visibleOrders;
+                if(!targets.length) return app.showToast('Nada para imprimir');
+                app.doPrint(targets);
             },
 
             doPrint: (list) => {
                 if(!list.length) return;
                 const area = document.getElementById('print-area');
-                
-                // Estilo para etiquetas (ej. 4 por página o continuas térmicas)
-                // Aquí haremos un diseño simple de tarjeta que cabe en una hoja A4 (3 columnas) o térmica
-                // Vamos a usar un estilo genérico limpio.
-                
                 const shopName = state.config.merchantName || "Mi Tienda";
-                const shopPhone = state.config.whatsapp || "";
-
+                
                 area.innerHTML = `
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px;">
                         ${list.map(x => `
-                            <div style="border: 2px solid #000; padding: 15px; page-break-inside: avoid; font-family: sans-serif; border-radius: 8px;">
-                                <div style="border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
-                                    <h3 style="margin:0; font-size: 18px; font-weight: bold;">DESTINATARIO</h3>
-                                    <p style="margin:5px 0; font-size: 16px;"><strong>${escapeHtml(x.clientName)}</strong></p>
-                                    <p style="margin:0; font-size: 14px;">📞 ${escapeHtml(x.clientPhone)}</p>
+                            <div style="border: 1px solid #ddd; padding: 20px; page-break-inside: avoid; font-family: 'Segoe UI', sans-serif; border-radius: 12px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+                                    <div style="font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Remitente</div>
+                                    <div style="font-weight: bold; font-size: 14px; color: #333;">${escapeHtml(shopName)}</div>
                                 </div>
-                                <div style="margin-bottom: 10px;">
-                                    <p style="margin:0; font-size: 12px; color: #666; text-transform: uppercase;">Dirección de Entrega:</p>
-                                    <p style="margin:5px 0; font-size: 14px; line-height: 1.4;">
-                                        ${x.clientAgency ? `AGENCIA ${escapeHtml(x.courier)}<br/>${escapeHtml(x.clientAgency)}` : `${escapeHtml(x.clientAddress)}<br/>${escapeHtml(x.clientDistrict)}`}
-                                    </p>
-                                    <p style="margin:5px 0; font-size: 12px;">Ref/DNI: ${x.clientAgency ? x.clientDni : x.clientRef}</p>
+                                <div style="margin-bottom: 20px;">
+                                    <p style="margin: 0; font-size: 10px; color: #a44; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">PARA:</p>
+                                    <h2 style="margin: 5px 0; font-size: 20px; font-weight: 800; color: #000; line-height: 1.2;">${escapeHtml(x.clientName).toUpperCase()}</h2>
+                                    <p style="margin: 0; font-size: 14px; color: #555; font-family: monospace;">${escapeHtml(x.clientPhone)}</p>
                                 </div>
-                                <div style="border-top: 1px dashed #999; padding-top: 10px; font-size: 12px;">
-                                    REMITENTE: <strong>${escapeHtml(shopName)}</strong> (${shopPhone})
+                                <div style="margin-bottom: 20px;">
+                                    <p style="margin: 0; font-size: 10px; color: #a44; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">DESTINO:</p>
+                                    <p style="margin: 5px 0 2px 0; font-size: 13px; color: #333;"><strong>${x.clientAgency ? 'DNI/CE:' : 'REF:'}</strong> ${x.clientAgency ? x.clientDni : x.clientRef}</p>
+                                    <p style="margin: 0; font-size: 14px; color: #444; line-height: 1.4;">${x.clientAgency ? `<strong>Agencia:</strong> ${escapeHtml(x.clientAgency)}` : `${escapeHtml(x.clientAddress)}<br/><span style="color:#666">${escapeHtml(x.clientDistrict)}</span>`}</p>
+                                </div>
+                                <div style="border-top: 1px solid #eee; padding-top: 12px; display: flex; align-items: center; gap: 8px; color: #555;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                                    <span style="font-size: 12px; font-weight: bold; text-transform: uppercase;">${escapeHtml(x.courier)}</span>
                                 </div>
                             </div>
                         `).join('')}
@@ -677,8 +719,6 @@
                 `;
                 
                 window.print();
-                
-                // Limpiar área después de imprimir (opcional, o dejarlo oculto)
                 setTimeout(() => { area.innerHTML = ''; }, 1000);
             },
 
