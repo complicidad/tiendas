@@ -488,6 +488,51 @@
                     app.toggleLoading(false);
                 });
             },
+
+            // NUEVA FUNCIÓN: ENVIAR RESUMEN AL CLIENTE
+            sendClientSummary: (orderId) => {
+                // Buscar el pedido en la memoria local (state.allOrders)
+                const order = state.allOrders.find(o => String(o.orderId || o.createdAt) === String(orderId));
+                
+                if (!order) return app.showToast("Error: No se encontró el pedido.");
+
+                // Datos del comercio
+                const storeName = state.config.merchantName || "Nuestra Tienda";
+                
+                // Limpiar número de teléfono (quitar espacios, guiones, paréntesis)
+                let phone = (order.clientPhone || "").replace(/[^0-9]/g, "");
+                
+                // Validar longitud mínima (ej. 9 dígitos para Perú). Si no tiene código de país, agregar 51.
+                if (phone.length === 9) {
+                    phone = "51" + phone;
+                }
+
+                if (phone.length < 9) return app.showToast("El número de teléfono no es válido.");
+
+                // Construir el mensaje
+                // Emojis y saltos de línea (%0A)
+                const statusEmoji = order.status === 'ENVIADO' ? '✅' : '📦';
+                const statusText = order.status === 'ENVIADO' ? 'Enviado' : 'Registrado';
+                
+                let destinationInfo = "";
+                if (order.clientAgency) {
+                    destinationInfo = `🏢 *Agencia:* ${order.clientAgency} (DNI: ${order.clientDni})`;
+                } else {
+                    destinationInfo = `🏠 *Dirección:* ${order.clientAddress}, ${order.clientDistrict} (Ref: ${order.clientRef})`;
+                }
+
+                const message = `Hola *${order.clientName}*! 👋\n` +
+                                `Tu pedido en *${storeName}* está *${statusText}* ${statusEmoji}\n\n` +
+                                `📝 *Detalles del Envío:*\n` +
+                                `📅 Fecha: ${order.shippingDate}\n` +
+                                `🚚 Courier: ${order.courier}\n` +
+                                `${destinationInfo}\n\n` +
+                                `Gracias por tu compra! ✨`;
+
+                // Abrir WhatsApp API
+                const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+                window.open(url, '_blank');
+            },
             
             showToast: (msg) => {
                 const el = document.getElementById('toast');
@@ -723,13 +768,16 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between font-bold text-slate-800">
                                 <span class="truncate">${escapeHtml(x.clientName)}</span>
-                                <div class="flex gap-2">
+                                <div class="flex items-center gap-2">
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded ${badgeClass}">${status}</span>
-                                    <span class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600 whitespace-nowrap">${escapeHtml(x.shippingDate)}</span>
+                                    <!-- Botón de WhatsApp integrado en la cabecera -->
+                                    <button onclick="app.sendClientSummary('${id}')" class="text-emerald-600 hover:bg-emerald-50 p-1 rounded-full transition" title="Enviar resumen al cliente">
+                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div class="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
-                                <span class="flex items-center gap-1"><i data-lucide="phone" class="w-3 h-3"></i> ${escapeHtml(x.clientPhone)}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${escapeHtml(x.shippingDate)}</span>
                                 <span class="flex items-center gap-1"><i data-lucide="truck" class="w-3 h-3"></i> ${escapeHtml(x.courier)}</span>
                             </div>
                             <div class="text-xs text-slate-600 mt-1.5 font-medium border-t border-slate-50 pt-1">
