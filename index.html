@@ -83,8 +83,16 @@
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">WhatsApp del Cliente</label>
                         <input id="admin-new-phone" type="tel" required placeholder="Ej: 999888777" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
+                    <div class="w-full md:w-40">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Plan</label>
+                        <select id="admin-new-plan" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="Gratis">Gratis</option>
+                            <option value="Pro">Pro</option>
+                            <option value="Empresa">Empresa</option>
+                        </select>
+                    </div>
                     <button type="submit" class="w-full md:w-auto bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-100">
-                        <i data-lucide="zap" class="w-4 h-4"></i> Generar & Enviar
+                        <i data-lucide="zap" class="w-4 h-4"></i> Crear
                     </button>
                 </form>
             </div>
@@ -94,7 +102,7 @@
                     <button onclick="app.adminLoadUsers()" class="p-2 hover:bg-slate-50 rounded-full text-slate-400"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left"><thead class="bg-slate-50 text-slate-500 uppercase text-xs"><tr><th class="px-6 py-3">WhatsApp</th><th class="px-6 py-3">Contraseña (Hash)</th><th class="px-6 py-3">Fecha Alta</th><th class="px-6 py-3 text-right">Acción</th></tr></thead><tbody id="admin-users-list" class="divide-y divide-slate-100"></tbody></table>
+                    <table class="w-full text-sm text-left"><thead class="bg-slate-50 text-slate-500 uppercase text-xs"><tr><th class="px-6 py-3">WhatsApp</th><th class="px-6 py-3">Plan</th><th class="px-6 py-3">Fecha Alta</th><th class="px-6 py-3 text-right">Acciones</th></tr></thead><tbody id="admin-users-list" class="divide-y divide-slate-100"></tbody></table>
                 </div>
             </div>
         </main>
@@ -113,7 +121,12 @@
                 <button onclick="app.setTab('orders')" id="nav-orders" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Pedidos</button>
             </nav>
             <div class="mt-auto p-4 border-t border-slate-100">
-                <div class="flex items-center gap-3 mb-3"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><i data-lucide="phone" class="w-4 h-4 text-slate-500"></i></div><div class="overflow-hidden"><p id="user-display" class="text-sm font-bold text-slate-700 truncate">...</p></div></div>
+                <div class="flex items-center gap-3 mb-3"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><i data-lucide="phone" class="w-4 h-4 text-slate-500"></i></div>
+                    <div class="overflow-hidden">
+                        <p id="user-display" class="text-sm font-bold text-slate-700 truncate">...</p>
+                        <p id="plan-display" class="text-[10px] font-bold text-indigo-600 uppercase tracking-wide bg-indigo-50 px-1.5 py-0.5 rounded w-fit mt-0.5">PLAN GRATIS</p>
+                    </div>
+                </div>
                 <button onclick="app.logout()" class="w-full text-red-500 text-xs font-bold hover:bg-red-50 py-2 rounded transition">Cerrar Sesión</button>
             </div>
         </aside>
@@ -151,23 +164,21 @@
         </main>
     </div>
 
-    <!-- VISTA CLIENTE (CON DESPLEGABLES COMPACTOS Y FECHAS REALES) -->
+    <!-- VISTA CLIENTE (FIX SCROLL + CLEAR BUTTONS) -->
     <div id="view-client" class="flex-1 min-h-screen bg-slate-50 hidden overflow-y-auto">
-        <div class="max-w-2xl mx-auto min-h-screen bg-white shadow-2xl overflow-hidden flex flex-col">
-            <div class="bg-slate-900 text-white p-6 sticky top-0 z-10 shadow-md flex items-center gap-3">
+        <div class="max-w-2xl mx-auto min-h-screen bg-white shadow-2xl flex flex-col relative">
+            <div class="bg-slate-900 text-white p-6 sticky top-0 z-30 shadow-md flex items-center gap-3">
                 <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center"><i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-400"></i></div>
                 <div><h1 id="client-title" class="font-bold text-lg leading-tight">Cargando...</h1><p class="text-xs text-slate-400">Datos de Envío</p></div>
             </div>
 
-            <div class="flex-1 p-6 space-y-8 pb-32">
+            <div class="flex-1 p-6 space-y-8 pb-48">
                 <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg shadow-sm"><p class="text-xs text-orange-700">📅 Pedidos para hoy cierran a las <strong id="client-time">--:--</strong>.</p></div>
 
                 <form id="client-form" onsubmit="app.submitOrder(event)" class="space-y-8">
                     <!-- PASO 1 -->
                     <div class="space-y-4">
                         <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">1. Configura tu Envío</h3>
-                        
-                        <!-- COURIER DESPLEGABLE -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-2">Selecciona Agencia o Delivery</label>
                             <div class="relative">
@@ -177,10 +188,8 @@
                                 <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-500"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
                             </div>
                         </div>
-
-                        <!-- FECHA DESPLEGABLE -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-2">Fecha de Despacho (Próximas 2 semanas)</label>
+                            <label class="block text-xs font-semibold text-slate-500 mb-2">Fecha de Despacho</label>
                             <div class="relative">
                                 <select id="c-date-select" onchange="app.validateForm()" class="w-full appearance-none bg-white border border-slate-300 rounded-xl py-3 pl-4 pr-10 text-slate-700 font-medium focus:ring-2 focus:ring-slate-800 outline-none cursor-pointer">
                                     <option value="" disabled selected>Elige fecha...</option>
@@ -193,56 +202,49 @@
                     <!-- PASO 2 (DINÁMICO) -->
                     <div id="dynamic-form-section" class="hidden space-y-6 fade-in">
                         <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">2. Datos de Destino</h3>
-                        
-                        <!-- AGENCIA (BUSCADOR ESTILO CLARO) -->
-                        <div id="fields-agency" class="hidden space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">BUSCAR SEDE (CALLE/DISTRITO)</label>
-                                <div class="relative group">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="h-5 w-5 text-slate-400"></i></div>
-                                    <!-- Input Claro -->
-                                    <input id="c-agency" type="text" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-slate-800 transition placeholder-slate-400" placeholder="Escribe para buscar..." autocomplete="off" oninput="app.searchAgency(this.value)">
-                                    <!-- Botón X Limpiar -->
-                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                        <button type="button" id="btn-clear-agency" onclick="app.clearAgency()" class="hidden text-slate-400 hover:text-slate-600"><i data-lucide="x" class="h-5 w-5"></i></button>
-                                    </div>
-                                    <!-- Dropdown Resultados Claro -->
-                                    <div id="agency-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto z-50 divide-y divide-slate-100">
-                                        <!-- Resultados se inyectan aquí -->
-                                    </div>
-                                </div>
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-500 mb-1">DNI / CE</label><input id="c-dni" type="tel" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
-                        </div>                        
-
-                        <!-- DOMICILIO -->
-                        <div id="fields-home" class="hidden space-y-4">
-
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">DISTRITO</label>
-                                    <div class="relative group">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="map-pin" class="h-5 w-5 text-slate-400"></i></div>
-                                        <input id="c-district" type="text" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-slate-800 transition placeholder-slate-400" placeholder="Buscar distrito..." autocomplete="off" oninput="app.searchDistrict(this.value)">
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center"><button type="button" id="btn-clear-district" onclick="app.clearDistrict()" class="hidden text-slate-400 hover:text-slate-600"><i data-lucide="x" class="h-5 w-5"></i></button></div>
-                                        <div id="district-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto z-50 divide-y divide-slate-100"></div>
-                                    </div>
-                                </div>
-                                <div><label class="block text-xs font-semibold text-slate-500 mb-1">Dirección Exacta</label><input id="c-address" placeholder="Calle / Av / Jr" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
-                                <div><label class="block text-xs font-semibold text-slate-500 mb-1">Referencia</label><input id="c-ref" placeholder="Frente a..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
-
-                        </div>
-
                         <div class="grid grid-cols-1 gap-4">
                             <div><label class="block text-xs font-semibold text-slate-500 mb-1">Nombre Completo</label><input id="c-name" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
                             <div><label class="block text-xs font-semibold text-slate-500 mb-1">Celular / WhatsApp</label><input id="c-phone" type="tel" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
                         </div>
 
+                        <!-- AGENCIA (BUSCADOR CLARO + X) -->
+                        <div id="fields-agency" class="hidden space-y-4">
+                            <div><label class="block text-xs font-semibold text-slate-500 mb-1">DNI / CE</label><input id="c-dni" type="tel" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                            <div class="relative z-20">
+                                <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">BUSCAR SEDE (CALLE/DISTRITO)</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="h-5 w-5 text-slate-400"></i></div>
+                                    <input id="c-agency" type="text" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-slate-800 transition placeholder-slate-400" placeholder="Escribe para buscar..." autocomplete="off" oninput="app.searchAgency(this.value)">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <button type="button" id="btn-clear-agency" onclick="app.clearAgency()" class="hidden text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="h-5 w-5"></i></button>
+                                    </div>
+                                    <div id="agency-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto z-50 divide-y divide-slate-100"></div>
+                                </div>
+                            </div>
+                        </div>
 
-
+                        <!-- DOMICILIO (BUSCADOR CLARO + X) -->
+                        <div id="fields-home" class="hidden space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="col-span-2"><label class="block text-xs font-semibold text-slate-500 mb-1">Dirección Exacta</label><input id="c-address" placeholder="Calle / Av / Jr" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                                <div class="relative z-20">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">DISTRITO</label>
+                                    <div class="relative group">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="map-pin" class="h-5 w-5 text-slate-400"></i></div>
+                                        <input id="c-district" type="text" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-slate-800 transition placeholder-slate-400" placeholder="Buscar distrito..." autocomplete="off" oninput="app.searchDistrict(this.value)">
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <button type="button" id="btn-clear-district" onclick="app.clearDistrict()" class="hidden text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="h-5 w-5"></i></button>
+                                        </div>
+                                        <div id="district-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto z-50 divide-y divide-slate-100"></div>
+                                    </div>
+                                </div>
+                                <div><label class="block text-xs font-semibold text-slate-500 mb-1">Referencia</label><input id="c-ref" placeholder="Frente a..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- FOOTER -->
-                    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-center max-w-2xl mx-auto z-20">
+                    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-center max-w-2xl mx-auto z-10">
                         <button type="submit" id="btn-submit-order" disabled class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition active:scale-95 flex justify-center items-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
                             <i data-lucide="message-circle" class="w-6 h-6"></i> Enviar Datos
                         </button>
@@ -271,343 +273,52 @@
 
         const ALL_COURIERS = ["Olva Courier", "Shalom", "Rappi", "PedidosYa", "DHL", "FedEx", "Motorizado", "Tienda"];
         const ALL_DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-        // Mapa para convertir nombre día a índice JS (0=Dom, 1=Lun...)
         const DAY_INDEX_MAP = { "Dom": 0, "Lun": 1, "Mar": 2, "Mié": 3, "Jue": 4, "Vie": 5, "Sáb": 6 };
         const DAY_NAMES_FULL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
         const MONTH_NAMES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-
         const initialState = { merchantName: "", whatsapp: "", couriers: [], shippingDays: [], updateTime: "18:00" };
         const state = { user: null, merchantId: null, apiUrl: DEFAULT_API_URL, isClientView: false, config: { ...initialState }, selectedCourierType: null, externalData: {} };
 
         window.app = {
-            updateConnectionStatus: () => {
-                const el = document.getElementById('connection-status');
-                if(el) el.innerHTML = state.apiUrl ? `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Seguro` : `Local`;
-            },
-
-            // --- EXTERNAL DATA ---
-            loadExternalLists: async () => {
-                try {
-                    if(!state.externalData.districts) {
-                        const res = await fetch(JSON_DISTRITOS);
-                        const data = await res.json();
-                        state.externalData.districts = data.map(d => d.Distrito || d.nombre);
-                    }
-                    if(!state.externalData.agencies) {
-                        const res = await fetch(JSON_SHALOM);
-                        state.externalData.agencies = await res.json(); 
-                    }
-                } catch(e) { console.error(e); }
-            },
-
-            // --- AGENCY SEARCH LOGIC ---
-            searchAgency: (query) => {
-                const resultsContainer = document.getElementById('agency-results');
-                const clearBtn = document.getElementById('btn-clear-agency');
-                if (!query) { resultsContainer.classList.add('hidden'); clearBtn.classList.add('hidden'); return; }
-                clearBtn.classList.remove('hidden');
-
-                if(query.length < 2) { resultsContainer.classList.add('hidden'); return; }
-                const lowerQ = query.toLowerCase();
-                const matches = (state.externalData.agencies || []).filter(a => (a.Agencia && a.Agencia.toLowerCase().includes(lowerQ)) || (a.Direccion && a.Direccion.toLowerCase().includes(lowerQ))).slice(0, 50);
-
-                resultsContainer.innerHTML = matches.length === 0 ? '<div class="p-4 text-slate-400 text-sm text-center">No se encontraron resultados</div>' : matches.map(a => `<div onclick="app.selectAgency('${a.Agencia.replace(/'/g, "\\'")}', '${a.Direccion.replace(/'/g, "\\'")}')" class="p-4 cursor-pointer hover:bg-slate-50 transition border-b border-slate-50 last:border-0"><p class="font-bold text-slate-800 text-sm mb-1">${a.Agencia}</p><p class="text-xs text-slate-500">${a.Direccion}</p></div>`).join('');
-                resultsContainer.classList.remove('hidden');
-            },
-            selectAgency: (name, address) => {
-                const input = document.getElementById('c-agency'); input.value = `${name} - ${address}`;
-                document.getElementById('agency-results').classList.add('hidden'); document.getElementById('btn-clear-agency').classList.remove('hidden');
-            },
-            clearAgency: () => {
-                const input = document.getElementById('c-agency'); input.value = ''; document.getElementById('agency-results').classList.add('hidden'); document.getElementById('btn-clear-agency').classList.add('hidden'); input.focus();
-            },
-
-            // --- DISTRICT SEARCH LOGIC ---
-            searchDistrict: (query) => {
-                const resultsContainer = document.getElementById('district-results');
-                const clearBtn = document.getElementById('btn-clear-district');
-                if (!query) { resultsContainer.classList.add('hidden'); clearBtn.classList.add('hidden'); return; }
-                clearBtn.classList.remove('hidden');
-                if(query.length < 1) { resultsContainer.classList.add('hidden'); return; }
-
-                const lowerQ = query.toLowerCase();
-                const matches = (state.externalData.districts || []).filter(d => d.toLowerCase().includes(lowerQ)).slice(0, 50);
-                resultsContainer.innerHTML = matches.length === 0 ? '<div class="p-4 text-slate-400 text-sm text-center">No se encontraron resultados</div>' : matches.map(d => `<div onclick="app.selectDistrict('${d.replace(/'/g, "\\'")}')" class="p-4 cursor-pointer hover:bg-slate-50 transition border-b border-slate-50 last:border-0"><p class="font-bold text-slate-800 text-sm">${d}</p></div>`).join('');
-                resultsContainer.classList.remove('hidden');
-            },
-            selectDistrict: (val) => {
-                const input = document.getElementById('c-district'); input.value = val; document.getElementById('district-results').classList.add('hidden'); document.getElementById('btn-clear-district').classList.remove('hidden');
-            },
-            clearDistrict: () => {
-                const input = document.getElementById('c-district'); input.value = ''; document.getElementById('district-results').classList.add('hidden'); document.getElementById('btn-clear-district').classList.add('hidden'); input.focus();
-            },
-
-            // --- DATE GENERATION LOGIC ---
-            generateDateOptions: () => {
-                const select = document.getElementById('c-date-select');
-                select.innerHTML = '<option value="" disabled selected>Elige una fecha...</option>';
-                
-                const allowedDays = state.config.shippingDays || []; // ["Lun", "Vie"]
-                if (allowedDays.length === 0) return;
-
-                const now = new Date();
-                // Parse closing time
-                const [closeHour, closeMin] = (state.config.updateTime || "18:00").split(':').map(Number);
-                const cutoffTime = new Date(now);
-                cutoffTime.setHours(closeHour, closeMin, 0, 0);
-
-                // Iterar próximos 14 días
-                for(let i = 0; i < 14; i++) {
-                    const futureDate = new Date(now);
-                    futureDate.setDate(now.getDate() + i);
-                    
-                    // Logic for closing time
-                    if (i === 0 && now > cutoffTime) {
-                        continue; // Skip today if past closing time
-                    }
-
-                    // 0-6 (Dom-Sab)
-                    const dayIndex = futureDate.getDay(); 
-                    const isAllowed = allowedDays.some(allowedDayName => DAY_INDEX_MAP[allowedDayName] === dayIndex);
-                    
-                    if (isAllowed) {
-                        const dayName = DAY_NAMES_FULL[dayIndex];
-                        const dayNum = futureDate.getDate().toString().padStart(2, '0');
-                        const monthName = MONTH_NAMES[futureDate.getMonth()];
-                        const value = `${dayName} ${dayNum}/${(futureDate.getMonth()+1).toString().padStart(2,'0')}`; 
-                        const label = `${dayName} ${dayNum} ${monthName}`; 
-                        
-                        const opt = document.createElement('option');
-                        opt.value = value;
-                        opt.innerText = label;
-                        select.appendChild(opt);
-                    }
-                }
-            },
-
-            // --- CLIENT FORM HANDLERS ---
-            onCourierChange: (courier) => {
-                const type = COURIER_TYPES[courier] || "home";
-                state.selectedCourierType = type;
-                state.selectedCourier = courier;
-
-                document.getElementById('dynamic-form-section').classList.remove('hidden');
-                const agencyFields = document.getElementById('fields-agency');
-                const homeFields = document.getElementById('fields-home');
-                
-                ['c-dni','c-agency','c-address','c-district'].forEach(id => document.getElementById(id).removeAttribute('required'));
-
-                if(type === 'agency') {
-                    agencyFields.classList.remove('hidden'); homeFields.classList.add('hidden');
-                    document.getElementById('c-dni').setAttribute('required','true');
-                    const agInput = document.getElementById('c-agency');
-                    agInput.setAttribute('required','true');
-                    agInput.value = "";
-                    app.clearAgency(); 
-                    app.clearDistrict();
-
-                    if(courier.includes('Shalom')) {
-                        agInput.placeholder = "Escribe para buscar sede...";
-                    } else {
-                        agInput.placeholder = "Nombre de Agencia / Dirección";
-                    }
-                } else {
-                    agencyFields.classList.add('hidden'); homeFields.classList.remove('hidden');
-                    document.getElementById('c-address').setAttribute('required','true');
-                    document.getElementById('c-district').setAttribute('required','true');
-                    app.clearAgency();
-                    app.clearDistrict();
-                }
-                app.validateForm();
-            },
-
-            onDateChange: (val) => {
-                app.validateForm();
-            },
-
-            validateForm: () => {
-                const btn = document.getElementById('btn-submit-order');
-                const courierVal = document.getElementById('c-courier-select').value;
-                const dateVal = document.getElementById('c-date-select').value;
-                
-                if(courierVal && dateVal) btn.removeAttribute('disabled');
-                else btn.setAttribute('disabled', 'true');
-            },
-
-            submitOrder: async (e) => {
-                e.preventDefault();
-                app.toggleLoading(true);
-                const day = document.getElementById('c-date-select').value;
-                const name = document.getElementById('c-name').value;
-                const phone = document.getElementById('c-phone').value;
-                
-                let orderData = { clientName: name, clientPhone: phone, courier: state.selectedCourier, shippingDate: day, createdAt: Date.now(), product: "N/A" };
-                let waText = "";
-
-                if (state.selectedCourierType === 'agency') {
-                    const dni = document.getElementById('c-dni').value;
-                    const agency = document.getElementById('c-agency').value;
-                    orderData.clientDni = dni; orderData.clientAgency = agency;
-                    waText = `📦 *NUEVO ENVÍO (AGENCIA)*\n\n👤 *Cliente:* ${name}\n📱 *Tel:* ${phone}\n🆔 *DNI:* ${dni}\n\n🏢 *Agencia:* ${agency}\n🚚 *Courier:* ${state.selectedCourier}\n📅 *Fecha:* ${day}`;
-                } else {
-                    const addr = document.getElementById('c-address').value;
-                    const dist = document.getElementById('c-district').value;
-                    const ref = document.getElementById('c-ref').value;
-                    orderData.clientAddress = addr; orderData.clientDistrict = dist; orderData.clientRef = ref;
-                    waText = `📦 *NUEVO ENVÍO (CASA)*\n\n👤 *Cliente:* ${name}\n📱 *Tel:* ${phone}\n\n📍 *Distrito:* ${dist}\n🏠 *Dirección:* ${addr}\n🗺️ *Ref:* ${ref}\n\n🚚 *Courier:* ${state.selectedCourier}\n📅 *Fecha:* ${day}`;
-                }
-
-                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveOrder", merchantId: state.merchantId, data: orderData }) }); } catch(e) {}
-                window.open(`https://wa.me/51${state.config.whatsapp}?text=${encodeURIComponent(waText)}`, '_blank');
-                app.toggleLoading(false);
-            },
-
-            // --- STANDARD LOGIC ---
-            handleLogin: async (e) => {
-                e.preventDefault();
-                const phone = document.getElementById('auth-phone').value.trim();
-                const pass = document.getElementById('auth-pass').value.trim();
-                const errorEl = document.getElementById('auth-error');
-                app.toggleLoading(true);
-
-                if (phone === '999000999' && pass === 'admin123') { app.loginSuccess({ uid: 'admin_master', phone: 'Administrador', isAdmin: true }); return; }
-
-                if (state.apiUrl) {
-                    try {
-                        const res = await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "loginUser", data: { phone, password: pass } }) });
-                        const json = await res.json();
-                        if (json.status === 'success') { app.loginSuccess(json.user); return; } 
-                        else { errorEl.innerText = json.message; errorEl.classList.remove('hidden'); app.toggleLoading(false); return; }
-                    } catch (err) { console.error(err); }
-                }
-                const usersDB = JSON.parse(SafeStorage.getItem('app_users_db') || '[]');
-                const user = usersDB.find(u => u.phone === phone && u.password === pass);
-                if (user) app.loginSuccess(user);
-                else { errorEl.innerText = "Usuario no encontrado"; errorEl.classList.remove('hidden'); app.toggleLoading(false); }
-            },
-
-            loginSuccess: (user) => { state.user = user; SafeStorage.setItem('app_current_user', JSON.stringify(user)); app.init(); },
-            logout: () => { SafeStorage.removeItem('app_current_user'); state.user = null; state.merchantId = null; app.init(); },
-
-            // Admin
-            adminLoadUsers: async () => {
-                const list = document.getElementById('admin-users-list'); list.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando...</td></tr>';
-                let users = [];
-                try { const res = await fetch(`${state.apiUrl}?action=getUsers`); const json = await res.json(); if(json.users) users = json.users; } catch(e) {}
-                list.innerHTML = users.length ? users.map(u => `<tr class="bg-white border-b hover:bg-slate-50"><td class="px-6 py-4 font-bold text-slate-700">${u.phone}</td><td class="px-6 py-4 font-mono text-xs text-slate-500">****</td><td class="px-6 py-4 text-xs text-slate-400">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td><td class="px-6 py-4 text-right"><button onclick="app.adminResend('${u.uid}','${u.phone}')" class="text-indigo-600 text-xs font-bold">Re-enviar</button></td></tr>`).join('') : '<tr><td colspan="4" class="p-4 text-center">Vacío</td></tr>';
-                app.toggleLoading(false);
-            },
-            adminCreateUser: async (e) => {
-                e.preventDefault(); const phone = document.getElementById('admin-new-phone').value.trim();
-                app.toggleLoading(true); const newPass = Math.floor(1000 + Math.random() * 9000).toString();
-                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "registerUser", data: { phone, password: newPass } }) }); } catch(e) {}
-                const msg = `🔐 Bienvenid@ a Logística Pro\n📱 Usuario: ${phone}\n🔑 Clave: *${newPass}*\nIngresa: ${window.location.href}`;
-                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-                document.getElementById('admin-new-phone').value = ""; app.adminLoadUsers();
-            },
-            adminResend: async (uid, phone) => {
-                if(!confirm(`¿Nueva clave para ${phone}?`)) return; app.toggleLoading(true);
-                const newPass = Math.floor(1000 + Math.random() * 9000).toString();
-                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: uid, newPassword: newPass }) }); } catch(e){}
-                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(`🔐 Recuperación\n📱 ${phone}\n🔑 Nueva: *${newPass}*`)}`, '_blank');
-                app.toggleLoading(false);
-            },
-
-            // Merchant
-            saveConfig: async () => {
-                app.toggleLoading(true);
-                state.config.merchantName = document.getElementById('inp-store-name').value; state.config.whatsapp = document.getElementById('inp-whatsapp').value; state.config.updateTime = document.getElementById('inp-time').value;
-                SafeStorage.setItem(`config_${state.user.uid}`, JSON.stringify(state.config));
-                try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveConfig", merchantId: state.user.uid, data: state.config }) }); } catch(e){}
-                setTimeout(() => app.toggleLoading(false), 500);
-            },
-            loadData: async () => {
-                app.toggleLoading(true); state.config = { ...initialState };
-                try { const res = await fetch(`${state.apiUrl}?action=getConfig&merchantId=${state.merchantId}`); const json = await res.json(); if (json.data) state.config = json.data; } catch(e){}
-                
-                if (state.isClientView) app.renderClient(); else app.renderDashboard();
-                if(!state.isClientView) app.loadOrders();
-                app.toggleLoading(false);
-            },
-            loadOrders: async () => {
-                const list = document.getElementById('orders-list'); list.innerHTML = '...'; let orders = [];
-                try { const res = await fetch(`${state.apiUrl}?action=getOrders&merchantId=${state.merchantId}`); const json = await res.json(); if (json.orders) orders = json.orders; } catch(e){}
-                
-                if (!orders.length) list.innerHTML = '<div class="text-center py-10 text-slate-400">Sin pedidos</div>';
-                else list.innerHTML = orders.map(o => `<div class="bg-white p-3 rounded-lg shadow-sm border border-slate-100 mb-2"><div class="flex justify-between font-bold text-slate-800"><span>${o.clientName}</span><span class="text-xs bg-emerald-100 px-2 py-0.5 rounded text-emerald-800">${o.shippingDate}</span></div><div class="text-xs text-slate-500 mt-1">${o.clientAgency ? `Agencia: ${o.clientAgency}` : `Dirección: ${o.clientAddress}`}</div></div>`).join('');
-            },
-
-            // UI
-            setTab: (t) => { ['config','share','orders'].forEach(x => { document.getElementById(`tab-${x}`).classList.add('hidden'); document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition"; }); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100"; if(t==='share') app.updateShareLink(); },
-            updateShareLink: () => { document.getElementById('share-link').innerText = `${window.location.origin}${window.location.pathname}?merchant=${state.user.uid}`; },
-            copyLink: () => { navigator.clipboard.writeText(document.getElementById('share-link').innerText); alert("¡Copiado!"); },
-            shareOnWhatsapp: () => { window.open(`https://wa.me/?text=${encodeURIComponent("Haz tu pedido aquí: " + document.getElementById('share-link').innerText)}`, '_blank'); },
-            openLink: () => { window.open(document.getElementById('share-link').innerText, '_blank'); },
             toggleLoading: (show) => { const el = document.getElementById('loading-overlay'); show ? (el.classList.remove('hidden'), setTimeout(()=>el.classList.remove('opacity-0'),10)) : (el.classList.add('opacity-0'), setTimeout(()=>el.classList.add('hidden'),300)); },
+            updateConnectionStatus: () => { const el = document.getElementById('connection-status'); if(el) el.innerHTML = state.apiUrl ? `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Seguro` : `Local`; },
+            loadExternalLists: async () => { try { if(!state.externalData.districts) { const res = await fetch(JSON_DISTRITOS); const data = await res.json(); state.externalData.districts = data.map(d => d.Distrito || d.nombre); } if(!state.externalData.agencies) { const res = await fetch(JSON_SHALOM); state.externalData.agencies = await res.json(); } } catch(e) { console.error(e); } },
+            scrollToEl: (el) => { setTimeout(() => { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100); },
+
+            // SEARCH LOGIC (Light)
+            searchAgency: (q) => { const c = document.getElementById('agency-results'), x = document.getElementById('btn-clear-agency'); if (!q) { c.classList.add('hidden'); x.classList.add('hidden'); return; } x.classList.remove('hidden'); if(q.length<2) { c.classList.add('hidden'); return; } const lq = q.toLowerCase(); const m = (state.externalData.agencies||[]).filter(a => (a.Agencia && a.Agencia.toLowerCase().includes(lq)) || (a.Direccion && a.Direccion.toLowerCase().includes(lq))).slice(0,50); c.innerHTML = m.length ? m.map(a => `<div onclick="app.selectAgency('${a.Agencia.replace(/'/g,"\\'")}','${a.Direccion.replace(/'/g,"\\'").replace(/\n/g," ")}')" class="p-4 cursor-pointer hover:bg-slate-50 transition border-b border-slate-50 last:border-0"><p class="font-bold text-slate-800 text-sm mb-1">${a.Agencia}</p><p class="text-xs text-slate-500">${a.Direccion}</p></div>`).join('') : '<div class="p-4 text-slate-400 text-sm text-center">Sin resultados</div>'; c.classList.remove('hidden'); app.scrollToEl(c); },
+            selectAgency: (n, a) => { document.getElementById('c-agency').value = `${n} - ${a}`; document.getElementById('agency-results').classList.add('hidden'); document.getElementById('btn-clear-agency').classList.remove('hidden'); },
+            clearAgency: () => { const i = document.getElementById('c-agency'); i.value=''; document.getElementById('agency-results').classList.add('hidden'); document.getElementById('btn-clear-agency').classList.add('hidden'); i.focus(); },
+            searchDistrict: (q) => { const c = document.getElementById('district-results'), x = document.getElementById('btn-clear-district'); if (!q) { c.classList.add('hidden'); x.classList.add('hidden'); return; } x.classList.remove('hidden'); if(q.length<1) { c.classList.add('hidden'); return; } const lq = q.toLowerCase(); const m = (state.externalData.districts||[]).filter(d => d.toLowerCase().includes(lq)).slice(0,50); c.innerHTML = m.length ? m.map(d => `<div onclick="app.selectDistrict('${d.replace(/'/g,"\\'")}')" class="p-4 cursor-pointer hover:bg-slate-50 transition border-b border-slate-50 last:border-0"><p class="font-bold text-slate-800 text-sm">${d}</p></div>`).join('') : '<div class="p-4 text-slate-400 text-sm text-center">Sin resultados</div>'; c.classList.remove('hidden'); app.scrollToEl(c); },
+            selectDistrict: (v) => { document.getElementById('c-district').value = v; document.getElementById('district-results').classList.add('hidden'); document.getElementById('btn-clear-district').classList.remove('hidden'); },
+            clearDistrict: () => { const i = document.getElementById('c-district'); i.value=''; document.getElementById('district-results').classList.add('hidden'); document.getElementById('btn-clear-district').classList.add('hidden'); i.focus(); },
+
+            generateDateOptions: () => { const s = document.getElementById('c-date-select'); s.innerHTML = '<option value="" disabled selected>Elige una fecha...</option>'; const ad = state.config.shippingDays || []; if (!ad.length) return; const now = new Date(); const [ch, cm] = (state.config.updateTime || "18:00").split(':').map(Number); const cut = new Date(now); cut.setHours(ch, cm, 0, 0); for(let i=0;i<14;i++) { const f = new Date(now); f.setDate(now.getDate()+i); if(i===0 && now>cut) continue; const di = f.getDay(); if(ad.some(n => DAY_INDEX_MAP[n]===di)) { const val = `${DAY_NAMES_FULL[di]} ${f.getDate().toString().padStart(2,'0')}/${(f.getMonth()+1).toString().padStart(2,'0')}`; const lbl = `${DAY_NAMES_FULL[di]} ${f.getDate()} ${MONTH_NAMES[f.getMonth()]}`; const o = document.createElement('option'); o.value = val; o.innerText = lbl; s.appendChild(o); } } },
+            onCourierChange: (c) => { const type = COURIER_TYPES[c] || "home"; state.selectedCourierType = type; state.selectedCourier = c; document.getElementById('dynamic-form-section').classList.remove('hidden'); const af = document.getElementById('fields-agency'), hf = document.getElementById('fields-home'); ['c-dni','c-agency','c-address','c-district'].forEach(id => document.getElementById(id).removeAttribute('required')); if(type === 'agency') { af.classList.remove('hidden'); hf.classList.add('hidden'); document.getElementById('c-dni').setAttribute('required','true'); const ag = document.getElementById('c-agency'); ag.setAttribute('required','true'); ag.value=""; app.clearAgency(); app.clearDistrict(); if(c.includes('Shalom')) ag.placeholder="Escribe para buscar sede..."; else ag.placeholder="Nombre de Agencia / Dirección"; } else { af.classList.add('hidden'); hf.classList.remove('hidden'); document.getElementById('c-address').setAttribute('required','true'); document.getElementById('c-district').setAttribute('required','true'); app.clearAgency(); app.clearDistrict(); } app.validateForm(); },
+            validateForm: () => { const btn = document.getElementById('btn-submit-order'), c = document.getElementById('c-courier-select').value, d = document.getElementById('c-date-select').value; if(c && d) btn.removeAttribute('disabled'); else btn.setAttribute('disabled','true'); },
+            submitOrder: async (e) => { e.preventDefault(); app.toggleLoading(true); const day = document.getElementById('c-date-select').value, name = document.getElementById('c-name').value, phone = document.getElementById('c-phone').value; let data = { clientName: name, clientPhone: phone, courier: state.selectedCourier, shippingDate: day, createdAt: Date.now(), product: "N/A" }, wa = ""; if (state.selectedCourierType === 'agency') { const dni = document.getElementById('c-dni').value, ag = document.getElementById('c-agency').value; data.clientDni = dni; data.clientAgency = ag; wa = `📦 *NUEVO ENVÍO (AGENCIA)*\n\n👤 ${name} | 📱 ${phone}\n🆔 DNI: ${dni}\n🏢 Agencia: ${ag}\n\n🚚 ${state.selectedCourier}\n📅 ${day}`; } else { const ad = document.getElementById('c-address').value, ds = document.getElementById('c-district').value, rf = document.getElementById('c-ref').value; data.clientAddress = ad; data.clientDistrict = ds; data.clientRef = rf; wa = `📦 *NUEVO ENVÍO (CASA)*\n\n👤 ${name} | 📱 ${phone}\n📍 ${ds}\n🏠 ${ad}\n🗺️ Ref: ${rf}\n\n🚚 ${state.selectedCourier}\n📅 ${day}`; } try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveOrder", merchantId: state.merchantId, data: data }) }); } catch(e){} window.open(`https://wa.me/51${state.config.whatsapp}?text=${encodeURIComponent(wa)}`, '_blank'); app.toggleLoading(false); },
+
+            // CORE & AUTH
+            handleLogin: async (e) => { e.preventDefault(); const p = document.getElementById('auth-phone').value.trim(), pw = document.getElementById('auth-pass').value.trim(), err = document.getElementById('auth-error'); app.toggleLoading(true); if(p==='999000999'&&pw==='admin123'){ app.loginSuccess({uid:'admin_master',phone:'Admin',isAdmin:true}); return; } if(state.apiUrl) { try { const res = await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "loginUser", data: { phone: p, password: pw } }) }); const json = await res.json(); if(json.status==='success') { app.loginSuccess(json.user); return; } else { err.innerText=json.message; err.classList.remove('hidden'); app.toggleLoading(false); return; } } catch(e){ console.error(e); } } const db=JSON.parse(SafeStorage.getItem('app_users_db')||'[]'); const u=db.find(x=>x.phone===p&&x.password===pw); if(u) app.loginSuccess(u); else { err.innerText="Usuario no encontrado"; err.classList.remove('hidden'); app.toggleLoading(false); } },
+            loginSuccess: (u) => { state.user=u; SafeStorage.setItem('app_current_user', JSON.stringify(u)); app.init(); },
+            logout: () => { SafeStorage.removeItem('app_current_user'); state.user=null; state.merchantId=null; app.init(); },
+            adminLoadUsers: async () => { const l = document.getElementById('admin-users-list'); l.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando...</td></tr>'; let u = []; try { const res = await fetch(`${state.apiUrl}?action=getUsers`); const json = await res.json(); if(json.users) u = json.users; } catch(e){} l.innerHTML = u.length ? u.map(user => `<tr class="bg-white border-b hover:bg-slate-50"><td class="px-6 py-4 font-bold text-slate-700">${user.phone}</td><td class="px-6 py-4"><span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded">${user.plan||'Gratis'}</span></td><td class="px-6 py-4 text-xs text-slate-400">${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</td><td class="px-6 py-4 text-right flex gap-2 justify-end"><button onclick="app.adminResend('${user.uid}','${user.phone}')" class="text-indigo-600 text-xs font-bold">Clave</button><select onchange="app.adminUpdatePlan('${user.uid}', this.value)" class="text-xs border rounded p-1 bg-slate-50"><option value="" disabled selected>Cambiar Plan</option><option value="Gratis">Gratis</option><option value="Pro">Pro</option><option value="Empresa">Empresa</option></select></td></tr>`).join('') : '<tr><td colspan="4" class="p-4 text-center">Vacío</td></tr>'; app.toggleLoading(false); },
+            adminCreateUser: async (e) => { e.preventDefault(); const p = document.getElementById('admin-new-phone').value.trim(), pl = document.getElementById('admin-new-plan').value; app.toggleLoading(true); const np = Math.floor(1000+Math.random()*9000).toString(); try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "registerUser", data: { phone: p, password: np, plan: pl } }) }); } catch(e){} window.open(`https://wa.me/51${p}?text=${encodeURIComponent(`🔐 Bienvenid@ (Plan ${pl})\n📱 User: ${p}\n🔑 Pass: *${np}*\nEntra: ${window.location.href}`)}`, '_blank'); document.getElementById('admin-new-phone').value=""; app.adminLoadUsers(); },
+            adminUpdatePlan: async (uid, newPlan) => { if(!confirm(`¿Cambiar plan a ${newPlan}?`)) return; app.toggleLoading(true); try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "updateUserPlan", merchantId: uid, newPlan: newPlan }) }); app.adminLoadUsers(); } catch(e){ alert("Error"); app.toggleLoading(false); } },
+            adminResend: async (uid, phone) => { if(!confirm(`¿Reset clave ${phone}?`)) return; app.toggleLoading(true); const np = Math.floor(1000+Math.random()*9000).toString(); try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: uid, newPassword: np }) }); } catch(e){} window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(`🔐 Recuperación\n📱 ${phone}\n🔑 Nueva: *${np}*`)}`, '_blank'); app.toggleLoading(false); },
+            saveConfig: async () => { app.toggleLoading(true); state.config.merchantName = document.getElementById('inp-store-name').value; state.config.whatsapp = document.getElementById('inp-whatsapp').value; state.config.updateTime = document.getElementById('inp-time').value; SafeStorage.setItem(`config_${state.user.uid}`, JSON.stringify(state.config)); try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "saveConfig", merchantId: state.user.uid, data: state.config }) }); } catch(e){} setTimeout(() => app.toggleLoading(false), 500); },
+            loadData: async () => { app.toggleLoading(true); state.config = { ...initialState }; try { const res = await fetch(`${state.apiUrl}?action=getConfig&merchantId=${state.merchantId}`); const json = await res.json(); if (json.data) state.config = json.data; } catch(e){} if (state.isClientView) app.renderClient(); else app.renderDashboard(); if(!state.isClientView) app.loadOrders(); app.toggleLoading(false); },
+            loadOrders: async () => { const l = document.getElementById('orders-list'); l.innerHTML = '...'; let o = []; try { const res = await fetch(`${state.apiUrl}?action=getOrders&merchantId=${state.merchantId}`); const json = await res.json(); if (json.orders) o = json.orders; } catch(e){} if (!o.length) l.innerHTML = '<div class="text-center py-10 text-slate-400">Sin pedidos</div>'; else l.innerHTML = o.map(x => `<div class="bg-white p-3 rounded-lg shadow-sm border border-slate-100 mb-2"><div class="flex justify-between font-bold text-slate-800"><span>${x.clientName}</span><span class="text-xs bg-emerald-100 px-2 py-0.5 rounded text-emerald-800">${x.shippingDate}</span></div><div class="text-xs text-slate-500 mt-1">${x.clientAgency ? `Agencia: ${x.clientAgency}` : `Dirección: ${x.clientAddress}`}</div></div>`).join(''); },
+            changePassword: async () => { const np = document.getElementById('inp-new-pass').value.trim(); if(!np) return alert("Ingresa clave"); app.toggleLoading(true); if(state.apiUrl) { try { await fetch(state.apiUrl, { method: "POST", body: JSON.stringify({ action: "changePassword", merchantId: state.user.uid, newPassword: np }) }); } catch(e){} } else { let db=JSON.parse(SafeStorage.getItem('app_users_db')||'[]'); let me=db.find(x=>x.uid===state.user.uid); if(me){ me.password=np; SafeStorage.setItem('app_users_db', JSON.stringify(db)); } } document.getElementById('inp-new-pass').value=""; alert("Actualizado"); app.toggleLoading(false); },
             toggleConfigItem: (k, v) => { if (state.config[k].includes(v)) state.config[k] = state.config[k].filter(i => i !== v); else state.config[k].push(v); app.renderDashboard(); },
-            
-            renderDashboard: () => {
-                document.getElementById('inp-store-name').value = state.config.merchantName || ''; document.getElementById('inp-whatsapp').value = state.config.whatsapp || ''; document.getElementById('inp-time').value = state.config.updateTime || '';
-                document.getElementById('container-couriers').innerHTML = ALL_COURIERS.map(c => `<div onclick="app.toggleConfigItem('couriers','${c}')" class="cursor-pointer border rounded p-2 text-xs font-bold flex items-center gap-2 select-none ${state.config.couriers.includes(c)?'bg-blue-50 border-blue-500 text-blue-700':'bg-white hover:bg-slate-50 text-slate-600'}"><div class="w-3 h-3 border rounded flex items-center justify-center ${state.config.couriers.includes(c)?'bg-blue-600 border-blue-600':''}">${state.config.couriers.includes(c)?'<i data-lucide="check" class="w-2 h-2 text-white"></i>':''}</div>${c}</div>`).join('');
-                document.getElementById('container-days').innerHTML = ALL_DAYS.map(d => `<button onclick="app.toggleConfigItem('shippingDays','${d}')" class="px-3 py-1 rounded text-xs font-bold border ${state.config.shippingDays.includes(d)?'bg-emerald-500 text-white border-emerald-500':'bg-white text-slate-500 hover:bg-slate-50'}">${d}</button>`).join('');
-                lucide.createIcons();
-            },
-            
-            renderClient: () => {
-                document.getElementById('client-title').innerText = state.config.merchantName || "Tienda"; document.getElementById('client-time').innerText = state.config.updateTime || "--:--";
-                
-                // Render Couriers Dropdown options
-                const cl = state.config.couriers || [];
-                const courierSelect = document.getElementById('c-courier-select');
-                if (cl.length > 0) {
-                     courierSelect.innerHTML = '<option value="" disabled selected>Elige una opción...</option>' + 
-                        cl.map(c => `<option value="${c}">${c}</option>`).join('');
-                } else {
-                    courierSelect.innerHTML = '<option value="" disabled selected>Sin couriers configurados</option>';
-                }
-                
-                app.generateDateOptions();
-                app.loadExternalLists(); 
-                lucide.createIcons();
-            },
-
+            renderDashboard: () => { document.getElementById('inp-store-name').value = state.config.merchantName || ''; document.getElementById('inp-whatsapp').value = state.config.whatsapp || ''; document.getElementById('inp-time').value = state.config.updateTime || ''; document.getElementById('container-couriers').innerHTML = ALL_COURIERS.map(c => `<div onclick="app.toggleConfigItem('couriers','${c}')" class="cursor-pointer border rounded p-2 text-xs font-bold flex items-center gap-2 select-none ${state.config.couriers.includes(c)?'bg-blue-50 border-blue-500 text-blue-700':'bg-white hover:bg-slate-50 text-slate-600'}"><div class="w-3 h-3 border rounded flex items-center justify-center ${state.config.couriers.includes(c)?'bg-blue-600 border-blue-600':''}">${state.config.couriers.includes(c)?'<i data-lucide="check" class="w-2 h-2 text-white"></i>':''}</div>${c}</div>`).join(''); document.getElementById('container-days').innerHTML = ALL_DAYS.map(d => `<button onclick="app.toggleConfigItem('shippingDays','${d}')" class="px-3 py-1 rounded text-xs font-bold border ${state.config.shippingDays.includes(d)?'bg-emerald-500 text-white border-emerald-500':'bg-white text-slate-500 hover:bg-slate-50'}">${d}</button>`).join(''); lucide.createIcons(); },
+            renderClient: () => { document.getElementById('client-title').innerText = state.config.merchantName || "Tienda"; document.getElementById('client-time').innerText = state.config.updateTime || "--:--"; const cl = state.config.couriers || []; const cs = document.getElementById('c-courier-select'); if (cl.length) cs.innerHTML = '<option value="" disabled selected>Elige una opción...</option>' + cl.map(c => `<option value="${c}">${c}</option>`).join(''); else cs.innerHTML = '<option value="" disabled selected>Sin couriers</option>'; app.generateDateOptions(); app.loadExternalLists(); lucide.createIcons(); },
+            setTab: (t) => { ['config','share','orders'].forEach(x => { document.getElementById(`tab-${x}`).classList.add('hidden'); document.getElementById(`nav-${x}`).className = "nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 transition"; }); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.getElementById(`nav-${t}`).className = "nav-item p-3 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 text-left flex gap-3 items-center transition ring-1 ring-emerald-100"; if(t==='share') document.getElementById('share-link').innerText=`${window.location.origin}${window.location.pathname}?merchant=${state.user.uid}`; },
             init: () => {
-                state.apiUrl = DEFAULT_API_URL;
-                app.updateConnectionStatus();
-
-                const params = new URLSearchParams(window.location.search);
-                const mid = params.get('merchant');
-                document.getElementById('view-client').classList.add('hidden'); document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-admin').classList.add('hidden');
-
-                if (mid) { 
-                    state.isClientView = true; state.merchantId = mid;
-                    document.getElementById('view-client').classList.remove('hidden');
-                    document.getElementById('debug-panel').classList.remove('hidden');
-                    document.getElementById('btn-toggle-label').innerText = "Ir a Login";
-                    document.getElementById('btn-toggle-view').onclick = () => { try{ history.pushState({},'',location.pathname); }catch(e){} app.init(); };
-                    app.loadData();
-                } else {
-                    const storedUser = SafeStorage.getItem('app_current_user');
-                    if (storedUser) { 
-                        state.user = JSON.parse(storedUser); 
-                        if(state.user.isAdmin) {
-                            document.getElementById('view-admin').classList.remove('hidden');
-                            app.adminLoadUsers();
-                        } else {
-                            state.merchantId = state.user.uid;
-                            document.getElementById('view-dashboard').classList.remove('hidden');
-                            document.getElementById('user-display').innerText = state.user.phone; 
-                            document.getElementById('debug-panel').classList.remove('hidden');
-                            document.getElementById('btn-toggle-view').onclick = () => { 
-                                app.saveConfig().then(() => { try{ const u = new URL(location); u.searchParams.set('merchant',state.user.uid); history.pushState({},'',u); }catch(e){} state.isClientView=true; state.merchantId=state.user.uid; document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-client').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText="Volver Panel"; document.getElementById('btn-toggle-view').onclick=()=>app.init(); app.loadData(); });
-                            };
-                            app.setTab('config'); app.loadData();
-                        }
-                    } else { 
-                        document.getElementById('view-auth').classList.remove('hidden');
-                        document.getElementById('debug-panel').classList.add('hidden');
-                    }
-                }
+                app.updateConnectionStatus(); const p = new URLSearchParams(window.location.search); const mid = p.get('merchant');
+                document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
+                if (mid) { state.isClientView=true; state.merchantId=mid; document.getElementById('view-client').classList.remove('hidden'); document.getElementById('debug-panel').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText="Ir a Login"; document.getElementById('btn-toggle-view').onclick=()=>{ try{ history.pushState({},'',location.pathname); }catch(e){} app.init(); }; app.loadData(); }
+                else { const u = JSON.parse(SafeStorage.getItem('app_current_user')); if(u) { state.user=u; if(u.isAdmin) { document.getElementById('view-admin').classList.remove('hidden'); app.adminLoadUsers(); } else { state.merchantId=u.uid; document.getElementById('view-dashboard').classList.remove('hidden'); document.getElementById('user-display').innerText=u.phone; document.getElementById('plan-display').innerText=`PLAN ${u.plan||'GRATIS'}`; document.getElementById('debug-panel').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText="Ver como Cliente"; document.getElementById('btn-toggle-view').onclick=()=>{ app.saveConfig().then(()=>{ try{ const url=new URL(location); url.searchParams.set('merchant',state.user.uid); history.pushState({},'',url); }catch(e){} state.isClientView=true; state.merchantId=state.user.uid; document.getElementById('view-dashboard').classList.add('hidden'); document.getElementById('view-client').classList.remove('hidden'); document.getElementById('btn-toggle-label').innerText="Volver Panel"; document.getElementById('btn-toggle-view').onclick=()=>app.init(); app.loadData(); }); }; app.setTab('config'); app.loadData(); } } else { document.getElementById('view-auth').classList.remove('hidden'); document.getElementById('debug-panel').classList.add('hidden'); } }
                 lucide.createIcons();
             }
         };
