@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Logística B2B</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -12,6 +12,13 @@
         .slide-up { animation: slideUp 0.4s ease-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Scrollbar personalizada sutil */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -21,21 +28,18 @@
         .modal-exit { opacity: 1; transform: scale(1); }
         .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 0.2s, transform 0.2s; }
 
-        /* Estilos de Impresión - Tarjeta */
+        /* Estilos de Impresión */
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
-            
-            #print-area { 
-                position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0;
-                background-color: white; display: block !important; z-index: 9999;
-            }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background-color: white; display: block !important; z-index: 9999; }
             .no-print { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex flex-col">
+<!-- h-[100dvh] asegura que ocupe el alto real en móviles ignorando la barra de url -->
+<body class="bg-slate-50 text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
 
     <!-- OVERLAY CARGA -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/95 z-[9999] flex flex-col items-center justify-center transition-opacity duration-300 hidden pointer-events-none opacity-0">
@@ -67,9 +71,9 @@
     <!-- ÁREA DE IMPRESIÓN -->
     <div id="print-area" class="hidden bg-white p-4"></div>
 
-    <!-- VISTA AUTH -->
-    <div id="view-auth" class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-emerald-50 hidden no-print">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-xl overflow-hidden border border-slate-100 slide-up">
+    <!-- VISTA AUTH (Login) -->
+    <div id="view-auth" class="flex-1 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-emerald-50 hidden overflow-y-auto no-print">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-xl overflow-hidden border border-slate-100 slide-up my-auto">
             <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="box" class="w-32 h-32 text-white"></i></div>
                 <div class="relative z-10">
@@ -100,10 +104,13 @@
                 </div>
             </div>
         </div>
+        <div class="mt-8 text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+            POWERED BY LATAM5S
+        </div>
     </div>
 
     <!-- VISTA ADMIN -->
-    <div id="view-admin" class="flex-1 flex flex-col h-full hidden bg-slate-100 no-print">
+    <div id="view-admin" class="flex-1 flex flex-col h-full hidden bg-slate-100 no-print overflow-hidden">
         <header class="bg-slate-900 text-white p-4 flex justify-between items-center shadow-md z-20">
             <div class="flex items-center gap-3">
                 <div class="bg-indigo-500 p-2 rounded-lg"><i data-lucide="shield" class="w-5 h-5"></i></div>
@@ -111,7 +118,7 @@
             </div>
             <button onclick="app.logout()" class="text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded transition">Salir</button>
         </header>
-        <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-5xl mx-auto w-full space-y-6">
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-5xl mx-auto w-full space-y-6 pb-20">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Alta de Emprendedor</h2>
                 <form onsubmit="app.adminCreateUser(event)" class="flex flex-col md:flex-row gap-4 items-end">
@@ -141,12 +148,15 @@
                     <table class="w-full text-sm text-left"><thead class="bg-slate-50 text-slate-500 uppercase text-xs"><tr><th class="px-6 py-3">WhatsApp</th><th class="px-6 py-3">Plan</th><th class="px-6 py-3">Fecha Alta</th><th class="px-6 py-3 text-right">Acciones</th></tr></thead><tbody id="admin-users-list" class="divide-y divide-slate-100"></tbody></table>
                 </div>
             </div>
+            <div class="text-center text-[10px] text-slate-400 mt-8 uppercase font-bold tracking-widest">
+                POWERED BY LATAM5S
+            </div>
         </main>
     </div>
 
     <!-- VISTA DASHBOARD (EMPRENDEDOR) -->
-    <div id="view-dashboard" class="flex-1 flex flex-col md:flex-row h-full hidden no-print">
-        <aside class="w-full md:w-72 bg-white border-b md:border-r border-slate-200 flex flex-col shadow-sm z-20">
+    <div id="view-dashboard" class="flex-1 flex flex-col md:flex-row h-full hidden no-print overflow-hidden">
+        <aside class="w-full md:w-72 bg-white border-b md:border-r border-slate-200 flex flex-col shadow-sm z-20 flex-shrink-0">
             <!-- HEADER ADAPTATIVO -->
             <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -156,7 +166,7 @@
                         <p class="text-xs text-slate-400 hidden md:block">Emprendedor</p>
                     </div>
                 </div>
-                <!-- CONTROLES SOLO MÓVIL (Integrados en Header) -->
+                <!-- CONTROLES SOLO MÓVIL -->
                 <div class="flex items-center gap-3 md:hidden">
                     <div class="text-right">
                         <p class="user-phone-display text-xs font-bold text-slate-700">...</p>
@@ -169,12 +179,12 @@
             </div>
 
             <nav class="flex md:flex-col p-2 gap-1 overflow-x-auto no-scrollbar">
-                <button onclick="app.setTab('config')" id="nav-config" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center bg-emerald-50 text-emerald-700"><i data-lucide="settings" class="w-4 h-4"></i> Configurar</button>
-                <button onclick="app.setTab('share')" id="nav-share" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50"><i data-lucide="share-2" class="w-4 h-4"></i> Compartir</button>
-                <button onclick="app.setTab('orders')" id="nav-orders" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50"><i data-lucide="truck" class="w-4 h-4"></i> Envíos</button>
+                <button onclick="app.setTab('config')" id="nav-config" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center bg-emerald-50 text-emerald-700 whitespace-nowrap"><i data-lucide="settings" class="w-4 h-4"></i> Configurar</button>
+                <button onclick="app.setTab('share')" id="nav-share" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 whitespace-nowrap"><i data-lucide="share-2" class="w-4 h-4"></i> Compartir</button>
+                <button onclick="app.setTab('orders')" id="nav-orders" class="nav-item p-3 rounded-lg text-sm font-bold text-left flex gap-3 items-center text-slate-500 hover:bg-slate-50 whitespace-nowrap"><i data-lucide="truck" class="w-4 h-4"></i> Envíos</button>
             </nav>
             
-            <!-- FOOTER ESCRITORIO (Oculto en Móvil) -->
+            <!-- FOOTER ESCRITORIO -->
             <div class="mt-auto p-4 border-t border-slate-100 hidden md:block">
                 <div class="flex items-center gap-3 mb-3">
                     <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><i data-lucide="phone" class="w-4 h-4 text-slate-500"></i></div>
@@ -184,47 +194,69 @@
                     </div>
                 </div>
                 <button onclick="app.logout()" class="w-full text-red-500 text-xs font-bold hover:bg-red-50 py-2 rounded transition">Cerrar Sesión</button>
+                <div class="text-center text-[9px] text-slate-300 mt-4 uppercase font-bold tracking-widest">
+                    POWERED BY LATAM5S
+                </div>
             </div>
         </aside>
-        <main class="flex-1 bg-slate-50/50 p-4 md:p-8 overflow-y-auto relative">
-            <div id="tab-config" class="tab-content max-w-2xl mx-auto space-y-6 slide-up">
-                <div class="flex justify-between items-center"><h2 class="text-xl font-bold text-slate-800">Configuración</h2><button id="btn-save-config" onclick="app.saveConfig()" class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition flex gap-2"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button></div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                    <h3 class="font-bold text-slate-800">Datos Públicos</h3>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre Tienda</label><input id="inp-store-name" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                    <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp Pedidos</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                    <h3 class="font-bold text-slate-800">Logística</h3>
-                    <label class="text-xs font-bold text-slate-400 uppercase">Couriers</label><div id="container-couriers" class="grid grid-cols-2 gap-2"></div>
-                    <label class="text-xs font-bold text-slate-400 uppercase block mt-4">Días Envío</label><div id="container-days" class="flex flex-wrap gap-2"></div>
-                    <div class="flex items-center gap-2 mt-2"><span class="text-sm font-bold text-slate-600">Hora Corte:</span><input type="time" id="inp-time" class="border rounded px-2 py-1 text-sm"></div>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-indigo-500"></i> Seguridad</h3>
-                    <div class="flex gap-2 items-end"><div class="flex-1"><label class="text-xs font-bold text-slate-400 uppercase">Nueva Contraseña</label><input id="inp-new-pass" type="password" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></div><button id="btn-change-pass" onclick="app.changePassword()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition h-[42px]">Actualizar</button></div>
-                </div>
-            </div>
-            <div id="tab-share" class="tab-content hidden h-full flex flex-col items-center justify-center p-4">
-                <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full slide-up">
-                    <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600"><i data-lucide="share-2" class="w-8 h-8"></i></div>
-                    <h2 class="text-xl font-bold mb-4">Enlace Público</h2>
-                    <p class="text-slate-600 text-sm mb-6 leading-relaxed">
-                        ¡Listo para compartir! <br>
-                        Tu formulario personalizado está activo. Comparte el siguiente enlace con tus clientes para que registren sus envíos.
-                    </p>
-
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 break-all"><code id="share-link" class="text-xs text-indigo-600 font-bold select-all">...</code></div>
-                    <div class="space-y-3">
-                        <button id="btn-copy-link" onclick="app.copyLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Copiar Link</button>
-                        <button onclick="app.shareOnWhatsapp()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Enviar por WhatsApp</button>
-                        <button onclick="app.openClientLink()" class="w-full bg-white border-2 border-indigo-100 text-indigo-600 py-3 rounded-xl font-bold hover:bg-indigo-50 transition flex items-center justify-center gap-2"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir en nueva pestaña</button>
+        
+        <main class="flex-1 bg-slate-50/50 relative overflow-hidden flex flex-col">
+            
+            <!-- PESTAÑA CONFIGURACIÓN (Con Scroll Propio) -->
+            <div id="tab-config" class="tab-content w-full h-full overflow-y-auto p-4 md:p-8 hidden">
+                <div class="max-w-2xl mx-auto space-y-6 slide-up pb-20">
+                    <div class="flex justify-between items-center"><h2 class="text-xl font-bold text-slate-800">Configuración</h2><button id="btn-save-config" onclick="app.saveConfig()" class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition flex gap-2"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button></div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                        <h3 class="font-bold text-slate-800">Datos Públicos</h3>
+                        <div><label class="text-xs font-bold text-slate-400 uppercase">Nombre Tienda</label><input id="inp-store-name" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                        <div><label class="text-xs font-bold text-slate-400 uppercase">WhatsApp Pedidos</label><input id="inp-whatsapp" type="tel" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                        <h3 class="font-bold text-slate-800">Logística</h3>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Couriers</label><div id="container-couriers" class="grid grid-cols-2 gap-2"></div>
+                        <label class="text-xs font-bold text-slate-400 uppercase block mt-4">Días Envío</label><div id="container-days" class="flex flex-wrap gap-2"></div>
+                        <div class="flex items-center gap-2 mt-2"><span class="text-sm font-bold text-slate-600">Hora Corte:</span><input type="time" id="inp-time" class="border rounded px-2 py-1 text-sm"></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-indigo-500"></i> Seguridad</h3>
+                        <div class="flex gap-2 items-end"><div class="flex-1"><label class="text-xs font-bold text-slate-400 uppercase">Nueva Contraseña</label><input id="inp-new-pass" type="password" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></div><button id="btn-change-pass" onclick="app.changePassword()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition h-[42px]">Actualizar</button></div>
+                    </div>
+                    <div class="text-center text-[10px] text-slate-300 uppercase font-bold tracking-widest pt-8">
+                        POWERED BY LATAM5S
                     </div>
                 </div>
             </div>
-            <div id="tab-orders" class="tab-content hidden max-w-5xl mx-auto h-full flex flex-col">
-                <!-- Header: Título + Herramientas Globales -->
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            
+            <!-- PESTAÑA COMPARTIR (Con Scroll Propio y centrado si hay espacio) -->
+            <div id="tab-share" class="tab-content w-full h-full overflow-y-auto p-4 hidden">
+                <div class="min-h-full flex flex-col items-center justify-center py-8 pb-20">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full slide-up">
+                        <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600"><i data-lucide="share-2" class="w-8 h-8"></i></div>
+                        
+                        <h2 class="text-xl font-bold mb-4">Enlace Público</h2>
+                        <p class="text-slate-600 text-sm mb-6 leading-relaxed">
+                            ¡Listo para compartir! <br>
+                            Tu formulario personalizado está activo. Comparte el siguiente enlace con tus clientes para que registren sus envíos.
+                        </p>
+
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 break-all"><code id="share-link" class="text-xs text-indigo-600 font-bold select-all">...</code></div>
+                        
+                        <div class="space-y-3">
+                            <button id="btn-copy-link" onclick="app.copyLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Copiar Link</button>
+                            <button onclick="app.shareOnWhatsapp()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Enviar por WhatsApp</button>
+                            <button onclick="app.openClientLink()" class="w-full bg-white border-2 border-indigo-100 text-indigo-600 py-3 rounded-xl font-bold hover:bg-indigo-50 transition flex items-center justify-center gap-2"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir en nueva pestaña</button>
+                        </div>
+                    </div>
+                    <div class="text-center text-[10px] text-slate-300 uppercase font-bold tracking-widest mt-8">
+                        POWERED BY LATAM5S
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PESTAÑA ENVÍOS (Estructura Flex completa) -->
+            <div id="tab-orders" class="tab-content hidden w-full h-full flex flex-col p-4 md:p-8">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 flex-shrink-0">
                     <h2 class="text-xl font-bold text-slate-800">Mis Envíos</h2>
                     <div class="flex gap-2 w-full md:w-auto">
                         <button onclick="app.printLabels()" class="flex-1 md:flex-none px-4 py-2 bg-slate-800 text-white rounded-lg text-xs font-bold hover:bg-slate-900 transition flex items-center justify-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Etiquetas</button>
@@ -233,8 +265,8 @@
                     </div>
                 </div>
 
-                <!-- Toolbar de Filtros y Acciones Masivas -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <!-- Toolbar -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4 flex flex-col md:flex-row gap-4 justify-between items-center flex-shrink-0">
                     <!-- Filtros -->
                     <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center flex-1">
                         <div class="relative w-full sm:w-64">
@@ -246,7 +278,7 @@
                         </div>
                     </div>
                     
-                    <!-- Acciones en Lote -->
+                    <!-- Acciones -->
                     <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 border-t md:border-t-0 md:border-l border-slate-100 pt-3 md:pt-0 md:pl-4">
                         <button onclick="app.toggleAllSelection()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2"><i data-lucide="check-square" class="w-4 h-4"></i> Todo</button>
                         
@@ -262,25 +294,30 @@
                     </div>
                 </div>
 
-                <!-- Lista de Pedidos -->
+                <!-- Lista (Aquí está el scroll interno) -->
                 <div class="flex-1 overflow-hidden flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm relative">
-                    <div class="overflow-y-auto p-2 space-y-1 h-full" id="orders-list">
-                        <!-- Items inyectados -->
+                    <div class="overflow-y-auto p-2 space-y-1 h-full pb-20" id="orders-list">
+                        <!-- Items -->
                     </div>
+                </div>
+                
+                <div class="text-center text-[10px] text-slate-300 uppercase font-bold tracking-widest mt-4 md:hidden">
+                    POWERED BY LATAM5S
                 </div>
             </div>
         </main>
     </div>
 
     <!-- VISTA CLIENTE -->
-    <div id="view-client" class="flex-1 min-h-screen bg-slate-50 hidden overflow-y-auto no-print">
+    <div id="view-client" class="flex-1 h-full hidden overflow-y-auto no-print bg-slate-50">
         <div class="max-w-2xl mx-auto min-h-screen bg-white shadow-2xl flex flex-col relative overflow-hidden">
             <div class="bg-slate-900 text-white p-6 sticky top-0 z-30 shadow-md flex items-center gap-3">
                 <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center"><i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-400"></i></div>
                 <div><h1 id="client-title" class="font-bold text-lg leading-tight">Cargando...</h1><p class="text-xs text-slate-400">Datos de Envío</p></div>
             </div>
 
-            <div class="flex-1 p-6 space-y-8 pb-24">
+            <!-- Agregado pb-32 para asegurar espacio contra barras de navegacion movil -->
+            <div class="flex-1 p-6 space-y-8 pb-32">
                 <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg shadow-sm"><p class="text-xs text-orange-700">📅 Pedidos para hoy cierran a las <strong id="client-time">--:--</strong>.</p></div>
 
                 <form id="client-form" onsubmit="app.submitOrder(event)" class="space-y-8">
@@ -308,10 +345,10 @@
                         </div>
                     </div>
 
-                    <!-- PASO 2 (Lista Vertical sin Labels, solo Placeholders) -->
+                    <!-- PASO 2 -->
                     <div id="dynamic-form-section" class="hidden space-y-4 fade-in">
                         
-                        <!-- AGENCIA (SEDE -> DNI -> [Generic Name -> Phone]) -->
+                        <!-- AGENCIA -->
                         <div id="fields-agency" class="hidden space-y-4">
                             <!-- 1. Sede -->
                             <div class="relative z-20">
@@ -326,7 +363,7 @@
                             <div><input id="c-dni" type="tel" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition" placeholder="DNI / CE"></div>
                         </div>
 
-                        <!-- DOMICILIO (DISTRITO -> DIRECCION -> REFERENCIA -> [Generic Name -> Phone]) -->
+                        <!-- DOMICILIO -->
                         <div id="fields-home" class="hidden space-y-4">
                             <!-- 1. Distrito -->
                             <div class="relative z-20">
@@ -343,7 +380,7 @@
                             <div><input id="c-ref" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition" placeholder="Referencia (Frente a...)"></div>
                         </div>
 
-                        <!-- GENERICOS (Vertical Stack, Sin Labels) -->
+                        <!-- GENERICOS -->
                         <div class="space-y-4 pt-1">
                             <div><input id="c-name" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition" placeholder="Nombre Completo"></div>
                             <div><input id="c-phone" type="tel" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800 transition" placeholder="Celular / WhatsApp"></div>
@@ -358,6 +395,10 @@
                         </button>
                     </div>
                 </form>
+                
+                <div class="text-center text-[10px] text-slate-300 uppercase font-bold tracking-widest mt-8 pb-4">
+                    POWERED BY LATAM5S
+                </div>
             </div>
         </div>
     </div>
