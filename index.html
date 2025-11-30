@@ -269,7 +269,7 @@
             
             <!-- PESTAÑA ENVÍOS OPTIMIZADA -->
             <div id="tab-orders" class="tab-content hidden w-full h-full flex flex-col p-3 md:p-8">
-                <!-- Header eliminado (Solo titulo visible en desktop si se quisiera, pero se pidió quitar) -->
+                <!-- Header eliminado -->
                 
                 <!-- Toolbar Compacta 2 Líneas -->
                 <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm mb-3 flex flex-col gap-3 flex-shrink-0">
@@ -285,11 +285,13 @@
                     <!-- Línea 2: Herramientas y Acciones en Scroll Horizontal -->
                     <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                         <!-- Grupo Selección -->
-                        <button onclick="app.toggleAllSelection()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2 flex-shrink-0 border border-slate-200"><i data-lucide="check-square" class="w-4 h-4"></i> Todo</button>
+                        <button onclick="app.toggleAllSelection()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2 flex-shrink-0 border border-slate-200">
+                            <i data-lucide="check-square" class="w-4 h-4"></i> <span class="hidden sm:inline">Todo</span>
+                        </button>
                         
                         <div class="h-6 w-px bg-slate-200 mx-1 flex-shrink-0"></div>
                         
-                        <!-- Grupo Herramientas (Texto visible solo en sm, solo iconos en movil) -->
+                        <!-- Grupo Herramientas -->
                         <button onclick="app.printLabels()" class="px-3 py-2 bg-slate-50 text-slate-700 border border-slate-200 rounded-lg font-bold hover:bg-slate-100 transition flex items-center justify-center gap-2 text-xs flex-shrink-0">
                             <i data-lucide="printer" class="w-4 h-4"></i> <span class="hidden sm:inline">Etiquetas</span>
                         </button>
@@ -303,8 +305,12 @@
                         <div class="h-6 w-px bg-slate-200 mx-1 flex-shrink-0"></div>
 
                         <!-- Grupo Acciones -->
-                        <button onclick="app.openStatusMenu()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0 shadow-sm"><i data-lucide="plus-circle" class="w-4 h-4"></i> Estado</button>
-                        <button onclick="app.deleteSelected()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2 flex-shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="app.openStatusMenu()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0 shadow-sm">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> <span class="hidden sm:inline">Estado</span>
+                        </button>
+                        <button onclick="app.deleteSelected()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2 flex-shrink-0">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 </div>
 
