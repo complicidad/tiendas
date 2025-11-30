@@ -56,21 +56,22 @@
         </div>
     </div>
 
-    <!-- MODAL SELECCIÓN DE ESTADO (ACTION SHEET) -->
-    <div id="modal-status" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm hidden flex flex-col justify-end md:justify-center items-center transition-opacity duration-200 opacity-0">
-        <div id="modal-status-card" class="bg-white w-full md:w-96 md:rounded-2xl rounded-t-2xl p-6 shadow-2xl transform translate-y-full md:translate-y-10 transition-transform duration-300">
-            <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 md:hidden"></div>
+    <!-- MODAL SELECCIÓN DE ESTADO (AHORA SIEMPRE CENTRADO) -->
+    <div id="modal-status" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm hidden flex items-center justify-center transition-opacity duration-200 opacity-0">
+        <!-- Se removieron clases de 'bottom sheet' (rounded-t-2xl, translate-y-full) y se usaron las de modal centrado -->
+        <div id="modal-status-card" class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl transform scale-95 transition-transform duration-200 mx-4">
+            
             <h3 class="text-lg font-bold text-slate-900 mb-4 text-center">Actualizar Estado</h3>
             <p class="text-xs text-slate-500 text-center mb-6">Se aplicará a los elementos seleccionados.</p>
             
             <div class="space-y-3">
-                <button onclick="app.setStatus('ENVIADO')" class="w-full py-4 rounded-xl font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center gap-3">
+                <button onclick="app.setStatus('ENVIADO')" class="w-full py-4 rounded-xl font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center gap-3 transition">
                     <i data-lucide="truck" class="w-5 h-5"></i> MARCAR COMO ENVIADO
                 </button>
-                <button onclick="app.setStatus('PENDIENTE')" class="w-full py-4 rounded-xl font-bold bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 flex items-center justify-center gap-3">
+                <button onclick="app.setStatus('PENDIENTE')" class="w-full py-4 rounded-xl font-bold bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 flex items-center justify-center gap-3 transition">
                     <i data-lucide="clock" class="w-5 h-5"></i> MARCAR COMO PENDIENTE
                 </button>
-                <button onclick="app.closeModal('modal-status')" class="w-full py-3 rounded-xl font-bold text-slate-400 hover:bg-slate-50 mt-2">Cancelar</button>
+                <button onclick="app.closeModal('modal-status')" class="w-full py-3 rounded-xl font-bold text-slate-400 hover:bg-slate-50 mt-2 transition">Cancelar</button>
             </div>
         </div>
     </div>
