@@ -29,7 +29,7 @@
                         sans: ['Quicksand', 'sans-serif'], 
                         label: ['Inter', 'sans-serif'] 
                     },
-                    boxShadow: { 'neon': '0 0 30px rgba(59, 130, 246, 0.4)' },
+                    boxShadow: { 'neon': '0 0 40px rgba(59, 130, 246, 0.3)' },
                 }
             }
         }
@@ -42,21 +42,12 @@
         .text-gradient { background: linear-gradient(to right, #60A5FA, #34D399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .logo-text-gradient { background: linear-gradient(to right, #3B82F6, #2DD4BF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Animación Impresora: Altura ajustada para no romper el layout */
-        @keyframes printCycle {
-            0% { height: 0; opacity: 0; transform: translateY(-10px); }
-            15% { height: 280px; opacity: 1; transform: translateY(0); }
-            85% { height: 280px; opacity: 1; transform: translateY(0); }
-            100% { height: 0; opacity: 0; transform: translateY(-10px); }
-        }
-        .animate-print-label { animation: printCycle 5.5s ease-in-out infinite; overflow: hidden; }
-        
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        .animate-float { animation: float 3.5s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .animate-float { animation: float 4s ease-in-out infinite; }
     </style>
 </head>
 
-<body class="bg-dark_bg text-gray-100 antialiased selection:bg-primary selection:text-white">
+<body class="bg-dark_bg text-gray-100 antialiased selection:bg-primary selection:text-white overflow-x-hidden">
 
     <header class="fixed w-full z-50 top-0 py-4">
         <div class="mx-auto max-w-7xl px-4">
@@ -65,7 +56,7 @@
                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white shadow-lg">5S</div>
                     <span class="font-extrabold text-lg logo-text-gradient tracking-tight italic">Latam5S</span>
                 </a>
-                <a href="https://wa.me/51904774275?text=Hans,%20quiero%20empezar%20gratis" target="_blank" class="bg-white text-dark_bg px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all transform hover:scale-105 active:scale-95">
+                <a href="https://wa.me/51904774275?text=Hans,%20quiero%20empezar%20gratis" target="_blank" class="bg-white text-dark_bg px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all transform hover:scale-105">
                     Empezar Gratis
                 </a>
             </nav>
@@ -82,7 +73,7 @@
                         Estándar Universal de <br><span class="text-gradient">Datos para Envíos 🇵🇪</span>
                     </h1>
                     <p class="text-gray-400 text-lg md:text-xl max-w-xl mx-auto lg:mx-0 leading-relaxed mb-10">
-                        Deja de digitar datos manualmente. Convierte tus ventas de WhatsApp en <b>Rótulos Profesionales</b> y Excels listos para Shalom y Olva en un solo clic.
+                        Deja de digitar datos manualmente. Convierte tus ventas de WhatsApp en <b>Rótulos Profesionales</b> y Excels para Shalom y Olva en un solo clic.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                         <a href="#showroom" class="px-10 py-5 bg-primary hover:bg-blue-600 text-white font-bold rounded-full shadow-neon transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg uppercase tracking-tighter">
@@ -92,41 +83,36 @@
                 </div>
 
                 <div class="flex justify-center items-center w-full relative z-10">
-                    <div class="relative w-full max-w-[420px] mx-auto">
-                        <div class="absolute inset-0 bg-primary/20 blur-[100px] pointer-events-none"></div>
+                    <div class="relative w-full max-w-[440px] animate-float">
+                        <div class="absolute inset-0 bg-primary/30 blur-[120px] pointer-events-none"></div>
                         
-                        <div class="w-full h-16 bg-gray-800 rounded-t-3xl border-x border-t border-white/10 relative z-20 flex items-center justify-center shadow-2xl">
-                            <div class="w-3/4 h-2.5 bg-black rounded-full"></div>
-                        </div>
-                        
-                        <div class="bg-white mx-4 sm:mx-6 rounded-md shadow-2xl animate-print-label relative z-10 font-label border border-gray-400 p-4 sm:p-5 text-[#1a1a1a] text-left">
-                            <div class="flex justify-between items-center mb-1 border-b border-gray-200 pb-1.5">
-                                <span class="text-[10px] sm:text-[11px] text-[#9ca3af] font-semibold uppercase tracking-tight">REMITENTE</span>
-                                <span class="text-[14px] sm:text-[16px] font-extrabold text-black">Complicidad Boutique</span>
+                        <div class="bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative z-10 font-label border border-gray-200 p-5 sm:p-7 text-[#1a1a1a] text-left">
+                            <div class="flex justify-between items-center mb-1 border-b border-gray-200 pb-2">
+                                <span class="text-[11px] text-[#9ca3af] font-semibold uppercase tracking-tight">REMITENTE</span>
+                                <span class="text-[16px] font-extrabold text-black">Complicidad Boutique</span>
                             </div>
                             
-                            <div class="mt-2.5 mb-5">
-                                <span class="text-[10px] sm:text-[11px] text-[#9ca3af] font-semibold uppercase block mb-0.5">PARA:</span>
-                                <div class="text-[20px] sm:text-[24px] font-black leading-tight tracking-tight text-black">HOMERO SIMPSON</div>
-                                <div class="text-[16px] sm:text-[19px] font-extrabold mt-0.5 text-black">904 774 275</div>
+                            <div class="mt-4 mb-6">
+                                <span class="text-[11px] text-[#9ca3af] font-semibold uppercase block mb-1">PARA:</span>
+                                <div class="text-[22px] sm:text-[28px] font-black leading-none tracking-tight text-black">HOMERO SIMPSON</div>
+                                <div class="text-[18px] sm:text-[22px] font-extrabold mt-1 text-black">904 774 275</div>
                             </div>
 
-                            <div class="mb-5">
-                                <span class="text-[10px] sm:text-[11px] text-[#9ca3af] font-semibold uppercase block mb-1">DESTINO:</span>
-                                <div class="text-[11px] sm:text-[12px] font-semibold leading-tight text-black">
-                                    <span class="font-extrabold uppercase">AGENCIA:</span> LIMA / LIMA / LA MOLINA | Av. Siempreviva 742 - Ref. Frente a la Taberna de Moe, Springfield
+                            <div class="mb-6">
+                                <span class="text-[11px] text-[#9ca3af] font-semibold uppercase block mb-1.5">DESTINO:</span>
+                                <div class="text-[12px] sm:text-[14px] font-semibold leading-tight text-black">
+                                    <span class="font-black uppercase">AGENCIA:</span> LIMA / LIMA / LA MOLINA | Av. Siempreviva 742 - Ref. Frente a la Taberna de Moe, Springfield
                                 </div>
-                                <div class="text-[12px] sm:text-[13px] font-extrabold mt-1.5 text-black uppercase tracking-tight">DNI: 12345678</div>
+                                <div class="text-[13px] sm:text-[15px] font-extrabold mt-2 text-black uppercase tracking-tight">DNI: 12345678</div>
                             </div>
 
-                            <div class="flex justify-between items-end border-t border-gray-200 pt-2.5 mt-2">
-                                <div class="bg-[#f3f4f6] text-black px-3 py-1 rounded font-black text-[12px] sm:text-[13px] tracking-wide border border-gray-200 uppercase">SHALOM</div>
-                                <div class="text-[12px] sm:text-[14px] font-extrabold text-black">Lunes 09/03</div>
+                            <div class="flex justify-between items-end border-t border-gray-200 pt-4 mt-2">
+                                <div class="bg-black text-white px-4 py-1.5 rounded font-black text-[14px] tracking-widest uppercase">SHALOM</div>
+                                <div class="text-[14px] font-extrabold text-black">Lunes 09/03</div>
                             </div>
                         </div>
-
-                        <div class="w-full h-6 bg-gray-800 rounded-b-3xl border-x border-b border-white/10 shadow-2xl relative z-0"></div>
-                        <p class="text-center mt-8 text-[10px] font-bold text-primary tracking-[0.4em] uppercase animate-pulse">Resultado Real de Latam5S ⚡️</p>
+                        
+                        <p class="text-center mt-10 text-[10px] font-bold text-primary tracking-[0.4em] uppercase animate-pulse">Resultado Real de Latam5S ⚡️</p>
                     </div>
                 </div>
             </div>
@@ -141,52 +127,52 @@
         </div>
     </section>
 
-    <section class="py-24 bg-dark_bg text-center">
+    <section class="py-24 bg-dark_bg text-center border-t border-white/5">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tighter italic">¿Más Ventas = Menos Vida? 📉</h2>
-            <p class="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed mb-10 px-4">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tighter italic px-4 leading-tight">¿Más Ventas = Menos Vida? 📉</h2>
+            <p class="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed mb-10 px-6">
                 No dejes que el éxito de tu negocio te robe el sueño. <br>
                 El Estándar Universal recupera <b>2 horas de tu libertad</b> cada día.
             </p>
-            <div class="inline-block p-8 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] bg-primary/5 border border-primary/20 shadow-2xl backdrop-blur-sm mx-4">
-                <span class="text-primary font-extrabold text-xl md:text-5xl tracking-tighter uppercase italic block sm:inline">Ventas ↑ + Automatización = Libertad 🌊</span>
+            <div class="inline-block p-8 sm:p-12 rounded-[3rem] bg-primary/5 border border-primary/20 shadow-2xl backdrop-blur-sm mx-4">
+                <span class="text-primary font-extrabold text-2xl md:text-5xl tracking-tighter uppercase italic block sm:inline">Ventas ↑ + Automatización = Libertad 🌊</span>
             </div>
         </div>
     </section>
 
     <section id="showroom" class="py-24 bg-card_bg relative border-t border-white/5">
         <div class="container mx-auto px-4 max-w-6xl relative z-10">
-            <div class="glass-card rounded-[3rem] sm:rounded-[4rem] p-6 sm:p-20 flex flex-col md:flex-row gap-12 sm:gap-16 items-center border border-white/10 shadow-2xl relative overflow-hidden">
+            <div class="glass-card rounded-[3rem] sm:rounded-[4rem] p-8 sm:p-20 flex flex-col md:flex-row gap-16 items-center border border-white/10 shadow-2xl relative overflow-hidden">
                 
                 <div class="flex-1 text-center md:text-left relative z-10">
                     <span class="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest mb-6">Tienda Demo Real</span>
-                    <h2 class="text-3xl sm:text-5xl font-bold mb-6 text-white leading-tight tracking-tight">Experimenta el <br><span class="text-gradient">Formulario Maestro 🚀</span></h2>
-                    <p class="text-gray-400 text-base sm:text-lg mb-10 leading-relaxed">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6 text-white leading-tight tracking-tight leading-tight">Experimenta el <br><span class="text-gradient">Formulario Maestro 🚀</span></h2>
+                    <p class="text-gray-400 text-lg mb-10 leading-relaxed">
                         Entra a nuestra tienda de prueba. Mira lo fácil que es elegir agencias y sedes reales de Shalom/Olva. **Toda la info llegará lista a tu WhatsApp.**
                     </p>
-                    <a href="https://www.latam5s.com/form?merchant=u_bfr4p7c2w" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-4 px-8 sm:px-12 py-5 sm:py-6 bg-secondary hover:bg-emerald-500 text-white font-extrabold rounded-2xl shadow-neon transition-all transform hover:-translate-y-2 text-lg sm:text-xl uppercase tracking-widest">
+                    <a href="https://www.latam5s.com/form?merchant=u_bfr4p7c2w" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-4 px-12 py-6 bg-secondary hover:bg-emerald-500 text-white font-extrabold rounded-2xl shadow-neon transition-all transform hover:-translate-y-2 text-xl uppercase tracking-widest">
                         <i data-feather="external-link"></i> Abrir Demo en Vivo
                     </a>
                 </div>
 
                 <div class="flex-1 flex justify-center relative w-full">
                     <div class="relative group animate-float mx-auto">
-                        <div class="absolute inset-0 bg-primary/30 blur-[80px] sm:blur-[100px] group-hover:bg-primary/50 transition-all"></div>
-                        <div class="relative w-[240px] sm:w-[280px] aspect-[9/19] bg-gray-900 rounded-[3rem] border-[6px] border-gray-800 shadow-2xl overflow-hidden ring-1 ring-white/10 flex flex-col items-center justify-center p-6 sm:p-8 text-center">
-                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                                <i data-feather="smartphone" class="w-6 h-6 sm:w-8 sm:h-8 text-primary"></i>
+                        <div class="absolute inset-0 bg-primary/30 blur-[100px] group-hover:bg-primary/50 transition-all"></div>
+                        <div class="relative w-[260px] sm:w-[280px] aspect-[9/19] bg-gray-900 rounded-[3.5rem] border-[6px] border-gray-800 shadow-2xl overflow-hidden ring-1 ring-white/10 flex flex-col items-center justify-center p-8 text-center">
+                            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                                <i data-feather="smartphone" class="w-8 h-8 text-primary"></i>
                             </div>
-                            <p class="text-white font-bold text-base sm:text-lg mb-2 leading-tight tracking-tight uppercase italic">Formulario <br>Latam5S</p>
-                            <div class="w-10 sm:w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full mb-6"></div>
-                            <p class="text-gray-500 text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.2em]">Estandariza tu negocio</p>
+                            <p class="text-white font-bold text-lg mb-2 uppercase italic tracking-tight">Formulario <br>Latam5S</p>
+                            <div class="w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full mb-6"></div>
+                            <p class="text-gray-500 text-[9px] uppercase font-bold tracking-[0.2em]">Estandariza tu negocio</p>
                         </div>
                         
-                        <div class="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 glass-panel px-4 sm:px-5 py-3 sm:py-4 rounded-2xl border border-primary/30 shadow-2xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-secondary rounded-full flex items-center justify-center text-white shadow-lg"><i class="fas fa-bolt text-xs sm:text-base"></i></div>
+                        <div class="absolute -bottom-6 -right-6 glass-panel px-5 py-4 rounded-2xl border border-primary/30 shadow-2xl">
+                            <div class="flex items-center gap-3 text-white">
+                                <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white shadow-lg"><i class="fas fa-bolt"></i></div>
                                 <div>
-                                    <p class="text-[8px] sm:text-[9px] text-gray-400 font-bold uppercase tracking-widest">Resultado</p>
-                                    <p class="text-xs sm:text-sm text-white font-black tracking-tight italic uppercase">100% ALTOQUE</p>
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Resultado</p>
+                                    <p class="text-sm text-white font-black tracking-tight italic uppercase">100% ALTOQUE</p>
                                 </div>
                             </div>
                         </div>
@@ -199,17 +185,17 @@
 
     <section class="py-24 container mx-auto px-4">
         <div class="grid md:grid-cols-3 gap-8 text-center">
-            <div class="glass-card p-8 sm:p-10 rounded-3xl border border-primary/10 hover:border-primary/40 transition-all group">
+            <div class="glass-card p-10 rounded-3xl border border-primary/10 hover:border-primary/40 transition-all group">
                 <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-6 group-hover:scale-110 transition-transform"><i data-feather="check-circle"></i></div>
                 <h3 class="text-xl font-bold mb-4 text-white uppercase tracking-tighter">Validación Estricta</h3>
                 <p class="text-gray-400 text-sm leading-relaxed italic">Cero errores de digitación. El sistema valida sedes reales en tiempo real.</p>
             </div>
-            <div class="glass-card p-8 sm:p-10 rounded-3xl border border-secondary/10 hover:border-secondary/40 transition-all group">
+            <div class="glass-card p-10 rounded-3xl border border-secondary/10 hover:border-secondary/40 transition-all group">
                 <div class="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary mx-auto mb-6 group-hover:scale-110 transition-transform"><i data-feather="file-text"></i></div>
                 <h3 class="text-xl font-bold mb-4 text-white uppercase tracking-tighter">Excel de Carga Masiva</h3>
                 <p class="text-gray-400 text-sm leading-relaxed italic">Genera en 1 clic el archivo perfecto para Shalom u Olva.</p>
             </div>
-            <div class="glass-card p-8 sm:p-10 rounded-3xl border border-purple-500/10 hover:border-purple-500/40 transition-all group">
+            <div class="glass-card p-10 rounded-3xl border border-purple-500/10 hover:border-purple-500/40 transition-all group">
                 <div class="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mx-auto mb-6 group-hover:scale-110 transition-transform"><i data-feather="printer"></i></div>
                 <h3 class="text-xl font-bold mb-4 text-white uppercase tracking-tighter">Rótulos Térmicos</h3>
                 <p class="text-gray-400 text-sm leading-relaxed italic">Etiquetas profesionales listas para imprimir. Adiós plumón.</p>
@@ -218,27 +204,26 @@
     </section>
 
     <section id="precios" class="py-24 bg-dark_bg border-t border-white/5 text-center">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-5xl font-extrabold mb-16 text-white tracking-tighter italic px-4">Planes de Crecimiento</h2>
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-5xl font-extrabold mb-16 text-white tracking-tighter italic px-4 leading-tight">Planes de Crecimiento</h2>
             
             <div class="grid md:grid-cols-2 gap-12 sm:gap-10 max-w-4xl mx-auto items-stretch px-4">
-                <div class="glass-panel p-8 sm:p-10 rounded-[2.5rem] border border-white/5 text-left flex flex-col h-full hover:bg-white/5 transition-colors">
+                <div class="glass-panel p-10 rounded-[2.5rem] border border-white/5 text-left flex flex-col h-full hover:bg-white/5 transition-colors">
                     <h3 class="font-bold text-gray-500 tracking-widest text-[10px] uppercase mb-2">BÁSICO</h3>
                     <div class="text-4xl sm:text-5xl font-bold mb-6 text-white">S/. 0</div>
-                    <p class="text-gray-400 text-sm mb-8 font-medium leading-relaxed">Para emprendedores que están empezando a poner orden.</p>
+                    <p class="text-gray-400 text-sm mb-8 font-medium">Para emprendedores empezando a poner orden.</p>
                     <ul class="space-y-4 mb-10 text-sm text-gray-300 flex-grow font-medium">
                         <li class="flex items-center gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4"></i> Formulario Estándar</li>
                         <li class="flex items-center gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4"></i> Datos vía WhatsApp</li>
                     </ul>
-                    <a href="https://wa.me/51904774275?text=Hans,%20quiero%20empezar%20GRATIS" class="block w-full py-4 border border-white/10 rounded-2xl text-center font-bold hover:bg-white/10 transition-all uppercase text-[10px] tracking-widest">EMPEZAR GRATIS</a>
+                    <a href="https://wa.me/51904774275?text=Hans,%20quiero%20empezar%20GRATIS" class="block w-full py-4 border border-white/10 rounded-2xl text-center font-bold text-white hover:bg-white/10 transition-all uppercase text-[10px] tracking-widest">EMPEZAR GRATIS</a>
                 </div>
 
-                <div class="relative group h-full mt-8 sm:mt-0">
+                <div class="relative group h-full mt-10 sm:mt-0">
                     <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-6 py-2 rounded-full shadow-neon z-20 animate-pulse tracking-widest uppercase text-center w-max">
                         Solo 50 cupos con descuento este mes
                     </div>
-                    
-                    <div class="glass-card p-8 sm:p-10 rounded-[3.5rem] border border-primary/50 text-left bg-gradient-to-b from-primary/20 to-transparent shadow-neon flex flex-col h-full transform transition-transform sm:scale-105 group-hover:scale-[1.07]">
+                    <div class="glass-card p-10 rounded-[3.5rem] border border-primary/50 text-left bg-gradient-to-b from-primary/20 to-transparent shadow-neon flex flex-col h-full transform transition-transform sm:scale-105 group-hover:scale-[1.07]">
                         <h3 class="font-bold text-primary_glow tracking-widest text-[10px] uppercase mb-2">PLAN PRO</h3>
                         <div class="mb-4">
                             <div class="flex items-baseline gap-2">
@@ -286,7 +271,7 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             particles = [];
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 55; i++) {
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
