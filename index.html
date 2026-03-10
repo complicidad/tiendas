@@ -6,10 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Latam5S: El Estándar Universal de Datos para Envíos 🇵🇪</title>
     
-    <meta property="og:title" content="Latam5S: El Estándar Universal de Datos para Envíos">
-    <meta property="og:description" content="Libérate del trabajo manual. Recibe tus pedidos listos para despachar.">
-    <meta property="og:image" content="https://raw.githubusercontent.com/complicidad/landing/main/brand2.png">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -39,17 +35,18 @@
         .text-gradient { background: linear-gradient(to right, #60A5FA, #34D399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .logo-text-gradient { background: linear-gradient(to right, #3B82F6, #2DD4BF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* EFECTO FLIP 3D */
-        .flip-container { perspective: 1000px; width: 100%; max-width: 440px; height: 320px; }
+        /* EFECTO FLIP 3D CORREGIDO */
+        .flip-container { perspective: 1000px; width: 100%; max-width: 440px; height: 380px; }
         .flip-card { 
             position: relative; width: 100%; height: 100%; 
             transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
             transform-style: preserve-3d;
-            animation: autoFlip 6s infinite ease-in-out;
+            animation: autoFlip 7s infinite ease-in-out;
         }
         .flip-front, .flip-back { 
             position: absolute; width: 100%; height: 100%; 
             backface-visibility: hidden; border-radius: 12px;
+            box-sizing: border-box;
         }
         .flip-back { transform: rotateY(180deg); }
         @keyframes autoFlip {
@@ -57,8 +54,11 @@
             50%, 90% { transform: rotateY(180deg); }
             100% { transform: rotateY(0deg); }
         }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         .animate-float { animation: float 4s ease-in-out infinite; }
+        
+        /* Líneas de flujo */
+        .flow-line { height: 60px; width: 2px; background: linear-gradient(to bottom, #3B82F6, #10B981); margin: 0 auto; }
     </style>
 </head>
 
@@ -101,68 +101,66 @@
                     <div class="flip-container animate-float">
                         <div class="flip-card">
                             
-                            <div class="flip-front bg-white shadow-2xl border border-gray-200 p-5 sm:p-7 text-[#1a1a1a] text-left">
-                                <div class="flex justify-between items-center mb-1 border-b border-gray-200 pb-2">
-                                    <span class="text-[11px] text-[#9ca3af] font-semibold uppercase tracking-tight font-label">REMITENTE</span>
-                                    <span class="text-[16px] font-extrabold font-label">Latam5S Store</span>
-                                </div>
-                                <div class="mt-4 mb-6 font-label">
-                                    <span class="text-[11px] text-[#9ca3af] font-semibold uppercase block mb-1">PARA:</span>
-                                    <div class="text-[22px] sm:text-[28px] font-black leading-none tracking-tight">HOMERO SIMPSON</div>
-                                    <div class="text-[18px] sm:text-[22px] font-extrabold mt-1">904 774 275</div>
-                                </div>
-                                <div class="mb-6 font-label">
-                                    <span class="text-[11px] text-[#9ca3af] font-semibold uppercase block mb-1.5">DESTINO:</span>
-                                    <div class="text-[12px] sm:text-[14px] font-semibold leading-tight">
-                                        <span class="font-black uppercase">AGENCIA:</span> LIMA / LIMA / LA MOLINA | Av. Siempreviva 742 - Ref. Frente a la Taberna de Moe
+                            <div class="flip-front bg-white shadow-2xl border border-gray-300 p-5 sm:p-6 text-[#1a1a1a] text-left flex flex-col justify-between">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1 border-b border-gray-200 pb-2">
+                                        <span class="text-[10px] text-[#9ca3af] font-bold uppercase font-label">REMITENTE</span>
+                                        <span class="text-[14px] font-black font-label">Latam5S Store</span>
                                     </div>
-                                    <div class="text-[13px] sm:text-[15px] font-extrabold mt-2 uppercase tracking-tight">DNI: 12345678</div>
+                                    <div class="mt-4 mb-4 font-label">
+                                        <span class="text-[10px] text-[#9ca3af] font-bold uppercase block mb-1">PARA:</span>
+                                        <div class="text-[22px] sm:text-[26px] font-black leading-tight tracking-tight">HOMERO SIMPSON</div>
+                                        <div class="text-[18px] sm:text-[20px] font-extrabold mt-0.5">904 774 275</div>
+                                    </div>
+                                    <div class="mb-4 font-label">
+                                        <span class="text-[10px] text-[#9ca3af] font-bold uppercase block mb-1">DESTINO:</span>
+                                        <div class="text-[11px] sm:text-[12px] font-bold leading-tight">
+                                            <span class="font-black uppercase">AGENCIA:</span> LIMA / LIMA / LA MOLINA | Av. Siempreviva 742 - Ref. Frente a la Taberna de Moe, Springfield
+                                        </div>
+                                        <div class="text-[12px] sm:text-[13px] font-extrabold mt-1.5 uppercase tracking-tight">DNI: 12345678</div>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between items-end border-t border-gray-200 pt-4 mt-2 font-label">
-                                    <div class="bg-black text-white px-4 py-1.5 rounded font-black text-[14px] tracking-widest uppercase">SHALOM</div>
-                                    <div class="text-[14px] font-extrabold">Lunes 09/03</div>
+                                <div class="flex justify-between items-end border-t border-gray-200 pt-3 mt-auto font-label">
+                                    <div class="bg-black text-white px-3 py-1 rounded font-black text-[12px] tracking-widest uppercase">SHALOM</div>
+                                    <div class="text-[12px] font-extrabold text-black">Lunes 09/03</div>
                                 </div>
                             </div>
 
                             <div class="flip-back bg-[#f9fafb] shadow-2xl border border-gray-300 p-4 flex flex-col font-sans overflow-hidden">
-                                <div class="flex items-center gap-2 mb-4 bg-[#1D6F42] -m-4 p-3 text-white">
+                                <div class="flex items-center gap-2 mb-4 bg-[#1D6F42] -mx-4 -mt-4 p-3 text-white">
                                     <i class="far fa-file-excel text-xl"></i>
                                     <span class="text-[12px] font-bold">Carga_Masiva_Latam5S.xlsx</span>
                                 </div>
-                                <div class="flex-grow mt-4">
-                                    <table class="w-full text-[10px] text-gray-600 border-collapse">
+                                <div class="flex-grow mt-2">
+                                    <table class="w-full text-[9px] text-gray-600 border-collapse">
                                         <thead>
-                                            <tr class="bg-gray-100 text-gray-400 font-bold uppercase">
-                                                <th class="border p-2 text-left">Cliente</th>
-                                                <th class="border p-2 text-left">DNI</th>
-                                                <th class="border p-2 text-left">Agencia</th>
-                                                <th class="border p-2 text-left">Sede</th>
+                                            <tr class="bg-gray-100 text-gray-400 font-bold">
+                                                <th class="border p-1.5 text-left uppercase">Cliente</th>
+                                                <th class="border p-1.5 text-left uppercase">DNI</th>
+                                                <th class="border p-1.5 text-left uppercase">Sede</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="bg-white">
-                                                <td class="border p-2 font-bold text-black uppercase">Homero Simpson</td>
-                                                <td class="border p-2">12345678</td>
-                                                <td class="border p-2">Shalom</td>
-                                                <td class="border p-2">La Molina</td>
+                                                <td class="border p-1.5 font-bold text-black uppercase">H. Simpson</td>
+                                                <td class="border p-1.5">12345678</td>
+                                                <td class="border p-1.5 font-bold">La Molina</td>
                                             </tr>
                                             <tr class="bg-gray-50">
-                                                <td class="border p-2">Marge Bouvier</td>
-                                                <td class="border p-2">87654321</td>
-                                                <td class="border p-2">Olva</td>
-                                                <td class="border p-2">Surco</td>
+                                                <td class="border p-1.5 uppercase">M. Bouvier</td>
+                                                <td class="border p-1.5">87654321</td>
+                                                <td class="border p-1.5">Surco</td>
                                             </tr>
                                             <tr class="bg-white">
-                                                <td class="border p-2">Ned Flanders</td>
-                                                <td class="border p-2">11223344</td>
-                                                <td class="border p-2">Shalom</td>
-                                                <td class="border p-2">Miraflores</td>
+                                                <td class="border p-1.5 uppercase">N. Flanders</td>
+                                                <td class="border p-1.5">11223344</td>
+                                                <td class="border p-1.5">Miraflores</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="mt-4 pt-2 border-t border-gray-200 text-center">
-                                    <p class="text-[9px] font-bold text-secondary uppercase tracking-[0.2em]">Listo para subir a la web 🚀</p>
+                                <div class="mt-auto py-2 border-t border-gray-200 text-center">
+                                    <p class="text-[9px] font-bold text-secondary uppercase tracking-widest">Listo para cargar 🚀</p>
                                 </div>
                             </div>
 
@@ -174,22 +172,52 @@
         </div>
     </section>
 
-    <section class="py-24 bg-dark_bg text-center border-t border-white/5">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-6xl font-extrabold text-white mb-6 tracking-tighter italic px-4 leading-tight">Libérate del trabajo manual 🌊</h2>
-            <p class="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed mb-10 px-6">
-                No dejes que el éxito de tu negocio te convierta en un digitador. <br>
-                Latam5S automatiza el orden de tus datos para que tú recuperes tu libertad.
-            </p>
-            <div class="inline-block p-8 sm:p-12 rounded-[3rem] bg-primary/5 border border-primary/20 shadow-2xl backdrop-blur-sm mx-4">
-                <span class="text-primary font-extrabold text-xl md:text-4xl tracking-tighter uppercase block">ORDEN LOGÍSTICO + AUTOMATIZACIÓN = TIEMPO PARA TI ⏳</span>
+    <section class="py-24 bg-dark_bg border-t border-white/5 relative">
+        <div class="container mx-auto px-4 max-w-5xl text-center">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-16 tracking-tighter italic">Estandariza una vez, despacha para siempre 🌊</h2>
+            
+            <div class="flex flex-col items-center">
+                <div class="glass-card p-6 rounded-2xl border border-primary/40 shadow-neon w-64">
+                    <div class="flex flex-col items-center gap-2">
+                        <i data-feather="edit-3" class="text-primary w-8 h-8"></i>
+                        <span class="text-sm font-bold uppercase tracking-widest">1. Entrada</span>
+                        <p class="text-[10px] text-gray-400">El cliente llena tus datos en el Formulario Universal</p>
+                    </div>
+                </div>
+
+                <div class="flow-line my-4"></div>
+                <div class="w-4 h-4 rounded-full bg-gradient-to-r from-primary to-secondary mb-4"></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-4">
+                    <div class="glass-card p-8 rounded-3xl border border-white/10 hover:border-primary/50 transition-all group">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                <i data-feather="printer"></i>
+                            </div>
+                            <h3 class="font-bold text-white uppercase tracking-tighter">Rótulos Profesionales</h3>
+                            <p class="text-xs text-gray-400 leading-relaxed">Genera automáticamente etiquetas para Shalom, Olva y cualquier otra agencia.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-3xl border border-white/10 hover:border-secondary/50 transition-all group">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+                                <i data-feather="file-text"></i>
+                            </div>
+                            <h3 class="font-bold text-white uppercase tracking-tighter">Excel Masivo</h3>
+                            <p class="text-xs text-gray-400 leading-relaxed">Descarga el archivo exacto para cargar 50 envíos en segundos a la web de Shalom u Olva.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
+            <p class="mt-16 text-primary font-bold text-xl md:text-2xl uppercase tracking-tighter">Libérate del trabajo manual con Latam5S ⏳</p>
         </div>
     </section>
 
     <section id="showroom" class="py-24 bg-card_bg relative border-t border-white/5">
         <div class="container mx-auto px-4 max-w-6xl relative z-10">
-            <div class="glass-card rounded-[3rem] sm:rounded-[4rem] p-8 sm:p-20 flex flex-col md:flex-row gap-16 items-center border border-white/10 shadow-2xl relative overflow-hidden text-white">
+            <div class="glass-card rounded-[3rem] sm:rounded-[4rem] p-8 sm:p-20 flex flex-col md:flex-row gap-16 items-center border border-white/10 shadow-2xl relative overflow-hidden">
                 <div class="flex-1 text-center md:text-left relative z-10">
                     <span class="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest mb-6">Uso Real Operativo</span>
                     <h2 class="text-4xl md:text-5xl font-bold mb-6 text-white leading-tight tracking-tight">Vívelo como <br><span class="text-gradient">tu propio cliente 🚀</span></h2>
@@ -207,7 +235,7 @@
                             <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 text-primary"><i data-feather="smartphone"></i></div>
                             <p class="text-white font-bold text-lg mb-2 uppercase tracking-tight italic">Formulario <br>Latam5S</p>
                             <div class="w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full mb-6"></div>
-                            <p class="text-gray-500 text-[9px] uppercase font-bold tracking-[0.2em]">Estandariza tu negocio</p>
+                            <p class="text-gray-500 text-[9px] uppercase font-bold tracking-[0.2em] text-white">Estandariza tu negocio</p>
                         </div>
                         <div class="absolute -bottom-6 -right-6 glass-panel px-5 py-4 rounded-2xl border border-primary/30 shadow-2xl">
                             <div class="flex items-center gap-3">
@@ -221,41 +249,22 @@
         </div>
     </section>
 
-    <section class="py-24 container mx-auto px-4">
-        <div class="grid md:grid-cols-3 gap-8 text-center text-white">
-            <div class="glass-card p-10 rounded-3xl border border-primary/10 hover:border-primary/40 transition-all group">
-                <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-6 group-hover:scale-110 transition-transform"><i data-feather="check-circle"></i></div>
-                <h3 class="text-xl font-bold mb-4 uppercase tracking-tighter">Validación Estricta</h3>
-                <p class="text-gray-400 text-sm leading-relaxed italic">DNI, celular y sedes reales en cada pedido.</p>
-            </div>
-            <div class="glass-card p-10 rounded-3xl border border-secondary/10 hover:border-secondary/40 transition-all group">
-                <div class="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary mx-auto mb-6 group-hover:scale-110 transition-transform"><i data-feather="zap"></i></div>
-                <h3 class="text-xl font-bold mb-4 uppercase tracking-tighter text-white">Excel Masivo</h3>
-                <p class="text-gray-400 text-sm leading-relaxed italic">Genera en 1 clic el archivo para Shalom u Olva.</p>
-            </div>
-            <div class="glass-card p-10 rounded-3xl border border-purple-500/10 hover:border-purple-500/40 transition-all group">
-                <div class="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mx-auto mb-6 group-hover:scale-110 transition-transform"><i data-feather="printer"></i></div>
-                <h3 class="text-xl font-bold mb-4 uppercase tracking-tighter text-white">Rótulos Profesionales</h3>
-                <p class="text-gray-400 text-sm leading-relaxed italic">Listos para cualquier impresora (Térmica, Láser o Tinta).</p>
-            </div>
-        </div>
-    </section>
-
     <section id="precios" class="py-24 bg-dark_bg border-t border-white/5 text-center">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-5xl font-extrabold mb-16 text-white tracking-tighter italic px-4">Planes de Crecimiento</h2>
+            <h2 class="text-3xl md:text-5xl font-extrabold mb-16 text-white tracking-tighter italic px-4 leading-tight">Planes de Crecimiento</h2>
+            
             <div class="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto items-stretch px-4">
                 <div class="glass-panel p-10 rounded-[2.5rem] border border-white/5 text-left flex flex-col h-full hover:bg-white/5 transition-colors">
                     <h3 class="font-bold text-gray-500 tracking-widest text-[10px] uppercase mb-2">BÁSICO</h3>
                     <div class="text-4xl sm:text-5xl font-bold mb-6 text-white">S/. 0</div>
-                    <p class="text-gray-400 text-sm mb-8 font-medium leading-relaxed">Para emprendedores empezando a poner orden.</p>
+                    <p class="text-gray-400 text-sm mb-8 font-medium leading-relaxed">Para emprendedores que recién están empezando.</p>
                     <ul class="space-y-4 mb-10 text-sm text-gray-300 flex-grow font-medium text-white">
                         <li class="flex items-center gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4"></i> Formulario Estándar</li>
                         <li class="flex items-center gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4"></i> Datos vía WhatsApp</li>
-                        <li class="flex items-center gap-3"><i data-feather="check" class="text-gray-500 w-4 h-4"></i> Agencias Ilimitadas</li>
                     </ul>
                     <a href="https://wa.me/51904774275?text=Hans,%20quiero%20empezar%20GRATIS" class="block w-full py-4 border border-white/10 rounded-2xl text-center font-bold text-white hover:bg-white/10 transition-all uppercase text-[10px] tracking-widest">EMPEZAR GRATIS</a>
                 </div>
+
                 <div class="relative group h-full mt-10 sm:mt-0">
                     <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-extrabold px-6 py-2 rounded-full shadow-neon z-20 animate-pulse tracking-widest uppercase text-center w-max">SOLO 50 CUPOS CON DESCUENTO ESTE MES</div>
                     <div class="glass-card p-10 rounded-[3.5rem] border border-primary/50 text-left bg-gradient-to-b from-primary/20 to-transparent shadow-neon flex flex-col h-full transform transition-transform sm:scale-105 group-hover:scale-[1.07]">
@@ -267,10 +276,10 @@
                             </div>
                             <div class="flex items-center gap-2 mt-2">
                                 <span class="text-xs text-gray-500 line-through decoration-red-500/50 italic font-medium">S/. 49 regular</span>
-                                <span class="text-[9px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full font-bold border border-red-500/20 uppercase tracking-widest italic font-black text-white text-white">40% OFF</span>
+                                <span class="text-[9px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full font-bold border border-red-500/20 uppercase tracking-widest italic font-black text-white">40% OFF</span>
                             </div>
                         </div>
-                        <ul class="space-y-4 mb-10 text-sm text-white flex-grow font-bold">
+                        <ul class="space-y-4 mb-10 text-sm text-white flex-grow font-bold text-white">
                             <li class="flex items-center gap-3"><i data-feather="zap" class="text-primary w-4 h-4 fill-primary/20"></i> Excel de Carga Masiva</li>
                             <li class="flex items-center gap-3"><i data-feather="zap" class="text-primary w-4 h-4 fill-primary/20"></i> Rótulos Profesionales</li>
                             <li class="flex items-center gap-3"><i data-feather="zap" class="text-primary w-4 h-4 fill-primary/20"></i> Gestión de Estados</li>
@@ -286,9 +295,9 @@
     <footer class="py-20 bg-black text-center text-gray-600 text-[10px] relative border-t border-white/5">
         <div class="flex justify-center items-center gap-2 mb-8 px-4">
             <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shadow-lg">5S</div>
-            <span class="font-extrabold text-lg logo-text-gradient tracking-tight uppercase italic">Latam5S</span>
+            <span class="font-extrabold text-lg logo-text-gradient tracking-tight uppercase">Latam5S</span>
         </div>
-        <p class="mb-4 uppercase tracking-[0.4em] font-medium opacity-50 px-6 italic">Hecho para emprendedores, no para programadores.</p>
+        <p class="mb-4 uppercase tracking-[0.4em] font-medium opacity-50 px-6 italic">Libérate del trabajo manual con Latam5S.</p>
         <div class="flex justify-center gap-6 sm:gap-10 font-bold uppercase tracking-widest px-4">
             <a href="#" class="hover:text-white transition-colors">Términos</a>
             <a href="#" class="hover:text-white transition-colors">Privacidad</a>
@@ -307,7 +316,7 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             particles = [];
-            for (let i = 0; i < 55; i++) {
+            for (let i = 0; i < 60; i++) {
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
