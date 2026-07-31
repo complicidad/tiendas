@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Olva Master - Agencias, Mapa y Auditoría</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS para el Mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- SheetJS para leer Excel/CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        #map { height: 400px; width: 100%; border-radius: 0.5rem; border: 1px solid #e2e8f0; z-index: 10; }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* Animación suave para paneles */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        <header class="text-center md:text-left border-b border-slate-200 pb-5">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Plataforma Logística <span class="text-blue-600">Olva</span></h1>
+            <p class="text-slate-500 font-medium">Procesamiento de Agencias JSON, Mapa Interactivo, Verificación Masiva y Auditoría de Versiones.</p>
+        </header>
+
+        <!-- Contenedores de Alertas Flotantes -->
+        <div id="errorMsg" class="hidden p-4 bg-red-100 text-red-700 border border-red-200 rounded-lg text-sm font-semibold transition-all fixed top-4 right-4 z-50 shadow-lg max-w-md flex items-center gap-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span id="errorTxt"></span>
+        </div>
+        <div id="successMsg" class="hidden p-4 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-sm font-semibold transition-all fixed top-4 right-4 z-50 shadow-lg max-w-md flex items-center gap-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span id="successTxt"></span>
+        </div>
+
+        <section class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200 fade-in">
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-sm">1</span>
+                Procesar y Exportar JSON Base (Olva)
+            </h2>
+            
+            <div class="flex flex-col mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="font-semibold text-sm text-slate-700">JSON Crudo (Pega la respuesta del API de Olva aquí)</label>
+                    <button onclick="limpiarEntrada()" class="text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition-colors">Limpiar Todo</button>
+                </div>
+                <textarea id="inputJson" class="w-full h-40 p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs font-mono resize-none shadow-inner" placeholder='{"success":true,"data":{"data":[{"office_id":"579", "nombres":"TIENDA CHACHAPOYAS...", ...}]}}'></textarea>
+                <button onclick="procesarJSON()" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-sm flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002 2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Procesar JSON y Extraer Agencias
+                </button>
+            </div>
+
+            <!-- Listas extraídas dinámicamente -->
+            <div id="jsonListsContainer" class="hidden mb-6">
+                <div class="flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+                    <h3 class="font-bold text-slate-800 text-sm">Agencias Procesadas:</h3>
+                    <span id="contadorAgencias" class="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">0</span>
+                </div>
+                
+                <div id="dynamicTypeLists" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Las listas por tipo de oficina de Olva se inyectarán aquí -->
+                </div>
+            </div>
+
+            <!-- Exportación de JSON -->
+            <div id="exportAction" class="hidden flex flex-col gap-5 border-t border-slate-100 pt-6 mt-4">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg shadow-sm">
+                    <div class="mb-5 border-b border-slate-200 pb-4">
+                        <h4 class="font-semibold text-sm mb-3 text-slate-700">Filtrar por Tipo de Agencia:</h4>
+                        <div id="filtersContainer" class="flex flex-wrap gap-3 text-sm font-medium">
+                            <!-- Los checkboxes de filtros se generan en JS -->
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-sm mb-3 text-slate-700">Selecciona y ordena los campos a exportar:</h4>
+                        <p class="text-xs text-slate-500 mb-3">El orden en el que dejes estas casillas determinará el orden en el JSON final.</p>
+                        <div id="checkboxContainer" class="flex flex-wrap gap-3 text-sm font-medium"></div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row justify-end gap-3">
+                    <button onclick="visualizarJSONDestinos()" class="border border-blue-600 text-blue-700 hover:bg-blue-50 font-semibold py-2 px-4 rounded-lg transition-colors">Visualizar Código JSON</button>
+                    <button onclick="descargarJSONDestinos()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm">Descargar Archivo JSON</button>
+                    <button onclick="copiarJSONDestinos()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        Copiar
+                    </button>
+                </div>
+                <textarea id="outputJsonDestinos" class="hidden w-full h-48 p-3 bg-slate-900 text-blue-300 rounded-lg text-xs font-mono resize-none border border-slate-700 shadow-inner" readonly></textarea>
+            </div>
+        </section>
+
+        <section class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200 fade-in">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <span class="bg-emerald-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-sm">2</span>
+                    Verificación Masiva de Agencias en Excel
+                </h2>
+            </div>
+            <p class="text-sm text-slate-500 mb-6">¿Tienes una base de datos antigua en Excel? Súbela para cruzar los nombres con la data fresca de Olva (JSON) y detectar qué agencias faltan o sobran en tus registros.</p>
+            
+            <div class="flex flex-col md:flex-row gap-4 items-end mb-6">
+                <div class="w-full md:w-2/3">
+                    <label class="block font-semibold text-sm text-slate-700 mb-2">Archivo Base de Datos (.csv, .xlsx)</label>
+                    <input type="file" id="fileUpload" accept=".csv, .xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-slate-300 rounded-lg cursor-pointer bg-slate-50 transition-colors"/>
+                </div>
+                <button onclick="procesarExcel()" class="w-full md:w-1/3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-sm flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Cruzar Base de Datos
+                </button>
+            </div>
+
+            <div id="resultadosCruce" class="hidden space-y-6 mt-8 border-t border-slate-100 pt-6">
+                <!-- Match Exitoso -->
+                <div id="containerMatch" class="hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+                        <h3 class="text-emerald-600 font-bold flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Agencias SÍ Cruzadas (Match Exitoso) (<span id="countMatch">0</span>)
+                        </h3>
+                    </div>
+                    <div class="table-container overflow-x-auto border border-emerald-200 rounded-lg shadow-sm max-h-[350px]">
+                        <table class="min-w-full divide-y divide-slate-200 text-sm relative">
+                            <thead class="bg-emerald-50 sticky top-0 z-10">
+                                <tr><th class="px-4 py-3 text-left font-semibold text-emerald-800">Agencia Oficial Olva</th><th class="px-4 py-3 text-left font-semibold text-emerald-800">Tipo de Local</th><th class="px-4 py-3 text-left font-semibold text-emerald-800">Estado de Verificación</th></tr>
+                            </thead>
+                            <tbody id="tbodyMatch" class="bg-white divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Faltantes en Excel -->
+                    <div id="containerSobrantesJSON" class="hidden">
+                        <h3 class="text-amber-600 font-bold mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            Faltantes en tu Excel (<span id="countSobrantesJSON">0</span>)
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-2">Olva tiene estas agencias activas, pero NO se encontraron en el Excel que subiste.</p>
+                        <div class="table-container overflow-x-auto border border-amber-200 rounded-lg shadow-sm max-h-64">
+                            <table class="min-w-full divide-y divide-slate-200 text-sm relative">
+                                <thead class="bg-amber-50 sticky top-0 z-10">
+                                    <tr><th class="px-4 py-3 text-left font-semibold text-amber-800">Agencia Oficial</th><th class="px-4 py-3 text-left font-semibold text-amber-800">Tipo</th></tr>
+                                </thead>
+                                <tbody id="tbodySobrantesJSON" class="bg-white divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Faltantes en JSON -->
+                    <div id="containerNoMatch" class="hidden">
+                        <h3 class="text-red-600 font-bold mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Faltantes en JSON Olva (<span id="countNoMatch">0</span>)
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-2">Aparecen en tu Excel, pero NO existen (o están mal escritas) en la data actual de Olva.</p>
+                        <div class="table-container overflow-x-auto border border-red-200 rounded-lg shadow-sm max-h-64">
+                            <table class="min-w-full divide-y divide-slate-200 text-sm relative">
+                                <thead class="bg-red-50 sticky top-0 z-10">
+                                    <tr><th class="px-4 py-3 text-left font-semibold text-red-800">Sede ingresada en Excel</th></tr>
+                                </thead>
+                                <tbody id="tbodyNoMatch" class="bg-white divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200 fade-in">
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-sm">3</span>
+                Auditoría / Comparador de JSON
+            </h2>
+            <p class="text-sm text-slate-500 mb-6">Sube un JSON histórico que hayas generado anteriormente para compararlo con la data que tienes en el Paso 1. Detectaremos inmediatamente qué agencias abrieron, cerraron o cambiaron de dirección.</p>
+            
+            <div class="flex flex-col md:flex-row gap-4 items-end mb-6">
+                <div class="w-full md:w-2/3">
+                    <label class="block font-semibold text-sm text-slate-700 mb-2">Sube tu JSON Histórico (.json)</label>
+                    <input type="file" id="fileUploadAntiguo" accept=".json" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-slate-300 rounded-lg cursor-pointer bg-slate-50 transition-colors"/>
+                </div>
+                <button onclick="procesarComparacion()" class="w-full md:w-1/3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-sm flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    Auditar Cambios
+                </button>
+            </div>
+
+            <!-- Contenedor Resultados de Comparación -->
+            <div id="resultadosComparacion" class="hidden space-y-6 mt-8 border-t border-slate-100 pt-6">
+                <div class="flex flex-wrap gap-4 mb-4">
+                    <span class="bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-lg border border-emerald-200 font-semibold text-sm shadow-sm">Nuevas (Altas): <span id="compNuevas">0</span></span>
+                    <span class="bg-red-100 text-red-800 px-3 py-1.5 rounded-lg border border-red-200 font-semibold text-sm shadow-sm">Eliminadas (Bajas): <span id="compEliminadas">0</span></span>
+                    <span class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg border border-amber-200 font-semibold text-sm shadow-sm">Modificadas: <span id="compModificadas">0</span></span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nuevas Agencias -->
+                    <div id="contNuevas" class="hidden">
+                        <h3 class="text-emerald-600 font-bold mb-2 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Altas Recientes
+                        </h3>
+                        <div class="table-container overflow-x-auto border border-emerald-200 rounded-lg shadow-sm max-h-64">
+                            <table class="min-w-full divide-y divide-slate-200 text-sm relative">
+                                <thead class="bg-emerald-50 sticky top-0 z-10">
+                                    <tr><th class="px-4 py-2 text-left font-semibold text-emerald-800">Agencia</th><th class="px-4 py-2 text-left font-semibold text-emerald-800">Tipo</th></tr>
+                                </thead>
+                                <tbody id="tbodyNuevas" class="bg-white divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Agencias Eliminadas -->
+                    <div id="contEliminadas" class="hidden">
+                        <h3 class="text-red-600 font-bold mb-2 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                            Bajas (Ya no operan)
+                        </h3>
+                        <div class="table-container overflow-x-auto border border-red-200 rounded-lg shadow-sm max-h-64">
+                            <table class="min-w-full divide-y divide-slate-200 text-sm relative">
+                                <thead class="bg-red-50 sticky top-0 z-10">
+                                    <tr><th class="px-4 py-2 text-left font-semibold text-red-800">Agencia Histórica</th><th class="px-4 py-2 text-left font-semibold text-red-800">Tipo Anterior</th></tr>
+                                </thead>
+                                <tbody id="tbodyEliminadas" class="bg-white divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agencias Modificadas -->
+                <div id="contModificadas" class="hidden mt-6">
+                    <h3 class="text-amber-600 font-bold mb-2 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Agencias Modificadas
+                    </h3>
+                    <div class="table-container overflow-x-auto border border-amber-200 rounded-lg shadow-sm max-h-64">
+                        <table class="min-w-full divide-y divide-slate-200 text-sm relative">
+                            <thead class="bg-amber-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-semibold text-amber-800 w-1/3">Agencia</th>
+                                    <th class="px-4 py-2 text-left font-semibold text-amber-800">Cambios Detectados (Anterior → Nuevo)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyModificadas" class="bg-white divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="mapSection" class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200 hidden fade-in">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <span class="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-sm">4</span>
+                    Mapa de Cobertura Nacional
+                </h2>
+                <span class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full border border-slate-200 shadow-sm">Refleja los filtros aplicados en el Paso 1</span>
+            </div>
+            <div id="map" class="bg-slate-100 flex items-center justify-center text-slate-400 text-sm shadow-inner"></div>
+        </section>
+    </div>
+
+    <!-- Script Base de Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    
+    <script>
+        let map = null, markersGroup = null;
+        let agenciasGlobales = []; // Data pura procesada
+        let jsonDestinosFinal = []; // Data lista para exportar respetando selección y filtros
+        let tiposUnicosGlobal = new Set(); // Para generar filtros dinámicos
+
+        // Inicializar mapa
+        window.onload = () => {
+            map = L.map('map').setView([-9.1900, -75.0152], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+            markersGroup = L.layerGroup().addTo(map);
+        };
+
+        // Utilidad de notificaciones
+        function mostrarMsg(id, txt) {
+            const div = document.getElementById(id);
+            document.getElementById(id === 'errorMsg' ? 'errorTxt' : 'successTxt').textContent = txt;
+            div.classList.remove('hidden');
+            setTimeout(() => div.classList.add('hidden'), 6000);
+        }
+
+        // Limpieza y estandarización de strings
+        function normalizarTexto(txt) {
+            if (!txt) return "";
+            return String(txt).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        }
+
+        function escapeHTML(str) {
+            if (!str) return "";
+            return String(str).replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
+        }
+
+        function aLetraCapital(texto) {
+            if (!texto) return "";
+            // Eliminamos la barra invertida \ y las comillas de forma estricta antes de capitalizar
+            return String(texto).replace(/["\\]/g, "").trim().toLowerCase().split(' ').map(palabra => {
+                return palabra ? palabra.charAt(0).toUpperCase() + palabra.slice(1) : "";
+            }).join(' ');
+        }
+
+        function limpiarEntrada() {
+            document.getElementById('inputJson').value = '';
+            document.getElementById('jsonListsContainer').classList.add('hidden');
+            document.getElementById('exportAction').classList.add('hidden');
+            document.getElementById('outputJsonDestinos').classList.add('hidden');
+            document.getElementById('fileUpload').value = '';
+            document.getElementById('resultadosCruce').classList.add('hidden');
+            document.getElementById('fileUploadAntiguo').value = '';
+            document.getElementById('resultadosComparacion').classList.add('hidden');
+            document.getElementById('mapSection').classList.add('hidden');
+            
+            if (markersGroup) markersGroup.clearLayers();
+            map.setView([-9.1900, -75.0152], 5);
+            
+            agenciasGlobales = [];
+            jsonDestinosFinal = [];
+            tiposUnicosGlobal.clear();
+            
+            mostrarMsg('successMsg', "Todo el entorno ha sido limpiado exitosamente.");
+        }
+
+        function procesarJSON() {
+            const inputRaw = document.getElementById('inputJson').value.trim();
+            if (!inputRaw) { mostrarMsg('errorMsg', "Pega el JSON primero."); return; }
+            try {
+                const parsed = JSON.parse(inputRaw);
+                let arrayAgencias = [];
+                
+                // Reconocer formato profundo Olva
+                if (parsed.data && parsed.data.data) {
+                    arrayAgencias = parsed.data.data;
+                } else if (parsed.data && Array.isArray(parsed.data)) {
+                    arrayAgencias = parsed.data;
+                } else if (Array.isArray(parsed)) {
+                    arrayAgencias = parsed;
+                } else {
+                    throw new Error("Estructura JSON no reconocida. Asegúrate de pegar el código correcto de Olva.");
+                }
+
+                if (arrayAgencias.length === 0) throw new Error("El arreglo de agencias está vacío.");
+
+                agenciasGlobales = [];
+                tiposUnicosGlobal.clear();
+
+                arrayAgencias.forEach(ag => {
+                    // Extraemos las ubicaciones asegurando eliminar comillas y \ en el texto original
+                    const depto = ag.department ? ag.department.replace(/["\\]/g, "").trim() : '';
+                    const prov = ag.province ? ag.province.replace(/["\\]/g, "").trim() : '';
+                    const dist = ag.district ? ag.district.replace(/["\\]/g, "").trim() : '';
+                    
+                    // Extraemos el nombre completo y el nombre corto
+                    const nombreCompletoCrudo = ag.nombres ? ag.nombres.replace(/["\\]/g, "").trim() : '';
+                    const nombreCortoCrudo = ag.nombres ? ag.nombres.split('-')[0].replace(/["\\]/g, "").trim() : '';
+                    const direccionCruda = ag.direccion ? ag.direccion.replace(/["\\]/g, "").trim() : '';
+                    
+                    const tipo = ag.office_type ? ag.office_type.replace(/["\\]/g, "").trim() : "SIN TIPO";
+                    tiposUnicosGlobal.add(tipo);
+
+                    const objAgencia = {
+                        ID: ag.office_id || "",
+                        // Unimos Departamento / Provincia / Distrito / Nombre Completo (sin recortar)
+                        Agencia: aLetraCapital(`${depto} / ${prov} / ${dist} / ${nombreCompletoCrudo}`),
+                        Nombre_Corto: aLetraCapital(nombreCortoCrudo),
+                        Direccion: aLetraCapital(direccionCruda),
+                        Tipo: tipo,
+                        Latitud: parseFloat(ag.lat) || 0,
+                        Longitud: parseFloat(ag.lng) || 0,
+                        Horario: ag.horario || null,
+                        norm_corto: normalizarTexto(nombreCortoCrudo) // Útil para cruces con Excel
+                    };
+
+                    agenciasGlobales.push(objAgencia);
+                });
+
+                // Ordenar matriz de la A a la Z
+                agenciasGlobales.sort((a, b) => a.Agencia.localeCompare(b.Agencia, 'es'));
+                
+                // Mapear al modelo final de exportación
+                jsonDestinosFinal = agenciasGlobales.map(r => ({
+                    ID: r.ID,
+                    Agencia: r.Agencia,
+                    Direccion: r.Direccion,
+                    Tipo: r.Tipo,
+                    Latitud: r.Latitud,
+                    Longitud: r.Longitud,
+                    Horario: r.Horario
+                }));
+
+                generarFiltrosPorTipo();
+                renderLists();
+                generarCheckboxes(jsonDestinosFinal[0]);
+                actualizarFiltros(); 
+                
+                mostrarMsg('successMsg', `Se procesaron ${agenciasGlobales.length} agencias de Olva exitosamente.`);
+                
+            } catch (e) { 
+                mostrarMsg('errorMsg', "Error procesando: " + e.message); 
+            }
+        }
+
+        // Generar dinámicamente los botones de filtrado (Agentes, Propias, etc)
+        function generarFiltrosPorTipo() {
+            const container = document.getElementById('filtersContainer');
+            container.innerHTML = '';
+            
+            Array.from(tiposUnicosGlobal).sort().forEach(tipo => {
+                container.innerHTML += `
+                    <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded border border-slate-200 shadow-sm hover:bg-slate-50">
+                        <input type="checkbox" value="${tipo}" checked class="filtro-tipo w-4 h-4 text-blue-600 focus:ring-blue-500 rounded cursor-pointer" onchange="actualizarFiltros()"> 
+                        ${escapeHTML(tipo)}
+                    </label>
+                `;
+            });
+        }
+
+        // Listar cajas por Tipo de Agencia
+        function renderLists() {
+            document.getElementById('contadorAgencias').textContent = agenciasGlobales.length;
+            const container = document.getElementById('dynamicTypeLists');
+            container.innerHTML = '';
+
+            const colores = ['blue', 'emerald', 'purple', 'amber', 'rose'];
+            let colorIdx = 0;
+
+            Array.from(tiposUnicosGlobal).sort().forEach(tipo => {
+                const elementos = agenciasGlobales.filter(a => a.Tipo === tipo);
+                const col = colores[colorIdx % colores.length];
+                
+                container.innerHTML += `
+                    <div class="bg-${col}-50 border border-${col}-100 rounded-lg p-3">
+                        <h4 class="font-semibold text-${col}-800 text-xs mb-2 flex justify-between">
+                            ${escapeHTML(tipo)} <span class="bg-${col}-200 text-${col}-800 px-1.5 rounded">${elementos.length}</span>
+                        </h4>
+                        <ul class="text-xs text-slate-600 space-y-1 max-h-40 overflow-y-auto pr-1">
+                            ${elementos.map(ag => `<li>• ${escapeHTML(ag.Nombre_Corto)}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                colorIdx++;
+            });
+
+            document.getElementById('jsonListsContainer').classList.remove('hidden');
+        }
+
+        // Generar Checkboxes ordenados para elegir qué variables exportar
+        function generarCheckboxes(objetoMuestra) {
+            const container = document.getElementById('checkboxContainer');
+            container.innerHTML = '';
+            if(!objetoMuestra) return;
+
+            // Mostrar el checklist en orden.
+            const llaves = Object.keys(objetoMuestra);
+            
+            llaves.forEach(key => {
+                // Seleccionados por defecto
+                const isChecked = ['ID', 'Agencia', 'Direccion', 'Tipo', 'Latitud', 'Longitud'].includes(key);
+                const html = `
+                    <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded border border-slate-200 shadow-sm hover:bg-slate-50">
+                        <input type="checkbox" value="${key}" ${isChecked ? 'checked' : ''} class="campo-exportar w-4 h-4 text-blue-600 focus:ring-blue-500 rounded cursor-pointer" onchange="actualizarFiltros()"> 
+                        ${key}
+                    </label>
+                `;
+                container.innerHTML += html;
+            });
+            document.getElementById('exportAction').classList.remove('hidden');
+        }
+
+        function obtenerDatosFiltrados() {
+            const tiposCheckboxes = document.querySelectorAll('.filtro-tipo:checked');
+            const tiposActivos = Array.from(tiposCheckboxes).map(chk => chk.value);
+            return jsonDestinosFinal.filter(item => tiposActivos.includes(item.Tipo));
+        }
+
+        function obtenerJSONExportable() {
+            const datosFiltrados = obtenerDatosFiltrados();
+            
+            // Aquí obtenemos el arreglo de checkboxes en el ORDEN en el que están en el DOM
+            const checkboxes = Array.from(document.querySelectorAll('.campo-exportar:checked'));
+            const camposActivos = checkboxes.map(chk => chk.value);
+
+            return datosFiltrados.map(item => {
+                let obj = {};
+                // Rellenar respetando el orden del DOM
+                camposActivos.forEach(campo => {
+                    if(item[campo] !== undefined) obj[campo] = item[campo];
+                });
+                return obj;
+            });
+        }
+
+        function actualizarFiltros() {
+            const datosFiltrados = obtenerDatosFiltrados();
+            
+            // Repintar Mapa interactivo
+            if (datosFiltrados.length > 0) {
+                document.getElementById('mapSection').classList.remove('hidden');
+                setTimeout(() => {
+                    map.invalidateSize();
+                    dibujarEnMapa(datosFiltrados, 'Agencia', 'Direccion', 'Latitud', 'Longitud');
+                }, 100);
+            } else {
+                document.getElementById('mapSection').classList.add('hidden');
+            }
+
+            // Actualizar vista previa
+            const out = document.getElementById('outputJsonDestinos');
+            if (!out.classList.contains('hidden')) {
+                out.value = JSON.stringify(obtenerJSONExportable(), null, 2);
+            }
+        }
+
+        function dibujarEnMapa(datos, keyNombre, keyDir, keyLat, keyLng) {
+            markersGroup.clearLayers();
+            let bounds = [];
+            datos.forEach(item => {
+                const lat = item[keyLat], lng = item[keyLng];
+                if (lat && lng && lat !== 0 && lng !== 0 && !isNaN(lat) && !isNaN(lng)) {
+                    const marker = L.marker([lat, lng])
+                        .bindPopup(`<b>${escapeHTML(item[keyNombre])}</b><br><span class="text-xs text-slate-500">${escapeHTML(item[keyDir])}</span><br><span class="text-[10px] font-bold text-blue-500 mt-1 block">${escapeHTML(item.Tipo || '')}</span>`);
+                    markersGroup.addLayer(marker);
+                    bounds.push([lat, lng]);
+                }
+            });
+            if (bounds.length > 0) map.fitBounds(bounds, { padding: [20, 20] });
+        }
+
+        function visualizarJSONDestinos() {
+            const out = document.getElementById('outputJsonDestinos');
+            if (out.classList.contains('hidden')) {
+                out.value = JSON.stringify(obtenerJSONExportable(), null, 2);
+                out.classList.remove('hidden');
+            } else out.classList.add('hidden');
+        }
+
+        function descargarJSONDestinos() {
+            const datos = obtenerJSONExportable();
+            if (datos.length === 0) { mostrarMsg('errorMsg', 'No hay datos para exportar.'); return; }
+            const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = "olva_agencias_filtradas.json"; a.click();
+        }
+
+        function copiarJSONDestinos() {
+            const datos = obtenerJSONExportable();
+            if (datos.length === 0) { mostrarMsg('errorMsg', "No hay datos para copiar."); return; }
+            const texto = JSON.stringify(datos, null, 2);
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(texto).then(() => mostrarMsg('successMsg', "JSON copiado al portapapeles."))
+                                                     .catch(() => fallBackCopiado(texto));
+            } else fallBackCopiado(texto);
+        }
+
+        function fallBackCopiado(texto) {
+            const textArea = document.createElement("textarea");
+            textArea.value = texto;
+            textArea.style.position = "fixed"; textArea.style.top = "-9999px"; textArea.style.left = "-9999px";
+            document.body.appendChild(textArea); textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); mostrarMsg('successMsg', "JSON copiado al portapapeles."); } 
+            catch (err) { mostrarMsg('errorMsg', "Error al intentar copiar."); }
+            document.body.removeChild(textArea);
+        }
+
+        function procesarExcel() {
+            if (agenciasGlobales.length === 0) { mostrarMsg('errorMsg', "Primero debes procesar un JSON en el Paso 1."); return; }
+            const fileInput = document.getElementById('fileUpload');
+            if (fileInput.files.length === 0) { mostrarMsg('errorMsg', "Selecciona el archivo Excel."); return; }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+                    const sheetName = workbook.SheetNames[0];
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1, defval: ""});
+                    cruzarBidireccional(rows);
+                } catch (err) { mostrarMsg('errorMsg', "Error al procesar el Excel. Asegúrate de que sea válido."); }
+            };
+            reader.readAsArrayBuffer(fileInput.files[0]);
+        }
+
+        function cruzarBidireccional(rows) {
+            // Leer nombres de agencias en todo el excel (buscando en todas las columnas por si acaso)
+            let agenciasExcelSet = new Map();
+            rows.forEach((row, i) => {
+                row.forEach(celda => {
+                    const txt = String(celda).trim();
+                    if(txt && isNaN(txt) && txt.length > 2) {
+                        agenciasExcelSet.set(txt, true);
+                    }
+                });
+            });
+
+            let matchExitoso = [];
+            let sobrantesJSON = [];
+            
+            // Cruzar JSON actual con el Set del Excel
+            agenciasGlobales.forEach(agJson => {
+                let encontradoEnExcel = null;
+                let keyExcel = "";
+                
+                for (let nombreExcel of agenciasExcelSet.keys()) {
+                    // Match por nombre corto normalizado
+                    if (agJson.norm_corto === normalizarTexto(nombreExcel)) {
+                        encontradoEnExcel = true;
+                        keyExcel = nombreExcel;
+                        break;
+                    }
+                }
+
+                if (encontradoEnExcel) {
+                    matchExitoso.push(agJson);
+                    agenciasExcelSet.delete(keyExcel); // Ya se usó
+                } else {
+                    sobrantesJSON.push(agJson); // Falta en el Excel
+                }
+            });
+
+            // Lo que queda en el mapa del Excel es lo que NO hizo match con Olva
+            let sobrantesExcel = Array.from(agenciasExcelSet.keys());
+
+            // Renderizar vistas
+            const renderMatch = document.getElementById('tbodyMatch');
+            renderMatch.innerHTML = '';
+            matchExitoso.forEach(item => {
+                renderMatch.innerHTML += `<tr><td class="px-4 py-2 font-medium text-slate-700">${escapeHTML(item.Agencia)}</td><td class="px-4 py-2 text-slate-500">${escapeHTML(item.Tipo)}</td><td class="px-4 py-2 text-emerald-600 font-semibold flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Cruzado</td></tr>`;
+            });
+
+            const renderSobJSON = document.getElementById('tbodySobrantesJSON');
+            renderSobJSON.innerHTML = '';
+            sobrantesJSON.forEach(item => {
+                renderSobJSON.innerHTML += `<tr><td class="px-4 py-2 font-medium text-slate-700">${escapeHTML(item.Agencia)}</td><td class="px-4 py-2 text-amber-600 font-medium">${escapeHTML(item.Tipo)}</td></tr>`;
+            });
+
+            const renderSobExcel = document.getElementById('tbodyNoMatch');
+            renderSobExcel.innerHTML = '';
+            sobrantesExcel.forEach(item => {
+                renderSobExcel.innerHTML += `<tr><td class="px-4 py-2 font-medium text-slate-700">${escapeHTML(item)}</td></tr>`;
+            });
+
+            // UI Visibilidad
+            document.getElementById('resultadosCruce').classList.remove('hidden');
+            document.getElementById('containerMatch').classList.toggle('hidden', matchExitoso.length === 0);
+            document.getElementById('containerSobrantesJSON').classList.toggle('hidden', sobrantesJSON.length === 0);
+            document.getElementById('containerNoMatch').classList.toggle('hidden', sobrantesExcel.length === 0);
+            
+            document.getElementById('countMatch').textContent = matchExitoso.length;
+            document.getElementById('countSobrantesJSON').textContent = sobrantesJSON.length;
+            document.getElementById('countNoMatch').textContent = sobrantesExcel.length;
+
+            mostrarMsg('successMsg', "Verificación Completada. Revisa las tablas generadas.");
+        }
+
+        function procesarComparacion() {
+            const fileInput = document.getElementById('fileUploadAntiguo');
+            if (fileInput.files.length === 0) { mostrarMsg('errorMsg', "Sube el archivo JSON antiguo (.json) para comparar."); return; }
+            
+            const nuevoJSON = obtenerJSONExportable();
+            if (!nuevoJSON || nuevoJSON.length === 0) {
+                mostrarMsg('errorMsg', "Primero debes cargar y procesar la data de Olva en el Paso 1."); return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const viejoJSON = JSON.parse(e.target.result);
+                    ejecutarComparacion(viejoJSON, nuevoJSON);
+                } catch (err) { mostrarMsg('errorMsg', "Error al leer. Asegúrate de que el archivo antiguo sea un JSON válido."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function ejecutarComparacion(viejo, nuevo) {
+            let mapaViejo = new Map();
+            let mapaNuevo = new Map();
+            
+            const getKey = (item) => item.ID ? String(item.ID) : normalizarTexto(item.Agencia || item.Nombre_Corto || "");
+
+            viejo.forEach(v => mapaViejo.set(getKey(v), v));
+            nuevo.forEach(n => mapaNuevo.set(getKey(n), n));
+
+            let agregadas = [], modificadas = [], eliminadas = [];
+
+            // Detectar Nuevas y Modificadas
+            nuevo.forEach(n => {
+                const key = getKey(n);
+                if (!mapaViejo.has(key)) {
+                    agregadas.push(n);
+                } else {
+                    const v = mapaViejo.get(key);
+                    let cambios = [];
+                    const todasLasClaves = new Set([...Object.keys(v), ...Object.keys(n)]);
+                    todasLasClaves.forEach(k => {
+                        const valViejo = (v[k] === undefined || v[k] === null) ? "" : String(v[k]).trim();
+                        const valNuevo = (n[k] === undefined || n[k] === null) ? "" : String(n[k]).trim();
+                        
+                        if (valViejo !== valNuevo && k !== 'ID') { 
+                            cambios.push({ campo: k, viejo: valViejo, nuevo: valNuevo });
+                        }
+                    });
+
+                    if (cambios.length > 0) {
+                        modificadas.push({ agencia: n.Agencia || key, cambios: cambios });
+                    }
+                }
+            });
+
+            // Detectar Eliminadas
+            viejo.forEach(v => {
+                const key = getKey(v);
+                if (!mapaNuevo.has(key)) eliminadas.push(v);
+            });
+
+            renderComparacion(agregadas, eliminadas, modificadas);
+        }
+
+        function renderComparacion(agregadas, eliminadas, modificadas) {
+            const getAgenciaName = (obj) => obj.Agencia || "Sin Nombre";
+            const getTipo = (obj) => obj.Tipo || "Desconocido";
+
+            const tbNuevas = document.getElementById('tbodyNuevas');
+            tbNuevas.innerHTML = '';
+            agregadas.sort((a,b) => getAgenciaName(a).localeCompare(getAgenciaName(b))).forEach(item => {
+                tbNuevas.innerHTML += `<tr><td class="px-4 py-2 text-slate-700">${escapeHTML(getAgenciaName(item))}</td><td class="px-4 py-2 text-emerald-600 font-medium">${escapeHTML(getTipo(item))}</td></tr>`;
+            });
+
+            const tbEliminadas = document.getElementById('tbodyEliminadas');
+            tbEliminadas.innerHTML = '';
+            eliminadas.sort((a,b) => getAgenciaName(a).localeCompare(getAgenciaName(b))).forEach(item => {
+                tbEliminadas.innerHTML += `<tr><td class="px-4 py-2 text-slate-700">${escapeHTML(getAgenciaName(item))}</td><td class="px-4 py-2 text-red-500 font-medium">${escapeHTML(getTipo(item))}</td></tr>`;
+            });
+
+            const tbModificadas = document.getElementById('tbodyModificadas');
+            tbModificadas.innerHTML = '';
+            modificadas.sort((a,b) => a.agencia.localeCompare(b.agencia)).forEach(item => {
+                const detalles = item.cambios.map(c => `<span class="bg-slate-100 px-2 py-1.5 rounded text-xs block mb-1.5 shadow-sm border border-slate-200"><b class="text-slate-700">${escapeHTML(c.campo)}:</b> <span class="text-red-500 line-through">${escapeHTML(c.viejo || 'Vacío')}</span> <span class="text-amber-600 font-bold ml-1">→ ${escapeHTML(c.nuevo || 'Vacío')}</span></span>`).join('');
+                tbModificadas.innerHTML += `<tr><td class="px-4 py-2 text-slate-700 font-medium align-top pt-3">${escapeHTML(item.agencia)}</td><td class="px-4 py-2 text-slate-500">${detalles}</td></tr>`;
+            });
+
+            // Actualizar UI
+            document.getElementById('resultadosComparacion').classList.remove('hidden');
+            document.getElementById('contNuevas').classList.toggle('hidden', agregadas.length === 0);
+            document.getElementById('contEliminadas').classList.toggle('hidden', eliminadas.length === 0);
+            document.getElementById('contModificadas').classList.toggle('hidden', modificadas.length === 0);
+            
+            document.getElementById('compNuevas').textContent = agregadas.length;
+            document.getElementById('compEliminadas').textContent = eliminadas.length;
+            document.getElementById('compModificadas').textContent = modificadas.length;
+
+            if (agregadas.length > 0 || eliminadas.length > 0 || modificadas.length > 0) {
+                mostrarMsg('successMsg', "Auditoría completada. Se detectaron variaciones en las versiones.");
+            } else {
+                mostrarMsg('successMsg', "Auditoría completada. Ambos JSON (antiguo y nuevo) son exactamente idénticos.");
+            }
+        }
+    </script>
+</body>
+</html>
