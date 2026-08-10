@@ -150,7 +150,7 @@
 
     if (action === "saveCashFlow") {
       var sheet = ss.getSheetByName("FlujoDeCaja");
-      if(sheet) sheet.appendRow([payload.id, payload.date, payload.client, payload.concept, payload.monto, payload.method, payload.voucher, payload.voucherUrl, payload.notes, payload.category]);
+      if(sheet) sheet.appendRow([payload.id, payload.date, payload.client, payload.concept, payload.monto, payload.method, payload.voucher, payload.voucherUrl, payload.notes, payload.category, payload.subscriptionDate]);
       return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
     } 
     else if (action === "updateCashFlow") {
@@ -160,9 +160,9 @@
         var values = dataRange.getValues();
         for (var i = 1; i < values.length; i++) {
           if (values[i][0] == payload.id) {
-            sheet.getRange(i + 1, 2, 1, 9).setValues([[
+            sheet.getRange(i + 1, 2, 1, 10).setValues([[
               payload.date, payload.client, payload.concept, payload.monto,
-              payload.method, payload.voucher, payload.voucherUrl, payload.notes, payload.category
+              payload.method, payload.voucher, payload.voucherUrl, payload.notes, payload.category, payload.subscriptionDate
             ]]);
             break;
           }
@@ -187,7 +187,7 @@ function doGet(e) {
       response.cashFlow = dataCaja.map(function(row) {
         return { 
           id: row[0], date: row[1] instanceof Date ? row[1].toISOString() : row[1], client: row[2], concept: row[3], monto: row[4], 
-          method: row[5], voucher: row[6], voucherUrl: row[7], notes: row[8], category: row[9]
+          method: row[5], voucher: row[6], voucherUrl: row[7], notes: row[8], category: row[9], subscriptionDate: row[10] instanceof Date ? row[10].toISOString() : row[10]
         };
       });
     }
@@ -229,6 +229,7 @@ function doGet(e) {
              return d.toISOString().split('T')[0];
           };
           const [date, setDate] = useState(isEdit ? initialData.date : getLocalToday());
+          const [subscriptionDate, setSubscriptionDate] = useState(isEdit ? (initialData.subscriptionDate || initialData.date) : getLocalToday());
           const [voucherType, setVoucherType] = useState(isEdit ? (initialData.voucher || 'Pendiente / Sin Comprobante') : 'Pendiente / Sin Comprobante');
           const [promoBienvenida, setPromoBienvenida] = useState(false);
           const [manualConcept, setManualConcept] = useState(isEdit ? initialData.concept : 'Suscripción x 1 mes');
@@ -276,7 +277,9 @@ function doGet(e) {
             const formData = new FormData(e.target);
             onSave({
               id: isEdit ? initialData.id : null,
-              date: formData.get('date') || date, client: formData.get('client') || '', concept: manualConcept, category: category,
+              date: formData.get('date') || date, 
+              subscriptionDate: (type === 'ingreso' && isSaasCategory) ? subscriptionDate : (formData.get('date') || date),
+              client: formData.get('client') || '', concept: manualConcept, category: category,
               income: type === 'ingreso' ? Number(manualAmount) : 0, expense: type === 'egreso' ? Number(manualAmount) : 0,
               method: formData.get('method') || 'Yape', voucher: voucherType, voucherUrl: formData.get('voucherUrl') || '', notes: formData.get('notes') || '', months: Number(months)
             });
@@ -313,7 +316,7 @@ function doGet(e) {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Fecha</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Pago</label>
                       <input required type="date" name="date" value={date} onChange={e => setDate(e.target.value)} disabled={isSaving} className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-100" />
                     </div>
                     <div>
@@ -324,25 +327,33 @@ function doGet(e) {
 
                   {type === 'ingreso' && isSaasCategory && (
                     <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg space-y-3">
-                      <div className="flex items-center justify-between">
-                        <label className="text-sm font-semibold text-blue-800 flex items-center gap-1">
-                          <Zap size={16} className="text-amber-500 fill-amber-500" /> Meses a pagar
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <button type="button" onClick={() => handleMonthsChange(Math.max(1, months - 1))} disabled={isSaving} className="w-8 h-8 rounded-full bg-white text-blue-600 shadow-sm font-bold border hover:bg-blue-100 disabled:opacity-50">-</button>
-                          <span className="w-4 text-center font-bold text-slate-700">{months}</span>
-                          <button type="button" onClick={() => handleMonthsChange(months + 1)} disabled={isSaving} className="w-8 h-8 rounded-full bg-white text-blue-600 shadow-sm font-bold border hover:bg-blue-100 disabled:opacity-50">+</button>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-semibold text-blue-800 flex items-center gap-1 mb-1">
+                            <Calendar size={14} className="text-blue-600" /> Inicio Suscripción
+                          </label>
+                          <input required type="date" name="subscriptionDate" value={subscriptionDate} onChange={e => setSubscriptionDate(e.target.value)} disabled={isSaving} className="w-full border border-blue-200 rounded-md p-1.5 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-blue-100 text-sm bg-white" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold text-blue-800 flex items-center gap-1 mb-1">
+                            <Zap size={14} className="text-amber-500 fill-amber-500" /> Meses a pagar
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <button type="button" onClick={() => handleMonthsChange(Math.max(1, months - 1))} disabled={isSaving} className="w-8 h-8 rounded-full bg-white text-blue-600 shadow-sm font-bold border hover:bg-blue-100 disabled:opacity-50">-</button>
+                            <span className="w-4 text-center font-bold text-slate-700">{months}</span>
+                            <button type="button" onClick={() => handleMonthsChange(months + 1)} disabled={isSaving} className="w-8 h-8 rounded-full bg-white text-blue-600 shadow-sm font-bold border hover:bg-blue-100 disabled:opacity-50">+</button>
+                          </div>
                         </div>
                       </div>
                       
                       {months === 1 && (
-                        <label className="flex items-center gap-2 cursor-pointer group animate-fade-in">
+                        <label className="flex items-center gap-2 cursor-pointer group animate-fade-in mt-2">
                           <input type="checkbox" checked={promoBienvenida} onChange={e => handlePromoChange(e.target.checked)} disabled={isSaving} className="w-4 h-4 text-blue-600 rounded border-blue-300 focus:ring-blue-500 disabled:opacity-50" />
                           <span className="text-sm font-bold text-blue-800 leading-tight">Promo Bienvenida (S/ 29.90)</span>
                         </label>
                       )}
                       <p className="text-xs text-blue-800 leading-tight border-t border-blue-200/50 pt-2 mt-2">
-                        El sistema detectará que dice <b>"x {months} mes"</b> y extenderá la suscripción automáticamente.
+                        El sistema usará la fecha de suscripción para calcular la renovación.
                       </p>
                     </div>
                   )}
@@ -360,7 +371,7 @@ function doGet(e) {
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">Comprobante</label>
                       <select name="voucher" value={voucherType} onChange={(e) => setVoucherType(e.target.value)} disabled={isSaving} className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-100">
-                        <option>Pendiente / Sin Comprobante</option><option>Boleta</option><option>Factura</option><option>RxH</option>
+                        <option>Pendiente / Sin Comprobante</option><option>Boleta</option><option>Factura</option>
                       </select>
                     </div>
                   </div>
@@ -452,6 +463,7 @@ function doGet(e) {
                   return {
                     id: item.id || Date.now() + Math.random(), 
                     date: item.date ? String(item.date).split('T')[0] : '',
+                    subscriptionDate: item.subscriptionDate ? String(item.subscriptionDate).split('T')[0] : (item.date ? String(item.date).split('T')[0] : ''),
                     client: String(item.client || ''), 
                     concept: String(item.concept || ''),
                     category: resolvedCategory,
@@ -516,11 +528,12 @@ function doGet(e) {
                 const isSaas = entry.category && entry.category.includes('SaaS');
                 const wasFormalOrInformalBeforeUpdate = !entry.category && entry.voucher; 
                 if (months > 0 && (isSaas || wasFormalOrInformalBeforeUpdate)) {
+                  const sDate = entry.subscriptionDate || entry.date;
                   if (!subsMap[entry.client]) {
-                    subsMap[entry.client] = { client: entry.client, startDate: entry.date, endDate: addMonthsToDate(entry.date, months), activeMonths: months, notes: entry.notes || '' };
+                    subsMap[entry.client] = { client: entry.client, startDate: sDate, endDate: addMonthsToDate(sDate, months), activeMonths: months, notes: entry.notes || '' };
                   } else {
                     const existing = subsMap[entry.client];
-                    const baseDate = new Date(existing.endDate) > new Date(entry.date) ? existing.endDate : entry.date;
+                    const baseDate = new Date(existing.endDate) > new Date(sDate) ? existing.endDate : sDate;
                     subsMap[entry.client] = { ...existing, endDate: addMonthsToDate(baseDate, months), activeMonths: existing.activeMonths + months, notes: entry.notes ? entry.notes : existing.notes };
                   }
                 }
@@ -765,7 +778,7 @@ function doGet(e) {
             const montoCashFlow = data.income > 0 ? data.income : -data.expense;
 
             const newCashEntry = { 
-                id: cashEntryId, date: data.date, client: data.client, concept: data.concept, monto: montoCashFlow,
+                id: cashEntryId, date: data.date, subscriptionDate: data.subscriptionDate, client: data.client, concept: data.concept, monto: montoCashFlow,
                 method: data.method, voucher: data.voucher, voucherUrl: data.voucherUrl, notes: data.notes, category: data.category,
                 income: data.income || 0, expense: data.expense || 0
             };
@@ -987,20 +1000,32 @@ function doGet(e) {
                         <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
                           <thead>
                             <tr className="bg-slate-50 text-slate-600 border-b">
-                              <th className="p-4 font-semibold">Fecha</th><th className="p-4 font-semibold">Cliente / Referencia</th><th className="p-4 font-semibold">Concepto</th>
+                              <th className="p-4 font-semibold">Fechas (Pago / Susc.)</th><th className="p-4 font-semibold">Cliente / Referencia</th><th className="p-4 font-semibold">Concepto / Notas</th>
                               <th className="p-4 font-semibold">Monto</th><th className="p-4 font-semibold">Medio</th><th className="p-4 font-semibold">Comprobante</th><th className="p-4 font-semibold text-center">Acciones</th>
                             </tr>
                           </thead>
                           <tbody>
                             {displayedCashFlow.map((item) => (
                               <tr key={item.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
-                                <td className="p-4 text-slate-600">{item.date}</td><td className="p-4 font-semibold text-blue-600">{item.client}</td>
-                                <td className="p-4"><p className="text-slate-700 max-w-[200px] truncate" title={item.concept}>{item.concept}</p><span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${item.income > 0 ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'}`}>{item.category || '-'}</span></td>
+                                <td className="p-4">
+                                  <div className="text-slate-700 font-medium flex items-center gap-1.5"><Wallet size={12} className="text-slate-400"/> {item.date}</div>
+                                  {(item.income > 0 && (item.category?.includes('SaaS') || (!item.category && item.voucher !== 'Pendiente'))) && item.subscriptionDate && (
+                                    <div className="text-[11px] text-blue-600 mt-1 flex items-center gap-1 font-bold" title="Inicio de Suscripción">
+                                      <Calendar size={11} /> Susc: {item.subscriptionDate}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="p-4 font-semibold text-blue-600">{item.client}</td>
+                                <td className="p-4">
+                                  <p className="text-slate-800 font-medium max-w-[200px] truncate" title={item.concept}>{item.concept}</p>
+                                  {item.notes && <p className="text-[11px] text-slate-500 max-w-[200px] truncate mt-0.5" title={item.notes}>📝 {item.notes}</p>}
+                                  <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${item.income > 0 ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'}`}>{item.category || '-'}</span>
+                                </td>
                                 <td className={`p-4 font-bold ${item.income > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>{item.income > 0 ? `+ S/ ${item.income.toFixed(2)}` : `- S/ ${item.expense.toFixed(2)}`}</td>
                                 <td className="p-4"><span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">{item.method}</span></td>
                                 <td className="p-4">
                                   <div className="flex items-center gap-2">
-                                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${item.voucher === 'Pendiente / Sin Comprobante' || item.voucher === 'Pendiente' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>{item.voucher}</span>
+                                    <span className={`px-2 py-1 rounded-md text-[11px] font-bold tracking-wide ${item.voucher === 'Pendiente / Sin Comprobante' || item.voucher === 'Pendiente' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>{item.voucher}</span>
                                     {item.voucherUrl && <a href={item.voucherUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-blue-700" title="Abrir comprobante"><ExternalLink size={16} /></a>}
                                   </div>
                                 </td>
@@ -1068,7 +1093,7 @@ function doGet(e) {
                      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 space-y-8">
                        <div>
                          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-2">1. Código para Google Apps Script</h3>
-                         <p className="text-slate-600 mb-4 text-sm">Cópialo y haz clic en <span className="font-semibold text-rose-600">Implementar &gt; Administrar implementaciones &gt; Editar &gt; Nueva versión &gt; Implementar</span>.</p>
+                         <p className="text-slate-600 mb-4 text-sm">Cópialo y haz clic en <span className="font-semibold text-rose-600">Implementar &gt; Administrar implementaciones &gt; Editar &gt; Nueva versión &gt; Implementar</span>. <b>Importante:</b> Si tenías una versión anterior, asegúrate de tener una <b>Columna K</b> vacía en tu Excel para guardar la Fecha de Suscripción.</p>
                          <div className="relative group">
                            <pre className="bg-slate-900 text-slate-300 p-4 rounded-xl text-xs overflow-x-auto border border-slate-700 h-64"><code>{appsScriptCode}</code></pre>
                            <button onClick={() => {navigator.clipboard.writeText(appsScriptCode); showMessage('Código copiado al portapapeles.');}} className="absolute top-3 right-3 bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors flex items-center gap-2"><Copy size={16} /> <span className="text-xs font-medium">Copiar código</span></button>
